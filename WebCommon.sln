@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{CEC21295-346D-4369-9511-FBB4BFFE1863}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{789A2940-98A7-4A45-B302-0FEE3151886E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{236D95BF-5F2A-4EA8-9E93-86AA7051AA6D}"
+	ProjectSection(SolutionItems) = preProject
+		nuget.config = nuget.config
+		README.md = README.md
+		UpdateNuspecVersion.ps1 = UpdateNuspecVersion.ps1
+	EndProjectSection
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "lagovista.iot.web.common", "src\lagovista.iot.web.common\lagovista.iot.web.common.xproj", "{3E7F0C75-AD38-4B90-AA7F-A2784DF36C5B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3E7F0C75-AD38-4B90-AA7F-A2784DF36C5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E7F0C75-AD38-4B90-AA7F-A2784DF36C5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E7F0C75-AD38-4B90-AA7F-A2784DF36C5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E7F0C75-AD38-4B90-AA7F-A2784DF36C5B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3E7F0C75-AD38-4B90-AA7F-A2784DF36C5B} = {CEC21295-346D-4369-9511-FBB4BFFE1863}
+	EndGlobalSection
+EndGlobal
