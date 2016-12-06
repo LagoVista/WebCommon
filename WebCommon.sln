@@ -14,7 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		UpdateNuspecVersion.ps1 = UpdateNuspecVersion.ps1
 	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "lagovista.iot.web.common", "src\lagovista.iot.web.common\lagovista.iot.web.common.xproj", "{3E7F0C75-AD38-4B90-AA7F-A2784DF36C5B}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Web Common", "src\lagovista.iot.web.common\Web Common.xproj", "{3E7F0C75-AD38-4B90-AA7F-A2784DF36C5B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
