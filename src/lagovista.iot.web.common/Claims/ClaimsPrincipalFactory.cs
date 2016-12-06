@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace LagoVista.IoI.Web.Common.Claims
+namespace LagoVista.IoT.Web.Common.Claims
 {
     public class ClaimsPrincipalFactory : UserClaimsPrincipalFactory<AppUser, Role>
     {

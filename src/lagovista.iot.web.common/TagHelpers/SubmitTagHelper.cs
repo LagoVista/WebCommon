@@ -1,9 +1,9 @@
-﻿using LagoVista.IoI.Web.Common.Resources;
+﻿using LagoVista.IoT.Web.Common.Resources;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using System;
 using System.Text;
 
-namespace LagoVista.IoI.Web.Common.TagHelpers
+namespace LagoVista.IoT.Web.Common.TagHelpers
 {
     [HtmlTargetElement("form-submit")]
     public class SubmitTagHelper : TagHelper

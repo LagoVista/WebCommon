@@ -3,13 +3,14 @@
   "buildOptions": {
     "debugType": "portable"
   },
-  "dependencies": {
-    "LagoVista.Core": "0.8.3-alpha01292",
-    "LagoVista.UserManagement": "0.8.3-alpha01376",
-    "LagoVista.Web.Identity": "0.8.3-alpha01376",
-    "Microsoft.AspNetCore.Identity": "1.1.0",
-    "Microsoft.AspNetCore.Mvc": "1.1.0"
-  },
+    "dependencies": {
+      "LagoVista.Core": "0.8.3-alpha01292",
+      "LagoVista.UserManagement": "0.8.3-alpha01376",
+      "LagoVista.Web.Identity": "0.8.3-alpha01376",
+      "Microsoft.AspNetCore.Identity": "1.1.0",
+      "Microsoft.AspNetCore.Mvc": "1.1.0",
+      "NuGet.CommandLine": "3.4.3"
+    },
   "frameworks": {
     "net461": {
       "dependencies": {

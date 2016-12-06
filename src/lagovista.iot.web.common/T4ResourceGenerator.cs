@@ -2,7 +2,7 @@
 using System.Reflection;
 
 //Resources:CommonResources:Common_Add
-namespace LagoVista.IoI.Web.Common.Resources
+namespace LagoVista.IoT.Web.Common.Resources
 {
 	public class CommonResources
 	{
@@ -18,7 +18,7 @@ namespace LagoVista.IoI.Web.Common.Resources
 			{
                 if (object.ReferenceEquals(_resourceManager, null)) 
 				{
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("LagoVista.IoI.Web.Common.Resources.CommonResources", typeof(CommonResources).GetTypeInfo().Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("LagoVista.IoT.Web.Common.Resources.CommonResources", typeof(CommonResources).GetTypeInfo().Assembly);
                     _resourceManager = temp;
                 }
                 return _resourceManager;

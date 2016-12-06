@@ -9,9 +9,9 @@ using lgv = LagoVista.Core.Attributes;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
-using LagoVista.IoI.Web.Common.Resources;
+using LagoVista.IoT.Web.Common.Resources;
 
-namespace LagoVista.IoI.Web.Common.TagHelpers
+namespace LagoVista.IoT.Web.Common.TagHelpers
 {
     [HtmlTargetElement("form-entry")]
     public class FormEntryTagHelper : TagHelper

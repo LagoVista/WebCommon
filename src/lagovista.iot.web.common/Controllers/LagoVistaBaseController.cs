@@ -1,7 +1,7 @@
 ﻿using LagoVista.Core.Models;
 using LagoVista.Core.PlatformSupport;
 using LagoVista.UserManagement.Models.Account;
-using LagoVista.IoI.Web.Common.Claims;
+using LagoVista.IoT.Web.Common.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -10,7 +10,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace LagoVista.IoI.Web.Common.Controllers
+namespace LagoVista.IoT.Web.Common.Controllers
 {
     public class LagoVistaBaseController : Controller
     {

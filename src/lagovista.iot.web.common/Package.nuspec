@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>LagoVista.IoT.Web.Common</id>
-    <version>0.8.1-alpha01121</version>
+    <version>0.8.5-alpha00875</version>
     <authors>Software Logistics, LLC</authors>
     <owners>Software Logistics, LLC</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -19,6 +19,6 @@
   <files>
     <file src="readme.txt" target="" />
     <file src="bin\release\net461\*.dll" target="lib\net461" />
-<!--    <file src="bin\release\netcoreapp1.0\*.dll" target="lib\netcoreapp1.0" />-->
+    <!--    <file src="bin\release\netcoreapp1.0\*.dll" target="lib\netcoreapp1.0" />-->
   </files>
 </package>

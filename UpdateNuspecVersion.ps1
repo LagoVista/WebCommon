@@ -1,13 +1,16 @@
 ﻿Param([string]$preRelease,[string]$major,[string]$minor)
+
 $children = gci ./ -recurse *.nuspec 
 foreach( $child in $children)
 {
     $nuspecFile = gi $child.fullName
     [xml] $content = Get-Content $nuspecFile
     $end = Get-Date
+	$end = $end.ToUniversalTime()
     $start = Get-Date "12/1/2016"
 
     $today = Get-Date
+	$today = $today.ToUniversalTime()
     $today = $today.ToShortDateString()
     $today = Get-Date $today
 

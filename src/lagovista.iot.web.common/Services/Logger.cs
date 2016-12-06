@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace LagoVista.IoI.Web.Common.Services
+namespace LagoVista.IoT.Web.Common.Services
 {
     public class Logger : ILogger
     {

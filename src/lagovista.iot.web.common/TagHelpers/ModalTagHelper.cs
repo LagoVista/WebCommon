@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace LagoVista.IoI.Web.Common.TagHelpers
+namespace LagoVista.IoT.Web.Common.TagHelpers
 {
     public class ModalContext
     {

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace LagoVista.IoI.Web.Common.Configuration
+namespace LagoVista.IoT.Web.Common.Configuration
 {
     public class AppUserManagementSettings : IAppUserManagementSettings
     {
