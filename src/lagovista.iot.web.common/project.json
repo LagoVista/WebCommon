@@ -3,16 +3,19 @@
   "buildOptions": { },
     "dependencies": {
       "LagoVista.Core": "0.8.9-alpha00674",
-      "LagoVista.UserManagement": "0.8.9-alpha00736",
-      "LagoVista.Web.Identity": "0.8.9-alpha00736",
+      "LagoVista.UserManagement": "0.8.10-alpha01008",
+      "LagoVista.Web.Identity": "0.8.10-alpha01008",
       "Microsoft.AspNetCore.Identity": "1.1.0",
-      "Microsoft.AspNetCore.Mvc": "1.1.0",
+      "Microsoft.AspNetCore.Mvc": "1.1.0"
     },
-  "frameworks": {
-    "net461": {
-      "dependencies": {
+    "frameworks": {
+      "netcoreapp1.0": {
+        "dependencies": { },
+        "imports": [ "dnxcore50", "portable-net45+win8" ]
       },
-      "imports": "dnxcore50"
+      "net461": {
+        "dependencies": {  },
+        "imports": [ "dotnet5.4", "portable-net451+netcore451+win81" ]
+      }
     }
-  }
 }
