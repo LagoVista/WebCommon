@@ -1,4 +1,5 @@
 ﻿using LagoVista.Core.Attributes;
+using LagoVista.Core.Models.UIMetaData;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -13,25 +14,14 @@ namespace LagoVista.Iot.Web.Common.Controllers
         [HttpGet("domains")]
         public List<DomainDescription> GetDomains()
         {
-            var domains = new List<DomainDescription>();
-
-            return domains;
+            return MetaDataHelper.Instance.Domains;
         }
 
         [HttpGet("domains/{domain}")]
-        public List<EntityDescriptionAttribute> GetEntities(String domain)
+        public List<EntityDescription> GetEntities(String domain)
         {
-            var entities = new List<EntityDescriptionAttribute>();
-
-            return entities;
-        }
-
-        [HttpGet("domains/{domain}/{entity}")]
-        public List<FormFieldAttribute> GetEntities(String domain, String entity)
-        {
-            var formFields = new List<FormFieldAttribute>();
-
-            return formFields;
+            var domainInstance = MetaDataHelper.Instance.Domains.Where(dmn => dmn.Name == domain).FirstOrDefault();
+            return domainInstance.Entities;
         }
     }
 }
