@@ -1,4 +1,4 @@
-$scriptPath = Split-Path $MyInvocation.MyCommand.Path
+	$scriptPath = Split-Path $MyInvocation.MyCommand.Path
 Set-Location $scriptPath
 
 dotnet restore

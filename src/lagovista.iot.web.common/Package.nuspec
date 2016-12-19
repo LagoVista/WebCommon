@@ -19,6 +19,6 @@
   <files>
     <file src="readme.txt" target="" />
     <file src="bin\release\net461\*.dll" target="lib\net461" />
-    <!--    <file src="bin\release\netcoreapp1.0\*.dll" target="lib\netcoreapp1.0" />-->
+    <file src="bin\release\netcoreapp1.0\*.dll" target="lib\netcoreapp1.0" />
   </files>
 </package>
