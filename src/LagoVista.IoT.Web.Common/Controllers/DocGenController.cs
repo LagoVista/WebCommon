@@ -11,24 +11,37 @@ namespace LagoVista.IoT.Web.Common.Controllers
     [Route("metadata/dox")]
     public class DocGenController : Controller
     {
+        /// <summary>
+        /// List of domains
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("domains")]
         public List<DomainDescription> GetDomains()
         {
             return MetaDataHelper.Instance.Domains;
         }
 
+        /// <summary>
+        /// List of entities for a  domain
+        /// </summary>
+        /// <param name="domain">Domain Name (key)</param>
+        /// <returns></returns>
         [HttpGet("domains/{domain}")]
-        public List<EntityDescription> GetEntities(String domain)
+        public IEnumerable<EntitySummary> GetEntities(String domain)
         {
-            var domainInstance = MetaDataHelper.Instance.Domains.Where(dmn => dmn.Key == domain).FirstOrDefault();
-            if (domainInstance != null)
-            {
-                return domainInstance.Entities;
-            }
-            else
-            {
-                return new List<EntityDescription>();
-            }
+            return MetaDataHelper.Instance.EntitySummaries.Where(ent => ent.DomainKey.ToLower() == domain.ToLower());
+        }
+
+        /// <summary>
+        /// Entity Detail
+        /// </summary>
+        /// <param name="domain">Domain Name (key)</param>
+        /// <param name="classname">Class Name</param>
+        /// <returns></returns>
+        [HttpGet("entity/{domain}/{classname}")]
+        public EntityDescription GetEntity(String domain, String classname)
+        {
+            return MetaDataHelper.Instance.Entities.Where(ent => ent.DomainName.ToLower() == domain.ToLower() && ent.Name.ToLower() == classname.ToLower()).FirstOrDefault();
         }
     }
 }
