@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace LagoVista.Iot.Web.Common.Controllers
+namespace LagoVista.IoT.Web.Common.Controllers
 {
     [Route("metadata/dox")]
     public class DocGenController : Controller
