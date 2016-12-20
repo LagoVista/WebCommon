@@ -20,8 +20,15 @@ namespace LagoVista.Iot.Web.Common.Controllers
         [HttpGet("domains/{domain}")]
         public List<EntityDescription> GetEntities(String domain)
         {
-            var domainInstance = MetaDataHelper.Instance.Domains.Where(dmn => dmn.Name == domain).FirstOrDefault();
-            return domainInstance.Entities;
+            var domainInstance = MetaDataHelper.Instance.Domains.Where(dmn => dmn.Key == domain).FirstOrDefault();
+            if (domainInstance != null)
+            {
+                return domainInstance.Entities;
+            }
+            else
+            {
+                return new List<EntityDescription>();
+            }
         }
     }
 }
