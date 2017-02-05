@@ -14,6 +14,11 @@ namespace LagoVista.IoT.Web.Common.Configuration
 
         public AppUserManagementSettings(IConfigurationRoot configuration)
         {
+            bool shouldConsolidate = true;
+            bool.TryParse(configuration["ConsolidateCollections"], out shouldConsolidate);
+            ShouldConsolidateCollections = shouldConsolidate;
+
+
             var tokenConfigSection = configuration.GetSection("Tokens");
             var refreshTokenTime = tokenConfigSection["RefreshTokenExpires"];
             RefreshTokenExpiresTimeSpan = TimeSpan.FromSeconds(String.IsNullOrEmpty(refreshTokenTime) ? Convert.ToInt32(refreshTokenTime) : 12600);
@@ -78,5 +83,9 @@ namespace LagoVista.IoT.Web.Common.Configuration
 
         public IConnectionSettings UserTableStorage { get; private set; }
 
+        public bool ShouldConsolidateCollections
+        {
+            get; private set;
+        }
     }
 }
