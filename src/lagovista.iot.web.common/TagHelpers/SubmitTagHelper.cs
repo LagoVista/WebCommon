@@ -21,7 +21,7 @@ namespace LagoVista.IoT.Web.Common.TagHelpers
             var tagBuilder = new StringBuilder();
             tagBuilder.AppendLine($@"<div class=""form-group"">");
             tagBuilder.AppendLine($@"  <div class=""col-md-offset-2 col-md-10"" >");
-            tagBuilder.AppendLine($@"    <input type=""submit"" value=""{Label}"" class=""btn btn-default"" />");
+            tagBuilder.AppendLine($@"    <input type=""submit"" value=""{Label}"" class=""btn btn-success"" />");
             tagBuilder.AppendLine($@" </div>");
             tagBuilder.AppendLine($@"</div>");
 
