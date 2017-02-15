@@ -2,11 +2,11 @@
   "version": "0.8.0-*",
   "buildOptions": { },
     "dependencies": {
-      "LagoVista.Core": "0.8.22-alpha01299",
-      "LagoVista.UserManagement":"0.8.22-alpha01390",
-      "LagoVista.Web.Identity":"0.8.22-alpha01390",
+      "LagoVista.Core": "0.8.75-alpha01398",
+      "LagoVista.UserManagement": "0.8.76-alpha00711",
+      "LagoVista.Web.Identity": "0.8.76-alpha00711",
       "Microsoft.AspNetCore.Identity": "1.1.0",
-      "Microsoft.AspNetCore.Mvc": "1.1.0"
+      "Microsoft.AspNetCore.Mvc": "1.1.1"
     },
     "frameworks": {
       "net461": {
