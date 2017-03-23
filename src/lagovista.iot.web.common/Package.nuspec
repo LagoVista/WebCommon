@@ -13,11 +13,11 @@
     <copyright>Copyright 2016</copyright>
     <tags>IoT</tags>
     <dependencies>
-      <dependency id="LagoVista.Core" Version="0.8.112-alpha00944" />
-      <dependency id="LagoVista.UserManagement" Version="0.8.112-alpha01250" />
-      <dependency id="LagoVista.Web.Identity" Version="0.8.112-alpha01250" />
-      <dependency id="Microsoft.AspNetCore.Identity" Version="1.1.1" />
-      <dependency id="Microsoft.AspNetCore.Mvc" Version="1.1.2" />
+      <dependency id="LagoVista.Core" version="0.8.112-alpha00944" />
+      <dependency id="LagoVista.UserManagement" version="0.8.112-alpha01250" />
+      <dependency id="LagoVista.Web.Identity" version="0.8.112-alpha01250" />
+      <dependency id="Microsoft.AspNetCore.Identity" version="1.1.1" />
+      <dependency id="Microsoft.AspNetCore.Mvc" version="1.1.2" />
       <dependency id="Newtonsoft.Json" version="10.0.1" />
     </dependencies>
   </metadata>
