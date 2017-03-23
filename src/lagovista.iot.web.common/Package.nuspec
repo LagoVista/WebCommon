@@ -13,12 +13,17 @@
     <copyright>Copyright 2016</copyright>
     <tags>IoT</tags>
     <dependencies>
-      <dependency id="Newtonsoft.Json" version="9.0.1" />
+      <dependency id="LagoVista.Core" Version="0.8.112-alpha00944" />
+      <dependency id="LagoVista.UserManagement" Version="0.8.112-alpha01250" />
+      <dependency id="LagoVista.Web.Identity" Version="0.8.112-alpha01250" />
+      <dependency id="Microsoft.AspNetCore.Identity" Version="1.1.1" />
+      <dependency id="Microsoft.AspNetCore.Mvc" Version="1.1.2" />
+      <dependency id="Newtonsoft.Json" version="10.0.1" />
     </dependencies>
   </metadata>
   <files>
     <file src="readme.txt" target="" />
-    <file src="bin\release\net461\*.dll" target="lib\net461" />
-    <file src="bin\release\netcoreapp1.0\*.dll" target="lib\netcoreapp1.0" />
+    <file src="bin\release\netstandard1.6\*.dll" target="lib\netstandard1.6" />
+    <file src="bin\release\netcoreapp1.1\*.dll" target="lib\netcoreapp1.1" />
   </files>
 </package>
