@@ -1,6 +1,5 @@
 ﻿using LagoVista.Core.Interfaces;
 using LagoVista.Core.Models;
-using LagoVista.Web.Identity.Interfaces;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -9,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace LagoVista.IoT.Web.Common.Configuration
 {
-    public class AppUserManagementSettings : IAppUserManagementSettings
+  /*  public class AppUserManagementSettings : IAppUserManagementSettings
     {
 
         public AppUserManagementSettings(IConfigurationRoot configuration)
@@ -87,5 +86,5 @@ namespace LagoVista.IoT.Web.Common.Configuration
         {
             get; private set;
         }
-    }
+    }*/
 }

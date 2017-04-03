@@ -2,15 +2,34 @@
 
   <PropertyGroup>
     <VersionPrefix>0.8.0</VersionPrefix>
-    <TargetFrameworks>netstandard1.6;netcoreapp1.1</TargetFrameworks>
+    <TargetFrameworks>netstandard1.6</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LagoVista.Core" Version="0.8.112-alpha00944" />
-    <PackageReference Include="LagoVista.UserManagement" Version="0.8.112-alpha01250" />
-    <PackageReference Include="LagoVista.Web.Identity" Version="0.8.112-alpha01250 " />
+    <PackageReference Include="LagoVista.Core" Version="0.8.120-alpha01118" />
+    <PackageReference Include="LagoVista.UserAdmin" Version="0.8.123-alpha00694" />
+    <PackageReference Include="LagoVista.UserAdmin.Repos" Version="0.8.123-alpha00694" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="1.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.1.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="T4ResourceGenerator.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>T4ResourceGenerator.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="T4ResourceGenerator.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>T4ResourceGenerator.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
 
 </Project>
