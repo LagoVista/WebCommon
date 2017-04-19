@@ -38,13 +38,18 @@ namespace LagoVista.IoT.Web.Common.Controllers
                 return new EntityHeader()
                 {
                     Id = CurrentUserId,
-                    Text = CurrentUserName
+                    Text = CurrentFullName
                 };
             }
         }
 
         //TODO: Need checks if user is not logged in.
         protected String CurrentUserId
+        {
+            get { return User.Claims.Where(claim => claim.Type == ClaimsPrincipalFactory.CurrentUserId).FirstOrDefault().Value; }
+        }
+
+        protected String CurrentUserName
         {
             get { return User.Claims.Where(claim => claim.Type == ClaimTypes.NameIdentifier).FirstOrDefault().Value; }
         }
@@ -54,7 +59,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
             get { return User.Claims.Where(claim => claim.Type == ClaimTypes.Email).FirstOrDefault().Value; }
         }
 
-        protected String CurrentUserName
+        protected String CurrentFullName
         {
             get
             {
