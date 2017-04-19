@@ -31,16 +31,17 @@ namespace LagoVista.IoT.Web.Common.Claims
             var principal = await base.CreateAsync(user);
 
             ((ClaimsIdentity)principal.Identity).AddClaims(new[] {
-            new Claim(ClaimTypes.GivenName, user.FirstName),
-            new Claim(ClaimTypes.Surname, user.LastName),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(CurrentUserId, user.Id),
-            new Claim(EmailVerified, user.EmailConfirmed.ToString()),
-            new Claim(PhoneVerfiied, user.PhoneNumberConfirmed.ToString()),
-            new Claim(IsSystemAdmin, user.IsSystemAdmin.ToString()),
-            new Claim(CurrentOrgName, user.CurrentOrganization == null ? None : user.CurrentOrganization.Text),
-            new Claim(CurrentOrgId, user.CurrentOrganization == null ? None : user.CurrentOrganization.Id),
-            new Claim(CurrentUserProfilePictureurl, user.ProfileImageUrl.ImageUrl),
+                new Claim(ClaimTypes.NameIdentifier, user.UserName),
+                new Claim(ClaimTypes.GivenName, user.FirstName),
+                new Claim(ClaimTypes.Surname, user.LastName),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(CurrentUserId, user.Id),
+                new Claim(EmailVerified, user.EmailConfirmed.ToString()),
+                new Claim(PhoneVerfiied, user.PhoneNumberConfirmed.ToString()),
+                new Claim(IsSystemAdmin, user.IsSystemAdmin.ToString()),
+                new Claim(CurrentOrgName, user.CurrentOrganization == null ? None : user.CurrentOrganization.Text),
+                new Claim(CurrentOrgId, user.CurrentOrganization == null ? None : user.CurrentOrganization.Id),
+                new Claim(CurrentUserProfilePictureurl, user.ProfileImageUrl.ImageUrl),
             });
 
             return principal;
