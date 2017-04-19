@@ -11,6 +11,7 @@ namespace LagoVista.IoT.Web.Common.Claims
     {
         public const string None = "-";
 
+        public const string CurrentUserId = "com.lagovista.iot.userid";
         public const string CurrentOrgName = "com.lagovista.iot.currentorgname";
         public const string CurrentOrgId = "com.lagovista.iot.currentorgid";
         public const string EmailVerified = "com.lagovista.iot.emailverified";
@@ -33,6 +34,7 @@ namespace LagoVista.IoT.Web.Common.Claims
             new Claim(ClaimTypes.GivenName, user.FirstName),
             new Claim(ClaimTypes.Surname, user.LastName),
             new Claim(ClaimTypes.Email, user.Email),
+            new Claim(CurrentUserId, user.Id),
             new Claim(EmailVerified, user.EmailConfirmed.ToString()),
             new Claim(PhoneVerfiied, user.PhoneNumberConfirmed.ToString()),
             new Claim(IsSystemAdmin, user.IsSystemAdmin.ToString()),
