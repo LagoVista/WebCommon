@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using LagoVista.Core;
+using LagoVista.Core.Interfaces;
 
 namespace LagoVista.IoT.Web.Common.Controllers
 {
@@ -67,6 +69,27 @@ namespace LagoVista.IoT.Web.Common.Controllers
                 var lastName = User.Claims.Where(claim => claim.Type == ClaimTypes.Surname).FirstOrDefault().Value;
                 return $"{firstName} {lastName}";
             }
+        }
+
+        private void SetAuditProperties(IAuditableEntity entity)
+        {
+            var createDate = DateTime.Now.ToJSONString();
+
+            entity.CreationDate = createDate;
+            entity.LastUpdatedDate = createDate;
+            entity.CreatedBy = UserEntityHeader;
+            entity.LastUpdatedBy = UserEntityHeader;
+        }
+
+        private void SetUpdatedProperties(IAuditableEntity entity)
+        {
+            entity.LastUpdatedDate = DateTime.Now.ToJSONString();
+            entity.LastUpdatedBy = UserEntityHeader;
+        }
+
+        private void SetOwnedProperties(IOwnedEntity entity)
+        {
+            entity.OwnerOrganization = OrgEntityHeader;
         }
 
         protected EntityHeader OrgEntityHeader
