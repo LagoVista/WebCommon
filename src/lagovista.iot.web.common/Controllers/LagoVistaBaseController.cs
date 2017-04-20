@@ -71,7 +71,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
             }
         }
 
-        private void SetAuditProperties(IAuditableEntity entity)
+        protected void SetAuditProperties(IAuditableEntity entity)
         {
             var createDate = DateTime.Now.ToJSONString();
 
@@ -81,13 +81,13 @@ namespace LagoVista.IoT.Web.Common.Controllers
             entity.LastUpdatedBy = UserEntityHeader;
         }
 
-        private void SetUpdatedProperties(IAuditableEntity entity)
+        protected void SetUpdatedProperties(IAuditableEntity entity)
         {
             entity.LastUpdatedDate = DateTime.Now.ToJSONString();
             entity.LastUpdatedBy = UserEntityHeader;
         }
 
-        private void SetOwnedProperties(IOwnedEntity entity)
+        protected void SetOwnedProperties(IOwnedEntity entity)
         {
             entity.OwnerOrganization = OrgEntityHeader;
         }
