@@ -6,9 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LagoVista.Core" Version="0.8.144-alpha00856" />
-    <PackageReference Include="LagoVista.UserAdmin" Version="0.8.144-alpha00892" />
-    <PackageReference Include="LagoVista.UserAdmin.Repos" Version="0.8.144-alpha00892" />
+    <PackageReference Include="LagoVista.Core" Version="0.8.146-alpha01178" />
+    <PackageReference Include="LagoVista.UserAdmin" Version="0.8.146-alpha01016" />
+    <PackageReference Include="LagoVista.UserAdmin.Repos" Version="0.8.146-alpha01016" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="1.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.1.2" />
   </ItemGroup>

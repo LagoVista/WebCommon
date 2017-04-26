@@ -18,7 +18,7 @@ namespace LagoVista.IoT.Web.Common.Attributes
             foreach (var argument in context.ActionArguments.Values.Where(v => v is IValidateable))
             {
                 var result = Validator.Validate(argument as IValidateable);
-                if (!result.IsValid)
+                if (!result.Successful)
                 {
                     var viewData = new ViewDataDictionary(new EmptyModelMetadataProvider(), context.ModelState);
                     var idx = 1;
