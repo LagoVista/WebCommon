@@ -31,6 +31,17 @@ namespace LagoVista.IoT.Web.Common.Services
             }
         }
 
+        public TimedEvent StartTimedEvent(string area, string description)
+        {
+            return new TimedEvent(area, description);
+        }
+
+        public void EndTimedEvent(TimedEvent evt)
+        {
+            var duration = DateTime.Now - evt.StartTime;
+            Log(LogLevel.Message, evt.Area, evt.Description, new KeyValuePair<string, string>("Duration", Math.Round(duration.TotalSeconds, 4).ToString()));
+        }
+
         public bool Verbose { get; set; }
 
         public void LogException(string area, Exception ex, params KeyValuePair<string, string>[] args)
@@ -38,7 +49,7 @@ namespace LagoVista.IoT.Web.Common.Services
 
         }
 
-        public void SetKeys(params string[] args)
+        public void SetKeys(params KeyValuePair<string, string>[] args)
         {
 
         }
