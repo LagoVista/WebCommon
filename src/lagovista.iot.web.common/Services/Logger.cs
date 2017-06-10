@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace LagoVista.IoT.Web.Common.Services
 {
-    public class Logger : ILogger
+    public class ConsoleLogger : ILogger
     {
-        public void Log(LogLevel level, string area, string message, params KeyValuePair<string, string>[] args)
+        public void AddCustomEvent(LogLevel level, string tag, string customEvent, params KeyValuePair<string, string>[] args)
         {
             if (!Verbose && level == LogLevel.Verbose)
             {
@@ -24,7 +24,7 @@ namespace LagoVista.IoT.Web.Common.Services
 
             Console.ResetColor();
 
-            Console.WriteLine($"Area: {area} => {message}");
+            Console.WriteLine($"Area: {tag} => {customEvent}");
             foreach (var arg in args)
             {
                 Console.WriteLine($"\t\t\t{arg.Key} = {arg.Value}");
@@ -39,17 +39,17 @@ namespace LagoVista.IoT.Web.Common.Services
         public void EndTimedEvent(TimedEvent evt)
         {
             var duration = DateTime.Now - evt.StartTime;
-            Log(LogLevel.Message, evt.Area, evt.Description, new KeyValuePair<string, string>("Duration", Math.Round(duration.TotalSeconds, 4).ToString()));
+            AddCustomEvent(LogLevel.Message, evt.Area, evt.Description, new KeyValuePair<string, string>("Duration", Math.Round(duration.TotalSeconds, 4).ToString()));
         }
 
         public bool Verbose { get; set; }
 
-        public void LogException(string area, Exception ex, params KeyValuePair<string, string>[] args)
+        public void AddException(string area, Exception ex, params KeyValuePair<string, string>[] args)
         {
 
         }
-
-        public void SetKeys(params KeyValuePair<string, string>[] args)
+        
+        public void AddKVPs(params KeyValuePair<string, string>[] args)
         {
 
         }
@@ -63,5 +63,6 @@ namespace LagoVista.IoT.Web.Common.Services
         {
 
         }
+       
     }
 }

@@ -11,15 +11,16 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using LagoVista.Core;
 using LagoVista.Core.Interfaces;
+using LagoVista.IoT.Logging.Loggers;
 
 namespace LagoVista.IoT.Web.Common.Controllers
 {
     public class LagoVistaBaseController : Controller
     {
         readonly UserManager<AppUser> _userManager;
-        readonly ILogger _logger;
+        readonly IAdminLogger _logger;
 
-        public LagoVistaBaseController(UserManager<AppUser> userManager, ILogger logger)
+        public LagoVistaBaseController(UserManager<AppUser> userManager, IAdminLogger logger)
         {
             _userManager = userManager;
             _logger = logger;
@@ -109,7 +110,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
 
                 if (orgName == null)
                 {
-                    _logger.Log(LogLevel.Error, "ControllerBase.CurrentUserOrg", $"Org has id, but no name for user id: {CurrentUserId}");
+                    _logger.AddError("ControllerBase.CurrentUserOrg", $"Org has id, but no name for user id: {CurrentUserId}");
                     return new EntityHeader()
                     {
                         Text = "???????",
@@ -163,7 +164,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
             get { return _userManager; }
         }
 
-        protected ILogger Logger
+        protected IAdminLogger Logger
         {
             get { return _logger; }
         }
