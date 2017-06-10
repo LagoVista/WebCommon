@@ -46,30 +46,31 @@ namespace LagoVista.IoT.Web.Common.Controllers
             }
         }
 
+        private String GetClaimValue(String claimId)
+        {
+            var claim = User.Claims.Where(clm => clm.Type == claimId).FirstOrDefault();
+            return claim == null ? "<????>" : claim.Value;
+        }
+
         //TODO: Need checks if user is not logged in.
         protected String CurrentUserId
         {
-            get { return User.Claims.Where(claim => claim.Type == ClaimsPrincipalFactory.CurrentUserId).FirstOrDefault().Value; }
+            get { return GetClaimValue(ClaimsPrincipalFactory.CurrentUserId); }
         }
 
         protected String CurrentUserName
         {
-            get { return User.Claims.Where(claim => claim.Type == ClaimTypes.NameIdentifier).FirstOrDefault().Value; }
+            get { return GetClaimValue(ClaimTypes.NameIdentifier); }
         }
 
         protected String CurrentUserEmail
         {
-            get { return User.Claims.Where(claim => claim.Type == ClaimTypes.Email).FirstOrDefault().Value; }
+            get { return GetClaimValue(ClaimTypes.Email); }
         }
 
         protected String CurrentFullName
         {
-            get
-            {
-                var firstName = User.Claims.Where(claim => claim.Type == ClaimTypes.GivenName).FirstOrDefault().Value;
-                var lastName = User.Claims.Where(claim => claim.Type == ClaimTypes.Surname).FirstOrDefault().Value;
-                return $"{firstName} {lastName}";
-            }
+            get{ return $"{GetClaimValue(ClaimTypes.GivenName)} {GetClaimValue(ClaimTypes.Surname)}"; }
         }
 
         protected void SetAuditProperties(IAuditableEntity entity)
@@ -129,18 +130,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
 
         protected String CurrentOrgId
         {
-            get
-            {
-                var orgClaim = User.Claims.Where(claim => claim.Type == ClaimsPrincipalFactory.CurrentOrgId).FirstOrDefault();
-                if (orgClaim != null)
-                {
-                    return orgClaim.Value;
-                }
-                else
-                {
-                    return String.Empty;
-                }
-            }
+            get { return GetClaimValue(ClaimsPrincipalFactory.CurrentOrgId); }
         }
 
         protected String CurrentUserProfileimageUrl
