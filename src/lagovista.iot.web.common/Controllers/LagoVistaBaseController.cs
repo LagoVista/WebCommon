@@ -85,6 +85,11 @@ namespace LagoVista.IoT.Web.Common.Controllers
 
         protected void SetUpdatedProperties(IAuditableEntity entity)
         {
+            if(entity == null)
+            {
+                throw new NullReferenceException("NULL Entity Passed to SetUpdatedProperties");
+            }
+
             entity.LastUpdatedDate = DateTime.Now.ToJSONString();
             entity.LastUpdatedBy = UserEntityHeader;
         }
