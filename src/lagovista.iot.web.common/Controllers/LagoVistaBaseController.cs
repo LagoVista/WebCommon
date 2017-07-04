@@ -1,7 +1,7 @@
 ﻿using LagoVista.Core.Models;
 using LagoVista.Core.PlatformSupport;
 using LagoVista.IoT.Web.Common.Claims;
-using LagoVista.UserAdmin.Models.Account;
+using LagoVista.UserAdmin.Models.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
