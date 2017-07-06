@@ -1,6 +1,6 @@
 ﻿using LagoVista.Core.Models;
 using LagoVista.Core.PlatformSupport;
-using LagoVista.IoT.Web.Common.Claims;
+using LagoVista.AspNetCore.Identity;
 using LagoVista.UserAdmin.Models.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using LagoVista.Core;
 using LagoVista.Core.Interfaces;
 using LagoVista.IoT.Logging.Loggers;
+using LagoVista.AspNetCore.Identity.Managers;
 
 namespace LagoVista.IoT.Web.Common.Controllers
 {
@@ -55,7 +56,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
         //TODO: Need checks if user is not logged in.
         protected String CurrentUserId
         {
-            get { return GetClaimValue(ClaimsPrincipalFactory.CurrentUserId); }
+            get { return GetClaimValue(ClaimsFactory.CurrentUserId); }
         }
 
         protected String CurrentUserName
@@ -103,8 +104,8 @@ namespace LagoVista.IoT.Web.Common.Controllers
         {
             get
             {
-                var orgId = User.Claims.Where(claim => claim.Type == ClaimsPrincipalFactory.CurrentOrgId).FirstOrDefault();
-                var orgName = User.Claims.Where(claim => claim.Type == ClaimsPrincipalFactory.CurrentOrgName).FirstOrDefault();
+                var orgId = User.Claims.Where(claim => claim.Type == ClaimsFactory.CurrentOrgId).FirstOrDefault();
+                var orgName = User.Claims.Where(claim => claim.Type == ClaimsFactory.CurrentOrgName).FirstOrDefault();
                 if (orgId == null)
                 {
                     return new EntityHeader()
@@ -135,12 +136,12 @@ namespace LagoVista.IoT.Web.Common.Controllers
 
         protected String CurrentOrgId
         {
-            get { return GetClaimValue(ClaimsPrincipalFactory.CurrentOrgId); }
+            get { return GetClaimValue(ClaimsFactory.CurrentOrgId); }
         }
 
         protected String CurrentUserProfileimageUrl
         {
-            get { return User.Claims.Where(claim => claim.Type == ClaimsPrincipalFactory.CurrentUserProfilePictureurl).FirstOrDefault().Value; }
+            get { return User.Claims.Where(claim => claim.Type == ClaimsFactory.CurrentUserProfilePictureurl).FirstOrDefault().Value; }
         }
 
         protected enum PopulateModes
