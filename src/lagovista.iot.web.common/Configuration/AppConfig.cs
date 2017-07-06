@@ -40,5 +40,9 @@ namespace LagoVista.IoT.Web.Common.Configuration
         public bool IsSSL { get; set; }
 
         public String SlotTitle { get; set; }
+
+        public string AppId => throw new NotImplementedException();
+
+        public string InstallationId => throw new NotImplementedException();
     }
 }
