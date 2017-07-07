@@ -41,8 +41,10 @@ namespace LagoVista.IoT.Web.Common.Configuration
 
         public String SlotTitle { get; set; }
 
-        public string AppId => throw new NotImplementedException();
+        public string AppId { get; set; }
 
-        public string InstallationId => throw new NotImplementedException();
+        public string InstallationId { get; set; }
+
+        public string ClientType { get; set; }
     }
 }
