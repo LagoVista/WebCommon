@@ -10,14 +10,14 @@ namespace LagoVista.IoT.Web.Common.Configuration
     {
         public string AppLogo
         {
-            get { return "http://bytemaster.blob.core.windows.net/icons/logo-wide.png"; }
+            get { return "http://bytemaster.blob.core.windows.net/icons/AppLogo.png"; }
         }
 
         public String AppName { get; set; }
 
         public string CompanyLogo
         {
-            get { return "http://bytemaster.blob.core.windows.net/icons/logo-wide.png"; }
+            get { return "http://bytemaster.blob.core.windows.net/icons/CompanyLog.png"; }
         }
 
         public Environments Environment
