@@ -17,7 +17,7 @@ namespace LagoVista.IoT.Web.Common.Configuration
 
         public string CompanyLogo
         {
-            get { return "http://bytemaster.blob.core.windows.net/icons/CompanyLog.png"; }
+            get { return "http://bytemaster.blob.core.windows.net/icons/CompanyLogo.png"; }
         }
 
         public Environments Environment
