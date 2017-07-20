@@ -4,11 +4,11 @@
     <TargetFramework>netstandard1.6</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="LagoVista.Core" Version="1.2.52-alpha1859" />
-    <PackageReference Include="LagoVista.IoT.Logging" Version="1.2.52-alpha1859" />
-    <PackageReference Include="LagoVista.UserAdmin" Version="1.2.52-alpha1859" />
-    <PackageReference Include="LagoVista.UserAdmin" Version="1.2.52-alpha1859" />
-    <PackageReference Include="LagoVista.AspNetCore.Identity" Version="1.2.52-alpha1859" />
+    <PackageReference Include="LagoVista.Core" Version="1.2.63-alpha1541" />
+    <PackageReference Include="LagoVista.IoT.Logging" Version="1.2.63-alpha1541" />
+    <PackageReference Include="LagoVista.UserAdmin" Version="1.2.63-alpha1541" />
+    <PackageReference Include="LagoVista.UserAdmin" Version="1.2.63-alpha1541" />
+    <PackageReference Include="LagoVista.AspNetCore.Identity" Version="1.2.63-alpha1541" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="1.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.1.2" />
   </ItemGroup>
