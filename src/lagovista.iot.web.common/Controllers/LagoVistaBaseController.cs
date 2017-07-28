@@ -50,7 +50,8 @@ namespace LagoVista.IoT.Web.Common.Controllers
         private String GetClaimValue(String claimId)
         {
             var claim = User.Claims.Where(clm => clm.Type == claimId).FirstOrDefault();
-            return claim == null ? "<????>" : claim.Value;
+            var value = claim == null ? "<????>" : claim.Value;
+            return value;
         }
 
         //TODO: Need checks if user is not logged in.
