@@ -13,6 +13,7 @@ using LagoVista.Core;
 using LagoVista.Core.Interfaces;
 using LagoVista.IoT.Logging.Loggers;
 using LagoVista.AspNetCore.Identity.Managers;
+using LagoVista.Core.Models.UIMetaData;
 
 namespace LagoVista.IoT.Web.Common.Controllers
 {
@@ -164,6 +165,65 @@ namespace LagoVista.IoT.Web.Common.Controllers
         protected IAdminLogger Logger
         {
             get { return _logger; }
+        }
+
+        public ListRequest GetListRequestFromHeader()
+        {
+            var listRequest = new ListRequest();
+
+            if(Request.Headers.ContainsKey("x-nextrowkey"))
+            {
+                listRequest.NextRowKey = Request.Headers["x-nextrowkey"];
+            }
+
+            if(Request.Headers.ContainsKey("x-nextpartitionkey"))
+            {
+                listRequest.NextPartitionKey = Request.Headers["x-nextpartitionkey"];
+            }
+
+            if (Request.Headers.ContainsKey("x-filter-startdate"))
+            {
+                listRequest.StartDate = Request.Headers["x-filter-startdate"];
+            }
+
+            if (Request.Headers.ContainsKey("x-filter-enddate"))
+            {
+                listRequest.EndDate = Request.Headers["x-filter-enddate"];
+            }
+
+            if (Request.Headers.ContainsKey("x-pagesize"))
+            {
+                if (Int32.TryParse(Request.Headers["x-pagesize"], out int pageSize))
+                {
+                    listRequest.PageSize = pageSize;
+                }
+                else
+                {
+                    listRequest.PageSize = 50;
+                }
+            }
+            else
+            {
+                listRequest.PageSize = 50;
+            }
+
+            if (Request.Headers.ContainsKey("x-pageindex"))
+            {
+                if (Int32.TryParse(Request.Headers["x-pageindex"], out int pageIndex))
+                {
+                    listRequest.PageIndex = pageIndex;
+                }
+                else
+                {
+                    listRequest.PageIndex = 1;
+                }
+            }
+            else
+            {
+                listRequest.PageIndex = 1;
+            }
+
+            return listRequest;
         }
     }
 }
