@@ -1,17 +1,12 @@
 ﻿using LagoVista.AspNetCore.Identity.Managers;
-using Microsoft.AspNetCore.Mvc.Controllers;
-using Microsoft.AspNetCore.Mvc.Filters;
-using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
 using LagoVista.Core.Validation;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Routing;
 
 namespace LagoVista.IoT.Web.Common.Attributes
 {
-    public class SystemAdminAttribute : ActionFilterAttribute
+    public class OrgAdminAttribute : ActionFilterAttribute
     {
         public override void OnActionExecuted(ActionExecutedContext context)
         {
@@ -19,12 +14,12 @@ namespace LagoVista.IoT.Web.Common.Attributes
 
             if (context.HttpContext.User != null && context.HttpContext.User.Identity.IsAuthenticated)
             {
-                if (!context.HttpContext.User.HasClaim(ClaimsFactory.IsSystemAdmin, true.ToString()))
+                if (!context.HttpContext.User.HasClaim(ClaimsFactory.IsOrgAdmin, true.ToString()))
                 {
                     context.HttpContext.Response.StatusCode = 403;
                     context.HttpContext.Response.Headers.Clear();
                     var result = new InvokeResult();
-                    result.Errors.Add(new ErrorMessage("Action Requires System Admin Role"));
+                    result.Errors.Add(new ErrorMessage("Action Requires Org Admin Role"));
                     context.Result = new JsonResult(result);
                 }
             }
@@ -32,3 +27,4 @@ namespace LagoVista.IoT.Web.Common.Attributes
         }
     }
 }
+
