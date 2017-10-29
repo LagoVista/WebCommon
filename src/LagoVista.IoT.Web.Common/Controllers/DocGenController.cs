@@ -1,5 +1,8 @@
 ﻿using LagoVista.Core.Attributes;
 using LagoVista.Core.Models.UIMetaData;
+using LagoVista.IoT.Logging.Loggers;
+using LagoVista.UserAdmin.Models.Users;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -42,6 +45,14 @@ namespace LagoVista.IoT.Web.Common.Controllers
         public EntityDescription GetEntity(String domain, String classname)
         {
             return MetaDataHelper.Instance.Entities.Where(ent => ent.DomainName.ToLower() == domain.ToLower() && ent.Name.ToLower() == classname.ToLower()).FirstOrDefault();
+        }
+    }
+
+    public class foo :LagoVistaBaseController
+    {
+        public foo(UserManager<AppUser> userManager, IAdminLogger logger) : base(userManager, logger)
+        {
+
         }
     }
 }

@@ -16,8 +16,8 @@ namespace LagoVista.IoT.Web.Common.Attributes
         {
             base.OnActionExecuted(context);
 
-            var ctrlDescriptor = context.ActionDescriptor as ControllerActionDescriptor;
-            if (ctrlDescriptor != null && (ctrlDescriptor.ControllerName == "Account" && ctrlDescriptor.ActionName == "LogOff"))
+            if (context.ActionDescriptor is ControllerActionDescriptor ctrlDescriptor && 
+                (ctrlDescriptor.ControllerName == "Account" && ctrlDescriptor.ActionName == "LogOff"))
             {
                 return;
             }
