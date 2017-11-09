@@ -8,6 +8,8 @@ namespace LagoVista.IoT.Web.Common.Services
 {
     public class ConsoleLogger : ILogger
     {
+        public bool DebugMode { get; set; }
+
         public void AddCustomEvent(LogLevel level, string tag, string customEvent, params KeyValuePair<string, string>[] args)
         {
             if (!Verbose && level == LogLevel.Verbose)
