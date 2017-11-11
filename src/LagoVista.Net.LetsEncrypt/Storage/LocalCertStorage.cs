@@ -4,7 +4,7 @@ using System;
 
 namespace LagoVista.Net.LetsEncrypt.Storage
 {
-    public class LocalCertStorage : IStorage
+    public class LocalCertStorage : ICertStorage
     {
         IAcmeSettings _settings;
 

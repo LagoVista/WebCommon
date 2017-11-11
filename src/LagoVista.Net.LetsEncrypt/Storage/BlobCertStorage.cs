@@ -6,7 +6,7 @@ using System.IO;
 
 namespace LagoVista.Net.LetsEncrypt.Storage
 {
-    public class BlobCertStorage : IStorage
+    public class BlobCertStorage : ICertStorage
     {
         IAcmeSettings _settings;
 

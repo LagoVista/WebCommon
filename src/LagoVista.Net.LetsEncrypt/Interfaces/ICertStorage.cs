@@ -5,13 +5,12 @@ using System.Threading.Tasks;
 
 namespace LagoVista.Net.LetsEncrypt.Interfaces
 {
-    public interface IStorage
+    public interface ICertStorage
     {
         Task SetChallengeAndResponseAsync(string challenge, string response);
         Task<String> GetResponseAsync(string challenge);
 
         Task StoreCertAsync(string domainName, byte[] bytes);
         Task<byte[]> GetCertAsync(string domainName);
-
     }
 }

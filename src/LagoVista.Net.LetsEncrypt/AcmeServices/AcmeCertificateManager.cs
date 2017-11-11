@@ -16,10 +16,10 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices
     public class AcmeCertificateManager : ICertificateManager
     {
         readonly IAcmeSettings _settings;
-        readonly IStorage _storage;
+        readonly ICertStorage _storage;
         readonly ILogger _logger;
 
-        public AcmeCertificateManager(IStorage storage, IAcmeSettings settings, ILogger logger)
+        public AcmeCertificateManager(ICertStorage storage, IAcmeSettings settings, ILogger logger)
         {
             _storage = storage;
             _settings = settings;

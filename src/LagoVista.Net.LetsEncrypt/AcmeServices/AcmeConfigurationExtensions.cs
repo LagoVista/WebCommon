@@ -12,7 +12,7 @@ namespace Microsoft.AspNetCore.Hosting
         {
 
             services.AddSingleton(settings);
-            services.AddTransient<IStorage, LocalCertStorage>();
+            services.AddTransient<ICertStorage, LocalCertStorage>();
             services.AddSingleton<ICertificateManager, AcmeCertificateManager>();
         }
     }

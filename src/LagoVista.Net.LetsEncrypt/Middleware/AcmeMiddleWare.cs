@@ -11,10 +11,10 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices.Middleware
 
         readonly RequestDelegate _next;
         readonly ILogger<AcmeResponseMiddleware> _logger;
-        readonly IStorage _storage;
+        readonly ICertStorage _storage;
         readonly IAcmeSettings _settings;
 
-        public AcmeResponseMiddleware(RequestDelegate next, IStorage storage, IAcmeSettings settings, ILogger<AcmeResponseMiddleware> logger)
+        public AcmeResponseMiddleware(RequestDelegate next, ICertStorage storage, IAcmeSettings settings, ILogger<AcmeResponseMiddleware> logger)
         {
             _next = next;
             _storage = storage;
