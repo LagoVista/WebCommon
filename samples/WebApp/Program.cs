@@ -15,7 +15,7 @@ namespace LagoVisata.Net.LetsEncrypt.Sample
          * ngrok http 5000
          */
 
-        private const string URI = "nuviotdev.ngrok.io";
+        private const string URI = "57cd6cd1.ngrok.io";
 
         public static void Main(string[] args)
         {
