@@ -66,6 +66,7 @@ namespace LagoVista.Net.LetsEncrypt.Storage
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"[CERT.STORAGE] Error getting bytes for certificate {domainName} from blob storage {ex.Message}");
+                Console.WriteLine(ex.StackTrace);
                 Console.ResetColor();
                 return null;
             }

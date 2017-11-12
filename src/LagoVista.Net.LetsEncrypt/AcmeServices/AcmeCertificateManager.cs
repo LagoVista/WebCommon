@@ -46,7 +46,7 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices
             }
             else
             {
-                if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Not certifcicate found in storage for {domainName}");
+                if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] did not find certificate in storage for: {domainName}");
             }
 
             if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Requesting new certificate for {domainName}");
@@ -131,7 +131,7 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices
                 var cert = await client.NewCertificate(csr);
                 var buffer = cert.ToPfx().Build(domainName, _settings.PfxPassword);
 
-                if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Created new cert and returning byte array for {domainName}.");
+                if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Created new certificate and returning byte array for {domainName}.");
 
                 return buffer;
             }
