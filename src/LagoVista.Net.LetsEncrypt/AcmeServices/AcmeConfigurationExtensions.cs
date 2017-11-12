@@ -12,7 +12,15 @@ namespace Microsoft.AspNetCore.Hosting
         {
 
             services.AddSingleton(settings);
-            services.AddTransient<ICertStorage, LocalCertStorage>();
+            if (settings.StorageLocation == StorageLocation.BlobStorage)
+            {
+                services.AddSingleton<ICertStorage, BlobCertStorage>();
+            }
+            else
+            {
+                services.AddSingleton<ICertStorage, LocalCertStorage>();
+            }
+
             services.AddSingleton<ICertificateManager, AcmeCertificateManager>();
         }
     }

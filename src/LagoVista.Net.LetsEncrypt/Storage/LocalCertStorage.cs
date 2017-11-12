@@ -17,6 +17,8 @@ namespace LagoVista.Net.LetsEncrypt.Storage
 
         public Task<byte[]> GetCertAsync(string domainName)
         {
+            if (!System.IO.Directory.Exists(_settings.StoragePath)) System.IO.Directory.CreateDirectory(_settings.StoragePath);
+
             var fullPath = $@"{_settings.StoragePath}\{domainName}.cer";
             if(System.IO.File.Exists(fullPath))
             {
@@ -40,6 +42,8 @@ namespace LagoVista.Net.LetsEncrypt.Storage
         public Task StoreCertAsync(string domainName, byte[] bytes)
         {
             var fullPath = $@"{_settings.StoragePath}\{domainName}.cer";
+
+            if(!System.IO.Directory.Exists(_settings.StoragePath)) System.IO.Directory.CreateDirectory(_settings.StoragePath);
 
             System.IO.File.WriteAllBytes(fullPath, bytes);
 

@@ -53,6 +53,6 @@ namespace LagoVista.Net.LetsEncrypt.Models
         [JsonProperty("keyAuthorization")]
         public string KeyAuthorization { get; set; }
         [JsonProperty("validationRecord")]
-        public List<ValidationRecord> validationRecord { get; set; }
+        public List<ValidationRecord> ValidationRecord { get; set; }
     }
 }
