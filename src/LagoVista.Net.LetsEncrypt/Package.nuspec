@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>LagoVista.Net.LetsEncrypt</id>
-    <version>1.2.178-alpha0505</version>
+    <version>1.2.183-alpha1053</version>
     <authors>Software Logistics, LLC</authors>
     <owners>Software Logistics, LLC</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
