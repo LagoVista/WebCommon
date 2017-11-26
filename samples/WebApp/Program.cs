@@ -15,7 +15,7 @@ namespace LagoVisata.Net.LetsEncrypt.Sample
          * ngrok http 5000
          */
 
-        private const string URI = "57cd6cd1.ngrok.io";
+        private const string URI = "nuviot-dev.ngrok.io";
 
         public static void Main(string[] args)
         {
@@ -36,7 +36,7 @@ namespace LagoVisata.Net.LetsEncrypt.Sample
 
                     })
                    .ConfigureServices(services => services.AddAcmeCertificateManager(settings))
-                   //.UseUrls("http://*:8008/.well-known/acme-challenge/")
+//                   .UseUrls("http://*:8008/.well-known/acme-challenge/")
                    .UseUrls("http://*:8008")
                    .Configure(app => app.UseAcmeResponse())
                    .UseKestrel()
