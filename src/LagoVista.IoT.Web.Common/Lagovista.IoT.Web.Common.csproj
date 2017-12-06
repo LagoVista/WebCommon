@@ -7,11 +7,11 @@
     <FileVersion>1.2.164.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="LagoVista.Core" Version="1.2.201-alpha1006" />
-    <PackageReference Include="LagoVista.IoT.Logging" Version="1.2.201-alpha1006" />
-    <PackageReference Include="LagoVista.UserAdmin" Version="1.2.201-alpha1006" />
-    <PackageReference Include="LagoVista.UserAdmin" Version="1.2.201-alpha1006" />
-    <PackageReference Include="LagoVista.AspNetCore.Identity" Version="1.2.201-alpha1006" />
+    <PackageReference Include="LagoVista.Core" Version="1.2.202-alpha0849" />
+    <PackageReference Include="LagoVista.IoT.Logging" Version="1.2.202-alpha0849" />
+    <PackageReference Include="LagoVista.UserAdmin" Version="1.2.202-alpha0849" />
+    <PackageReference Include="LagoVista.UserAdmin" Version="1.2.202-alpha0849" />
+    <PackageReference Include="LagoVista.AspNetCore.Identity" Version="1.2.202-alpha0849" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.1" />
   </ItemGroup>
