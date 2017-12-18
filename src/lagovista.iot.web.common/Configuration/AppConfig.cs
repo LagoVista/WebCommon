@@ -1,4 +1,5 @@
 ﻿using LagoVista.Core.Interfaces;
+using LagoVista.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,5 +47,7 @@ namespace LagoVista.IoT.Web.Common.Configuration
         public string InstallationId { get; set; }
 
         public string ClientType { get; set; }
+
+        public VersionInfo Version { get; set; }
     }
 }
