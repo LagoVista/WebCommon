@@ -49,5 +49,15 @@ namespace LagoVista.IoT.Web.Common.Configuration
         public string ClientType { get; set; }
 
         public VersionInfo Version { get; set; }
+
+        public string AppDescription { get; set; }
+
+        public string TermsAndConditionsLink { get; set; }
+
+        public string PrivacyStatementLink { get; set; }
+
+        public string CompanyName { get; set; }
+
+        public string CompanySiteLink { get; set; }
     }
 }
