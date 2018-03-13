@@ -15,7 +15,7 @@ namespace LagoVisata.Net.LetsEncrypt.Sample
          * ngrok http 5000
          */
 
-        private const string URI = "nuviot-dev.ngrok.io";
+        private const string URI = "nuviotdev.ngrok.io";
 
         public static void Main(string[] args)
         {
@@ -26,7 +26,7 @@ namespace LagoVisata.Net.LetsEncrypt.Sample
                 Development = true,
                 Diagnostics = true,
                 PfxPassword = "Test1234",
-                StoragePath = @"X:\Certs"
+                StoragePath = @"L:\Certs"
             };
 
             var acmeHost = new WebHostBuilder()
