@@ -31,20 +31,20 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices.Middleware
             if (requestPath.StartsWithSegments(AcmeResponsePath, out PathString requestPathId))
             {
                 var challenge = requestPathId.Value.TrimStart('/');
-                if(_settings.Diagnostics) _logger.LogWarning($"Acme challenge received on {requestPath}, challenge id = {challenge}");
+                if(_settings.Diagnostics) _logger.LogWarning($"[AcmeResponseMiddleWare] Acme challenge received on {requestPath}, challenge id = {challenge}");
 
                 var response = await _storage.GetResponseAsync(challenge);
 
                 if (!string.IsNullOrEmpty(response))
                 {
-                    if (_settings.Diagnostics) _logger.LogWarning($"Acme challenge response found: {response}");
+                    if (_settings.Diagnostics) _logger.LogWarning($"[AcmeResponseMiddleWare] Acme challenge response found: {response}");
                     context.Response.ContentType = "text/plain";
                     context.Response.StatusCode = 200;
                     await context.Response.WriteAsync(response);
                 }
                 else
                 {
-                    if (_settings.Diagnostics) _logger.LogError($"Error: Acme challenge response for challenge id {challenge} NOT FOUND!");
+                    if (_settings.Diagnostics) _logger.LogError($"[AcmeResponseMiddleWare] !!!! Error: Acme challenge response for challenge id {challenge} NOT FOUND!");
                     context.Response.StatusCode = 404;
                 }
             }
