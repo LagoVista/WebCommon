@@ -27,21 +27,21 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices
 
         public async Task<X509Certificate2> GetCertificate(string domainName)
         {
-            if(_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Certifiate Requested for {domainName}");
+            if(_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Certificate Requested for {domainName}");
             var pfx = await _storage.GetCertAsync(domainName);
             if (pfx != null)
             {
-                if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Certifiate found in storage for {domainName}");
+                if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Certificate found in storage for {domainName}");
                 var cert = new X509Certificate2(pfx, _settings.PfxPassword);
-                if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Certifiate has expire date of {cert.NotAfter}");
+                if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Certificate has expire date of {cert.NotAfter}");
                 if (cert.NotAfter - DateTime.UtcNow > _settings.RenewalPeriod)
                 {
-                    if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Certifiate is valid, returning cert");
+                    if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Certificate is valid, returning cert");
                     return cert;
                 }
                 else
                 {
-                    if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Certifiate is will expire, will request new cert");
+                    if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Certificate is will expire, will request new cert");
                 }
             }
             else
