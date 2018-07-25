@@ -11,6 +11,7 @@ using LagoVista.Net.LetsEncrypt.Models;
 using LagoVista.Net.LetsEncrypt.Interfaces;
 using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.Asn1.X509;
+using Certes.Acme.Resource;
 
 namespace LagoVista.Net.LetsEncrypt.AcmeServices
 {
@@ -68,7 +69,7 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices
             }
         }
 
-        private async Task<AcmeResult<Authorization>> PollResultAsync(AcmeClient client, Uri uri)
+        private async Task<AcmeResult<AuthorizationEntity>> PollResultAsync(AcmeClient client, Uri uri)
         {
             int attempt = 0;
             do
@@ -85,7 +86,7 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices
             return null;
         }
 
-        private async Task<AcmeResult<Authorization>> GetAuthorizationAsync(AcmeClient client, string domainName)
+        private async Task<AcmeResult<AuthorizationEntity>> GetAuthorizationAsync(AcmeClient client, string domainName)
         {
             var account = await client.NewRegistraton($"mailto:{_settings.EmailAddress}");
             account.Data.Agreement = account.GetTermsOfServiceUri();
@@ -114,7 +115,7 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices
 
                 if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Made call to {_settings.AcmeUri} for new cert for {domainName}.");
 
-                if (result.Data.Status != EntityStatus.Valid)
+                if (result.Data.Status != "valid"  )
                 {                    
                     var acmeResponse = JsonConvert.DeserializeObject<AcmeResponseModel>(result.Json);
                     Console.ForegroundColor = ConsoleColor.Red;

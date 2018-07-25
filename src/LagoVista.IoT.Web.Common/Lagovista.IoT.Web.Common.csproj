@@ -2,19 +2,19 @@
   <PropertyGroup>
     <VersionPrefix>1.2.164</VersionPrefix>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <NetStandardImplicitPackageVersion>2.0.1</NetStandardImplicitPackageVersion>
+    <NetStandardImplicitPackageVersion>2.0.3</NetStandardImplicitPackageVersion>
     <AssemblyVersion>1.2.164.0</AssemblyVersion>
     <FileVersion>1.2.164.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="LagoVista.Core" Version="" />
-    <PackageReference Include="LagoVista.IoT.Logging" Version="" />
-    <PackageReference Include="LagoVista.UserAdmin" Version="" />
-    <PackageReference Include="LagoVista.UserAdmin" Version="" />
-    <PackageReference Include="LagoVista.AspNetCore.Identity" Version="" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.3" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
+    <PackageReference Include="LagoVista.Core" Version="2.1.435-beta1758" />
+    <PackageReference Include="LagoVista.IoT.Logging" Version="2.1.435-beta1758" />
+    <PackageReference Include="LagoVista.UserAdmin" Version="2.1.435-beta1758" />
+    <PackageReference Include="LagoVista.UserAdmin" Version="2.1.435-beta1758" />
+    <PackageReference Include="LagoVista.AspNetCore.Identity" Version="2.1.435-beta1758" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.1.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.1.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
   <ItemGroup>
     <None Update="T4ResourceGenerator.tt">
