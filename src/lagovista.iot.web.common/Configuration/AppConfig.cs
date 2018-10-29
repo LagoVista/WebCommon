@@ -59,5 +59,12 @@ namespace LagoVista.IoT.Web.Common.Configuration
         public string CompanyName { get; set; }
 
         public string CompanySiteLink { get; set; }
+
+        public AuthTypes AuthType => AuthTypes.User;
+
+        public string InstanceId { get; set; }
+        public string InstanceAuthKey { get; set; }
+        public string DeviceId { get; set; }
+        public string DeviceRepoId { get; set; }
     }
 }
