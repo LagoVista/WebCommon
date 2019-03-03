@@ -1,10 +1,9 @@
-﻿using LagoVista.AspNetCore.Identity;
-using LagoVista.AspNetCore.Identity.Managers;
+﻿using LagoVista.AspNetCore.Identity.Managers;
+using LagoVista.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
-using LagoVista.Core;
 using System;
 using System.Linq;
 
@@ -16,7 +15,7 @@ namespace LagoVista.IoT.Web.Common.Attributes
         {
             base.OnActionExecuted(context);
 
-            if (context.ActionDescriptor is ControllerActionDescriptor ctrlDescriptor && 
+            if (context.ActionDescriptor is ControllerActionDescriptor ctrlDescriptor &&
                 (ctrlDescriptor.ControllerName == "Account" && ctrlDescriptor.ActionName == "LogOff"))
             {
                 return;
@@ -28,26 +27,20 @@ namespace LagoVista.IoT.Web.Common.Attributes
                 if (context.HttpContext.Request.Path.StartsWithSegments(new PathString("/Account/Verify")) ||
                     context.HttpContext.Request.Path.StartsWithSegments(new PathString("/Account/CreateNewOrg")) ||
                     context.HttpContext.Request.Path.StartsWithSegments(new PathString("/api/verify")) ||
-                    context.HttpContext.Request.Path.StartsWithSegments(new PathString("/api/org/namespace")) ||                    
+                    context.HttpContext.Request.Path.StartsWithSegments(new PathString("/api/org/namespace")) ||
                     context.HttpContext.Request.Path.Value.ToLower() == "/api/org")
                 {
                     return;
                 }
 
-
                 if (context.HttpContext.User.HasClaim(ClaimsFactory.EmailVerified, true.ToString()) && context.HttpContext.User.HasClaim(ClaimsFactory.PhoneVerfiied, true.ToString()))
                 {
                     var orgId = context.HttpContext.User.Claims.Where(claim => claim.Type == ClaimsFactory.CurrentOrgId).FirstOrDefault();
-                    if(orgId == null || orgId.Value == "-" || String.IsNullOrEmpty(orgId.Value) || orgId.Value == Guid.Empty.ToId())
+                    if (orgId == null || orgId.Value == "-" || String.IsNullOrEmpty(orgId.Value) || orgId.Value == Guid.Empty.ToId())
                     {
                         Console.WriteLine("User Autenticated, but no org, redirecting to Create New Org");
                         context.Result = new RedirectResult("/Account/CreateNewOrg");
                     }
-                    else
-                    {
-                        Console.WriteLine("User Authenticated, verified and org created");
-                    }
-
                 }
                 else
                 {
