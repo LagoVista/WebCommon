@@ -44,6 +44,8 @@ namespace LagoVista.IoT.Web.Common.Configuration
 
         public string AppId { get; set; }
 
+        public string APIToken { get; set; }
+
         public string InstallationId { get; set; }
 
         public string ClientType { get; set; }
