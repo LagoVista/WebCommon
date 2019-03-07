@@ -28,6 +28,7 @@ namespace LagoVista.IoT.Web.Common.Attributes
                     context.HttpContext.Request.Path.StartsWithSegments(new PathString("/Account/CreateNewOrg")) ||
                     context.HttpContext.Request.Path.StartsWithSegments(new PathString("/api/verify")) ||
                     context.HttpContext.Request.Path.StartsWithSegments(new PathString("/api/user")) ||
+                    context.HttpContext.Request.Path.StartsWithSegments(new PathString("/api/v1/auth")) ||
                     context.HttpContext.Request.Path.StartsWithSegments(new PathString("/api/user/register")) ||
                     context.HttpContext.Request.Path.StartsWithSegments(new PathString("/api/org/namespace")) ||
                     context.HttpContext.Request.Path.Value.ToLower() == "/api/org")
