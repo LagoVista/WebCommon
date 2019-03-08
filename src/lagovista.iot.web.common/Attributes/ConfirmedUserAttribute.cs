@@ -26,6 +26,7 @@ namespace LagoVista.IoT.Web.Common.Attributes
                 /* These three methods can be called without having the user be verified and have an org created */
                 if (context.HttpContext.Request.Path.StartsWithSegments(new PathString("/Account/Verify")) ||
                     context.HttpContext.Request.Path.StartsWithSegments(new PathString("/Account/CreateNewOrg")) ||
+                    context.HttpContext.Request.Path.StartsWithSegments(new PathString("/api/org/factory")) ||
                     context.HttpContext.Request.Path.StartsWithSegments(new PathString("/api/verify")) ||
                     context.HttpContext.Request.Path.StartsWithSegments(new PathString("/api/user")) ||
                     context.HttpContext.Request.Path.StartsWithSegments(new PathString("/api/v1/auth")) ||
