@@ -19,7 +19,7 @@ namespace LagoVista.IoT.Web.Common.Attributes
                     context.HttpContext.Response.StatusCode = 403;
                     context.HttpContext.Response.Headers.Clear();
                     var result = new InvokeResult();
-                    result.Errors.Add(new ErrorMessage("Action Requires App Builder Privelages"));
+                    result.Errors.Add(new ErrorMessage("Action Requires App Builder privileges"));
                     context.Result = new JsonResult(result);
                 }
             }
