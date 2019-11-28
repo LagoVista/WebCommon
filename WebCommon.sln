@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.16
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29503.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{CEC21295-346D-4369-9511-FBB4BFFE1863}"
 EndProject
@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{3EEE
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LagoVista.Net.LetsEncrypt", "src\LagoVista.Net.LetsEncrypt\LagoVista.Net.LetsEncrypt.csproj", "{D66BF7F2-8BED-4797-BE70-DFC41A51E59E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApp", "samples\WebApp\WebApp.csproj", "{DD93C476-1200-41A5-AD1C-EC008E365501}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ Global
 		{D66BF7F2-8BED-4797-BE70-DFC41A51E59E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D66BF7F2-8BED-4797-BE70-DFC41A51E59E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D66BF7F2-8BED-4797-BE70-DFC41A51E59E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD93C476-1200-41A5-AD1C-EC008E365501}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD93C476-1200-41A5-AD1C-EC008E365501}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD93C476-1200-41A5-AD1C-EC008E365501}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD93C476-1200-41A5-AD1C-EC008E365501}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -39,6 +45,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{3E7F0C75-AD38-4B90-AA7F-A2784DF36C5B} = {CEC21295-346D-4369-9511-FBB4BFFE1863}
 		{D66BF7F2-8BED-4797-BE70-DFC41A51E59E} = {CEC21295-346D-4369-9511-FBB4BFFE1863}
+		{DD93C476-1200-41A5-AD1C-EC008E365501} = {3EEEE49B-0643-405B-83C8-1370986A438D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {24DF6E85-CE09-4223-9C0B-D5ED243FE0C7}

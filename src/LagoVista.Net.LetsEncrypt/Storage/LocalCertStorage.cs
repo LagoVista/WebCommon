@@ -1,14 +1,16 @@
 ﻿using LagoVista.Net.LetsEncrypt.Interfaces;
 using System.Threading.Tasks;
 using System;
+using System.Collections.Generic;
 
 namespace LagoVista.Net.LetsEncrypt.Storage
 {
     public class LocalCertStorage : ICertStorage
     {
         IAcmeSettings _settings;
+        
 
-        private static string _response;
+        static Dictionary<string, string> _challanges = new Dictionary<string, string>();
 
         public LocalCertStorage(IAcmeSettings settings)
         {
@@ -30,12 +32,19 @@ namespace LagoVista.Net.LetsEncrypt.Storage
 
         public Task<string> GetResponseAsync(string challenge)
         {
-            return Task.FromResult( _response);
+            if (_challanges.ContainsKey(challenge))
+            {
+                return Task.FromResult(_challanges[challenge]);
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public Task SetChallengeAndResponseAsync(string challenge, string response)
         {
-            _response = response;
+            _challanges.Add(challenge, response);
             return Task.FromResult(default(object));
         }
 

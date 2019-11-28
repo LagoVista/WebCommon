@@ -10,7 +10,8 @@ namespace LagoVista.Net.LetsEncrypt.Models
 
         public Uri AcmeUri
         {
-            get{return Development ? new Uri("https://acme-staging.api.letsencrypt.org/directory") : new Uri("https://acme-v01.api.letsencrypt.org/directory");}
+            //get{return Development ? new Uri("https://acme-staging.api.letsencrypt.org/directory") : new Uri("https://acme-v01.api.letsencrypt.org/directory");}
+            get { return Development ? new Uri("https://acme-staging-v02.api.letsencrypt.org/directory") : new Uri("https://acme-v02.api.letsencrypt.org/directory"); }
         }
 
         public bool Diagnostics { get; set; } = false;

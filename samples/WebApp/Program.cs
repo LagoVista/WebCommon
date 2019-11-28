@@ -12,10 +12,10 @@ namespace LagoVisata.Net.LetsEncrypt.Sample
     {
         /* 
          * Usage: start NGROK and point to port 5000 
-         * ngrok http 5000
+         * ngrok http 8008 --hostname=nuviot-dev.ngrok.io
          */
 
-        private const string URI = "nuviotdev.ngrok.io";
+        private const string URI = "nuviot-dev.ngrok.io";
 
         public static void Main(string[] args)
         {
@@ -23,6 +23,10 @@ namespace LagoVisata.Net.LetsEncrypt.Sample
             {
                 EmailAddress = "kevinw@software-logistics.com",
                 StorageLocation = LagoVista.Net.LetsEncrypt.Interfaces.StorageLocation.FileSystem,
+                //StorageLocation = LagoVista.Net.LetsEncrypt.Interfaces.StorageLocation.BlobStorage,
+                StorageAccountName = "nuviotdev",
+                StorageContainerName = "tempcert",
+                StorageKey = "Za6PpxUbXjXic8rhK3lbcWyUQyVY2NVsgXRRD1rVj2LAjXUnji5/ooJx7u0ob9cPKTkPu/woa74DBE6IVKsLQA==",
                 Development = true,
                 Diagnostics = true,
                 PfxPassword = "Test1234",
@@ -36,7 +40,7 @@ namespace LagoVisata.Net.LetsEncrypt.Sample
 
                     })
                    .ConfigureServices(services => services.AddAcmeCertificateManager(settings))
-//                   .UseUrls("http://*:8008/.well-known/acme-challenge/")
+                   //                   .UseUrls("http://*:8008/.well-known/acme-challenge/")
                    .UseUrls("http://*:8008")
                    .Configure(app => app.UseAcmeResponse())
                    .UseKestrel()
@@ -68,7 +72,7 @@ namespace LagoVisata.Net.LetsEncrypt.Sample
                     }
                 })
                 .UseContentRoot(Directory.GetCurrentDirectory())
-                                //.UseUrls($"https://{URI}:9001")
+                //.UseUrls($"https://{URI}:9001")
                 .UseApplicationInsights()
                 .Build();
 
