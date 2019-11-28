@@ -7,16 +7,20 @@ using Microsoft.WindowsAzure.Storage.Table;
 using Microsoft.Extensions.Logging;
 using LagoVista.Net.LetsEncrypt.Models;
 using System;
+using LagoVista.IoT.Logging.Loggers;
+using LagoVista.Core;
 
 namespace LagoVista.Net.LetsEncrypt.Storage
 {
     public class BlobCertStorage : ICertStorage
     {
         IAcmeSettings _settings;
+        IInstanceLogger _instanceLogger;
 
-        public BlobCertStorage(IAcmeSettings settings)
+        public BlobCertStorage(IAcmeSettings settings, IInstanceLogger instanceLogger)
         {
             _settings = settings;
+            _instanceLogger = instanceLogger;
         }
 
         private async Task<CloudTable> GetCloudTableAsync()
@@ -45,29 +49,30 @@ namespace LagoVista.Net.LetsEncrypt.Storage
         {
             try
             {
-                if (_settings.Diagnostics) Console.WriteLine($"[CERT.STORAGE] Requested cert for {domainName}");
+                if (String.IsNullOrEmpty(domainName)) throw new ArgumentNullException(nameof(domainName));
+
+                this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, "BlobCertStorage_GetCertAsync", "Requested Cert", domainName.ToKVP("domainName"));
                 using (var ms = new MemoryStream())
                 {
                     var container = await GetContainerAsync();
                     var blob = container.GetBlockBlobReference(domainName);
                     if (!await blob.ExistsAsync())
                     {
-                        if (_settings.Diagnostics) Console.WriteLine($"[CERT.STORAGE] Cert not found on server for {domainName}");
+                        this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Error, "BlobCertStorage_GetCertAsync", "Cert not found", domainName.ToKVP("domainName"));
                         return null;
                     }
 
-                    if (_settings.Diagnostics) Console.WriteLine($"[CERT.STORAGE] Cert found on server for {domainName}");
+                    this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, "BlobCertStorage_GetCertAsync", "Cert found", domainName.ToKVP("domainName"));
                     await blob.DownloadToStreamAsync(ms);
-                    if (_settings.Diagnostics) Console.WriteLine($"[CERT.STORAGE] Cert downloaded and returned byte array for {domainName}");
-                    return ms.ToArray();
+                    var buffer = ms.ToArray();
+                    this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, "BlobCertStorage_GetCertAsync", "Cert downloaded",
+                        buffer.Length.ToString().ToKVP("bufferLen"), domainName.ToKVP("domainName"));
+                    return buffer;
                 }
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[CERT.STORAGE] Error getting bytes for certificate {domainName} from blob storage {ex.Message}");
-                Console.WriteLine(ex.StackTrace);
-                Console.ResetColor();
+                _instanceLogger.AddException("BlobCertStorage_GetCertAsync", ex, domainName.ToKVP("domainName"));
                 return null;
             }
         }
@@ -76,7 +81,9 @@ namespace LagoVista.Net.LetsEncrypt.Storage
         {
             try
             {
-                if (_settings.Diagnostics) Console.WriteLine($"[CERT.STORAGE] Attempt to find response for challenge {challenge}");
+                if (String.IsNullOrEmpty(challenge)) throw new ArgumentNullException(nameof(challenge));
+
+                this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, "BlobCertStorage_GetCertAsync", "Attempt to get response for challenge.", challenge.ToKVP("challenge"));
 
                 var table = await GetCloudTableAsync();
 
@@ -85,21 +92,20 @@ namespace LagoVista.Net.LetsEncrypt.Storage
                 var retrievedResult = await table.ExecuteAsync(getOperation);
                 if (retrievedResult.Result == null)
                 {
-                    if (_settings.Diagnostics) Console.WriteLine($"[CERT.STORAGE] Did not find response for challenge {challenge}");
+                    this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Error, "BlobCertStorage_GetResponseAsync", "Could not find challenge.", challenge.ToKVP("challenge"));
                     return null;
                 }
                 else
                 {
                     var response = (retrievedResult.Result as AcmeChallengeResponse).Response;
-                    if (_settings.Diagnostics) Console.WriteLine($"[CERT.STORAGE] Found and returning response for challenge {challenge} - {response}");
+                    this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, "BlobCertStorage_GetResponseAsync", "Found Response for challenge", 
+                        challenge.ToKVP("challenge"), response.ToKVP("response"));
                     return response;
                 }
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[CERT.STORAGE] Could not get response for challenge {challenge} to table storage {ex.Message}");
-                Console.ResetColor();
+                _instanceLogger.AddException("BlobCertStorage_GetResponseAsync", ex, challenge.ToKVP("challenge"));
                 return null;
             }
         }
@@ -108,7 +114,11 @@ namespace LagoVista.Net.LetsEncrypt.Storage
         {
             try
             {
-                if (_settings.Diagnostics) Console.WriteLine($"[CERT.STORAGE] Request to store response: {response} for challenge: {challenge}");
+                if (String.IsNullOrEmpty(challenge)) throw new ArgumentNullException(nameof(challenge));
+                if (String.IsNullOrEmpty(response)) throw new ArgumentNullException(nameof(response));
+
+                this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, "BlobCertStorage_SetChallengeAndResponseAsync", "Attempt to write challenge and response.", 
+                    challenge.ToKVP("challenge"), response.ToKVP("response"));
 
                 var model = new AcmeChallengeResponse(challenge);
                 model.Response = response;
@@ -117,13 +127,12 @@ namespace LagoVista.Net.LetsEncrypt.Storage
                 var operation = TableOperation.Insert(model);
                 await table.ExecuteAsync(operation);
 
-                if (_settings.Diagnostics) Console.WriteLine($"[CERT.STORAGE] Successfully stored response: {response} for challenge: {challenge}");
+                this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, "BlobCertStorage_SetChallengeAndResponseAsync", "Wrote challenge and response.", 
+                    challenge.ToKVP("challenge"), response.ToKVP("response"));
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("[CERT.STORAGE] Could not store challenge/response to table storage: " + ex.Message);
-                Console.ResetColor();
+                _instanceLogger.AddException("BlobCertStorage_SetChallengeAndResponseAsync", ex, challenge.ToKVP("challenge"), response.ToKVP("response"));
             }
         }
 
@@ -131,7 +140,12 @@ namespace LagoVista.Net.LetsEncrypt.Storage
         {
             try
             {
-                if (_settings.Diagnostics) Console.WriteLine($"[CERT.STORAGE] Request to store [{bytes.Length}] bytes for domain [{domainName}] to blob storage.");
+                if(bytes == null) throw new ArgumentNullException(nameof(bytes));
+                if (String.IsNullOrEmpty(domainName)) throw new ArgumentNullException(nameof(domainName));
+
+                this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, "BlobCertStorage_StoreCertAsync", "Storing SSL Cert to storage.",
+                    bytes.Length.ToString().ToKVP("byteCount"), domainName.ToKVP("domainName"));
+
                 using (var ms = new MemoryStream(bytes))
                 {
                     var container = await GetContainerAsync();
@@ -139,13 +153,12 @@ namespace LagoVista.Net.LetsEncrypt.Storage
                     await blob.DeleteIfExistsAsync();
                     await blob.UploadFromStreamAsync(ms);
                 }
-                if (_settings.Diagnostics) Console.WriteLine($"[CERT.STORAGE] Stored [{bytes.Length}] bytes for domain [{domainName}] to blob storage.");
+                this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, "BlobCertStorage_StoreCertAsync", "Stored SSL Cert to storage.",
+                  bytes.Length.ToString().ToKVP("byteCount"), domainName.ToKVP("domainName"));
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[CERT.STORAGE] Could not store cert for {domainName} to Blob Storage: {ex.Message}");
-                Console.ResetColor();
+                _instanceLogger.AddException("BlobCertStorage_StoreCertAsync", ex, domainName.ToKVP("domainName"));
             }
         }
     }

@@ -11,6 +11,8 @@ using LagoVista.Net.LetsEncrypt.Models;
 using LagoVista.Net.LetsEncrypt.Interfaces;
 using Certes.Acme.Resource;
 using System.Net.Http;
+using LagoVista.IoT.Logging.Loggers;
+using LagoVista.Core;
 
 namespace LagoVista.Net.LetsEncrypt.AcmeServices
 {
@@ -18,8 +20,11 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices
     {
         readonly IAcmeSettings _settings;
         readonly ICertStorage _storage;
+        IInstanceLogger _instanceLogger;
 
-        public AcmeCertificateManager(ICertStorage storage, IAcmeSettings settings)
+        private const string Tag = "AcmeCertMgr";
+
+        public AcmeCertificateManager(ICertStorage storage, IAcmeSettings settings, IInstanceLogger instanceLogger)
         {
             _storage = storage;
             _settings = settings;
@@ -27,62 +32,43 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices
 
         public async Task<X509Certificate2> GetCertificate(string domainName)
         {
-            if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Certificate Requested for {domainName}");
+            this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate Requested for {domainName}");
             var pfx = await _storage.GetCertAsync(domainName + "X");
             if (pfx != null)
             {
-                if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Certificate found in storage for {domainName}");
+                this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate found in storage for {domainName}");
                 var cert = new X509Certificate2(pfx, _settings.PfxPassword);
-                if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Certificate has expire date of {cert.NotAfter}");
+                this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate has expire date of {cert.NotAfter}");
                 if (cert.NotAfter - DateTime.UtcNow > _settings.RenewalPeriod)
                 {
-                    if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Certificate is valid, returning cert");
+                    this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate is valid, returning cert");
                     return cert;
                 }
                 else
                 {
-                    if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Certificate is will expire, will request new cert");
+                    this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate is will expire, will request new cert");
                 }
             }
             else
             {
-                if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] did not find certificate in storage for: {domainName}");
+                this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Did not find certificate in storage for: {domainName}");
             }
 
-            if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Requesting new certificate for {domainName}");
+            this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Requesting new certificate for {domainName}");
             pfx = await RequestNewCertificateV2(domainName);
             if (pfx != null)
             {
-                if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Obtained certificate for {domainName}");
-                if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Storing certificate for {domainName}");
+                this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Obtained certificate for {domainName}");
+                this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Storing certificate for {domainName}");
                 await _storage.StoreCertAsync(domainName, pfx);
-                if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Stored certificate will create X509 and return {domainName}");
+                this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Stored certificate will create X509 and return {domainName}");
                 return new X509Certificate2(pfx, _settings.PfxPassword);
             }
             else
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[ACMECERTMGR] Response from certificate is null for {domainName}, did not get certificate.");
-                Console.ResetColor();
+                this._instanceLogger.AddError($"{Tag}_GetCertificate", $"Response from certificate is null for {domainName}, did not get certificate.");
                 return null;
             }
-        }
-
-        private async Task<AcmeResult<AuthorizationEntity>> PollResultAsync(AcmeClient client, Uri uri)
-        {
-            int attempt = 0;
-            do
-            {
-                await Task.Delay(5000 * attempt);
-                var auth = await client.GetAuthorization(uri);
-                if (auth.Data.Status != EntityStatus.Pending)
-                {
-                    return auth;
-                }
-            }
-            while (++attempt < 5);
-
-            return null;
         }
 
         private async Task<Order> PollResultAsync(AcmeContext context, IOrderContext order, Uri uri)
@@ -91,25 +77,17 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices
             do
             {
                 await Task.Delay(5000 * attempt);
-                //var auth = context.Authorization(uri);
-
 
                 var authResult = await order.Resource();
-                
-                //var authResult = await auth.Resource();
 
                 if (authResult.Status == OrderStatus.Ready)
                 {
-                    Console.ForegroundColor = ConsoleColor.Cyan;
-                    Console.WriteLine($"Certificate is ready: {authResult.Status}!!!!!!!!!!!!");
-                    Console.ResetColor();
+                    this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_PollResultAsync", $"Certificate is ready: {authResult.Status}.");
                     return authResult;
                 }
                 else
                 {
-                    Console.ForegroundColor = ConsoleColor.Cyan;
-                    Console.WriteLine($"Waiting for certification creation: {authResult.Status}");
-                    Console.ResetColor();
+                    this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_PollResultAsync", $"Waiting for certification creation: {authResult.Status}");
                 }
             }
             while (++attempt < 5);
@@ -117,40 +95,11 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices
             return null;
         }
 
-        private async Task<AcmeResult<AuthorizationEntity>> GetAuthorizationAsync(AcmeClient client, string domainName)
-        {
-            try
-            {
-                var account = await client.NewRegistraton($"mailto:{_settings.EmailAddress}");
-                account.Data.Agreement = account.GetTermsOfServiceUri();
-                account = await client.UpdateRegistration(account);
-
-                var auth = await client.NewAuthorization(new AuthorizationIdentifier
-                {
-                    Type = AuthorizationIdentifierTypes.Dns,
-                    Value = domainName
-                });
-
-                var challenge = auth.Data.Challenges.Where(c => c.Type == ChallengeTypes.Http01).First();
-                var response = client.ComputeKeyAuthorization(challenge);
-                await _storage.SetChallengeAndResponseAsync(challenge.Token, response);
-                var httpChallenge = await client.CompleteChallenge(challenge);
-                return await PollResultAsync(client, httpChallenge.Location);
-            }
-            catch (Exception ex)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Calling {_settings.AcmeUri} to requesting certificate for  {domainName} - {ex.Message}");
-                Console.ResetColor();
-                return null;
-            }
-        }
-
         private async Task<byte[]> RequestNewCertificateV2(string domainName)
         {
             var context = new AcmeContext(_settings.AcmeUri);
             await context.NewAccount(_settings.EmailAddress, true);
-            
+
             var order = await context.NewOrder(new[] { domainName });
             var auths = await order.Authorizations();
 
@@ -184,14 +133,14 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices
                 var pfxBuilder = cert.ToPfx(privateKey);
                 var buffer = pfxBuilder.Build(domainName, _settings.PfxPassword);
 
-                if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Created new certificate and returning byte array for {domainName}.");
+                this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_RequestNewCertificateV2", $"Created new certificate and returning byte array for {domainName}.");
 
                 return buffer;
             }
             catch (Exception ex)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                if (_settings.Diagnostics) Console.WriteLine($"[ACMECERTMGR] Calling {_settings.AcmeUri} to requesting certificate for  {domainName} - {ex.Message}");
+                this._instanceLogger.AddException($"{Tag}_RequestNewCertificateV2", ex, _settings.AcmeUri.ToString().ToKVP("acmeUri"), domainName.ToKVP("domainName"));
                 Console.ResetColor();
                 return null;
             }
