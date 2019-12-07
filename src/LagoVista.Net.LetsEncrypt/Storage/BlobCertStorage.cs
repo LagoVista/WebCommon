@@ -17,7 +17,7 @@ namespace LagoVista.Net.LetsEncrypt.Storage
         IAcmeSettings _settings;
         IInstanceLogger _instanceLogger;
 
-        public BlobCertStorage(IAcmeSettings settings, IInstanceLogger instanceLogger)
+        public void Init(IAcmeSettings settings, IInstanceLogger instanceLogger)
         {
             _settings = settings;
             _instanceLogger = instanceLogger;
@@ -47,6 +47,8 @@ namespace LagoVista.Net.LetsEncrypt.Storage
 
         public async Task<byte[]> GetCertAsync(string domainName)
         {
+            if (_settings == null || _instanceLogger == null) throw new InvalidOperationException("[GetCertAsync] Not initialized.");
+
             try
             {
                 if (String.IsNullOrEmpty(domainName)) throw new ArgumentNullException(nameof(domainName));
@@ -79,6 +81,8 @@ namespace LagoVista.Net.LetsEncrypt.Storage
 
         public async Task<string> GetResponseAsync(string challenge)
         {
+            if (_settings == null || _instanceLogger == null) throw new InvalidOperationException("[GetResponseAsync] Not initialized.");
+
             try
             {
                 if (String.IsNullOrEmpty(challenge)) throw new ArgumentNullException(nameof(challenge));
@@ -112,6 +116,8 @@ namespace LagoVista.Net.LetsEncrypt.Storage
 
         public async Task SetChallengeAndResponseAsync(string challenge, string response)
         {
+            if (_settings == null || _instanceLogger == null) throw new InvalidOperationException("[SetChallengeAndResponseAsync] Not initialized.");
+
             try
             {
                 if (String.IsNullOrEmpty(challenge)) throw new ArgumentNullException(nameof(challenge));
@@ -138,6 +144,8 @@ namespace LagoVista.Net.LetsEncrypt.Storage
 
         public async Task StoreCertAsync(string domainName, byte[] bytes)
         {
+            if (_settings == null || _instanceLogger == null) throw new InvalidOperationException("[StoreCertAsync] Not initialized.");
+
             try
             {
                 if(bytes == null) throw new ArgumentNullException(nameof(bytes));

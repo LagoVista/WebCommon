@@ -5,6 +5,8 @@ using LagoVista.Net.LetsEncrypt.AcmeServices.Interfaces;
 using LagoVista.Net.LetsEncrypt.Models;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using LagoVista.IoT.Logging.Loggers;
+using WebApp;
 
 namespace LagoVisata.Net.LetsEncrypt.Sample
 {
@@ -60,7 +62,9 @@ namespace LagoVisata.Net.LetsEncrypt.Sample
                 {
                     // Request a new certificate with Let's Encrypt and store it for next time
                     var certificateManager = options.ApplicationServices.GetService(typeof(ICertificateManager)) as ICertificateManager;
-                    var certificate = await certificateManager.GetCertificate(URI);
+                    var instanceLogger = new InstanceLogger(new LogWriter(), "host", "1.0", "instance");
+
+                    var certificate = await certificateManager.GetCertificate(instanceLogger, URI);
                     if (certificate != null)
                     {
                         options.Listen(IPAddress.Loopback, 443,

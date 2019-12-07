@@ -2,20 +2,17 @@
 using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
+using LagoVista.IoT.Logging.Loggers;
 
 namespace LagoVista.Net.LetsEncrypt.Storage
 {
     public class LocalCertStorage : ICertStorage
     {
         IAcmeSettings _settings;
+        IInstanceLogger _instanceLogger;
         
 
         static Dictionary<string, string> _challanges = new Dictionary<string, string>();
-
-        public LocalCertStorage(IAcmeSettings settings)
-        {
-            _settings = settings;
-        }
 
         public Task<byte[]> GetCertAsync(string domainName)
         {
@@ -57,6 +54,12 @@ namespace LagoVista.Net.LetsEncrypt.Storage
             System.IO.File.WriteAllBytes(fullPath, bytes);
 
             return Task.FromResult(default(object));
+        }
+
+        public void Init(IAcmeSettings settings, IInstanceLogger instanceLogger)
+        {
+            _settings = settings;
+            _instanceLogger = instanceLogger;
         }
     }
 }

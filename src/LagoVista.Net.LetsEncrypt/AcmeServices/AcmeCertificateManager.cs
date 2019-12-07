@@ -13,62 +13,77 @@ using Certes.Acme.Resource;
 using System.Net.Http;
 using LagoVista.IoT.Logging.Loggers;
 using LagoVista.Core;
+using LagoVista.Net.LetsEncrypt.Storage;
 
 namespace LagoVista.Net.LetsEncrypt.AcmeServices
 {
     public class AcmeCertificateManager : ICertificateManager
     {
         readonly IAcmeSettings _settings;
-        readonly ICertStorage _storage;
-        IInstanceLogger _instanceLogger;
+        ICertStorage _storage;
+        static IInstanceLogger _instanceLogger;
 
         private const string Tag = "AcmeCertMgr";
 
-        public AcmeCertificateManager(ICertStorage storage, IAcmeSettings settings, IInstanceLogger instanceLogger)
+        public AcmeCertificateManager(ICertStorage storage, IAcmeSettings settings)
         {
-            _storage = storage;
-            _settings = settings;
+            _storage = storage ?? throw new NullReferenceException(nameof(storage));
+            _settings = settings ?? throw new NullReferenceException(nameof(settings));
         }
 
-        public async Task<X509Certificate2> GetCertificate(string domainName)
+        public async Task<X509Certificate2> GetCertificate(IInstanceLogger instanceLogger, string domainName)
         {
-            this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate Requested for {domainName}");
+            if(instanceLogger == null)
+            {
+                throw new ArgumentNullException(nameof(instanceLogger));
+            }
+
+            AcmeCertificateManager._instanceLogger = instanceLogger;
+            this._storage = new BlobCertStorage();
+            this._storage.Init(this._settings, instanceLogger);
+
+            AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate Requested for {domainName}");
             var pfx = await _storage.GetCertAsync(domainName + "X");
             if (pfx != null)
             {
-                this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate found in storage for {domainName}");
+                AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate found in storage for {domainName}");
                 var cert = new X509Certificate2(pfx, _settings.PfxPassword);
-                this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate has expire date of {cert.NotAfter}");
+                AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate has expire date of {cert.NotAfter}");
                 if (cert.NotAfter - DateTime.UtcNow > _settings.RenewalPeriod)
                 {
-                    this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate is valid, returning cert");
+                    AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate is valid, returning cert");
                     return cert;
                 }
                 else
                 {
-                    this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate is will expire, will request new cert");
+                    AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate is will expire, will request new cert");
                 }
             }
             else
             {
-                this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Did not find certificate in storage for: {domainName}");
+                AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Did not find certificate in storage for: {domainName}");
             }
 
-            this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Requesting new certificate for {domainName}");
+            AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Requesting new certificate for {domainName}");
             pfx = await RequestNewCertificateV2(domainName);
             if (pfx != null)
             {
-                this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Obtained certificate for {domainName}");
-                this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Storing certificate for {domainName}");
+                AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Obtained certificate for {domainName}");
+                AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Storing certificate for {domainName}");
                 await _storage.StoreCertAsync(domainName, pfx);
-                this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Stored certificate will create X509 and return {domainName}");
+                AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Stored certificate will create X509 and return {domainName}");
                 return new X509Certificate2(pfx, _settings.PfxPassword);
             }
             else
             {
-                this._instanceLogger.AddError($"{Tag}_GetCertificate", $"Response from certificate is null for {domainName}, did not get certificate.");
+                AcmeCertificateManager._instanceLogger.AddError($"{Tag}_GetCertificate", $"Response from certificate is null for {domainName}, did not get certificate.");
                 return null;
             }
+        }
+
+        public static IInstanceLogger GetInstanceLogger()
+        {
+            return _instanceLogger;
         }
 
         private async Task<Order> PollResultAsync(AcmeContext context, IOrderContext order, Uri uri)
@@ -82,12 +97,12 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices
 
                 if (authResult.Status == OrderStatus.Ready)
                 {
-                    this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_PollResultAsync", $"Certificate is ready: {authResult.Status}.");
+                    AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_PollResultAsync", $"Certificate is ready: {authResult.Status}.");
                     return authResult;
                 }
                 else
                 {
-                    this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_PollResultAsync", $"Waiting for certification creation: {authResult.Status}");
+                    AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_PollResultAsync", $"Waiting for certification creation: {authResult.Status}");
                 }
             }
             while (++attempt < 5);
@@ -133,14 +148,14 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices
                 var pfxBuilder = cert.ToPfx(privateKey);
                 var buffer = pfxBuilder.Build(domainName, _settings.PfxPassword);
 
-                this._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_RequestNewCertificateV2", $"Created new certificate and returning byte array for {domainName}.");
+                AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_RequestNewCertificateV2", $"Created new certificate and returning byte array for {domainName}.");
 
                 return buffer;
             }
             catch (Exception ex)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                this._instanceLogger.AddException($"{Tag}_RequestNewCertificateV2", ex, _settings.AcmeUri.ToString().ToKVP("acmeUri"), domainName.ToKVP("domainName"));
+                AcmeCertificateManager._instanceLogger.AddException($"{Tag}_RequestNewCertificateV2", ex, _settings.AcmeUri.ToString().ToKVP("acmeUri"), domainName.ToKVP("domainName"));
                 Console.ResetColor();
                 return null;
             }
