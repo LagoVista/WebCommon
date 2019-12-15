@@ -43,7 +43,7 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices
             this._storage.Init(this._settings, instanceLogger);
 
             AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate Requested for {domainName}");
-            var pfx = await _storage.GetCertAsync(domainName + "X");
+            var pfx = await _storage.GetCertAsync(domainName);
             if (pfx != null)
             {
                 AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate found in storage for {domainName}");
