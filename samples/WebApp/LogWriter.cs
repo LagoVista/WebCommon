@@ -16,6 +16,9 @@ namespace WebApp
 
         public Task WriteEvent(LogRecord record)
         {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(record.Message);
+            Console.ResetColor();
             return Task.CompletedTask;
         }
     }

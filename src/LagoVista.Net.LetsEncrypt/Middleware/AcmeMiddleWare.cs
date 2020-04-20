@@ -18,9 +18,9 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices.Middleware
 
         public AcmeResponseMiddleware(RequestDelegate next, ICertStorage storage, IAcmeSettings settings)
         {
-            _next = next;
-            _storage = storage;
-            _settings = settings;
+            _next = next ?? throw new NullReferenceException(nameof(next));
+            _storage = storage ?? throw new NullReferenceException(nameof(storage));
+            _settings = settings ?? throw new NullReferenceException(nameof(settings));
         }
 
         public async Task Invoke(HttpContext context)

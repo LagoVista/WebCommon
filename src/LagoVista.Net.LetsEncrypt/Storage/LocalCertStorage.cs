@@ -31,16 +31,26 @@ namespace LagoVista.Net.LetsEncrypt.Storage
         {
             if (_challanges.ContainsKey(challenge))
             {
-                return Task.FromResult(_challanges[challenge]);
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                var response = Task.FromResult(_challanges[challenge]);
+                Console.WriteLine($"Found result for challenge {challenge} - {response}");
+                Console.ResetColor();
+                return response;
             }
             else
             {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Could not find result for challenge {challenge}");
+                Console.ResetColor();
                 return null;
             }
         }
 
         public Task SetChallengeAndResponseAsync(string challenge, string response)
         {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"Setting challenge {challenge} for {response}");
+            Console.ResetColor();
             _challanges.Add(challenge, response);
             return Task.FromResult(default(object));
         }
