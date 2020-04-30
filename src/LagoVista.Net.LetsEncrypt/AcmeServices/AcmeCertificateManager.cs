@@ -39,8 +39,6 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices
             }
 
             AcmeCertificateManager._instanceLogger = instanceLogger;
-            //this._storage = new BlobCertStorage();
-            this._storage = new LocalCertStorage();
             this._storage.Init(this._settings, instanceLogger);
 
             AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate Requested for {domainName}");
