@@ -5,7 +5,15 @@
     <NetStandardImplicitPackageVersion>2.0.3</NetStandardImplicitPackageVersion>
     <AssemblyVersion>1.2.164.0</AssemblyVersion>
     <FileVersion>1.2.164.0</FileVersion>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="LagoVista.Core" Version="2.1.1066-beta1616" />
     <PackageReference Include="LagoVista.IoT.Logging" Version="2.1.1066-beta1616" />
