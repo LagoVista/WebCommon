@@ -25,43 +25,52 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices.Middleware
 
         public async Task Invoke(HttpContext context)
         {
-            var requestPath = context.Request.PathBase + context.Request.Path;
-
             var instanceLogger = AcmeCertificateManager.GetInstanceLogger();
             if (instanceLogger == null)
             {
                 throw new NullReferenceException("Instance Logger null on AcmeCertificationManger.");
             }
 
-            _storage.Init(_settings, instanceLogger);
-
-            instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, "AcmeResponseMiddleware_Invoke", $"Received request", requestPath.Value.ToKVP("requestPath"));
-
-            if (requestPath.StartsWithSegments(AcmeResponsePath, out PathString requestPathId))
+            try
             {
-                var challenge = requestPathId.Value.TrimStart('/');
-                instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, "AcmeResponseMiddleware_Invoke", $"Received request", challenge.ToKVP("challenge"), requestPath.Value.ToKVP("requestPath"));
+                context.Response.Headers.Add("Date", DateTime.UtcNow.ToJSONString());
 
-                var response = await _storage.GetResponseAsync(challenge);
+                var requestPath = context.Request.PathBase + context.Request.Path;
 
-                if (!string.IsNullOrEmpty(response))
+                _storage.Init(_settings, instanceLogger);
+
+                instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, "AcmeResponseMiddleware_Invoke", $"Received request", requestPath.Value.ToKVP("requestPath"));
+
+                if (requestPath.StartsWithSegments(AcmeResponsePath, out PathString requestPathId))
                 {
-                    instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, "AcmeResponseMiddleware_Invoke", "Found challenge and sent response", response.ToKVP("response"), challenge.ToKVP("challenge"));
+                    var challenge = requestPathId.Value.TrimStart('/');
+                    instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, "AcmeResponseMiddleware_Invoke", $"Received request", challenge.ToKVP("challenge"), requestPath.Value.ToKVP("requestPath"));
 
-                    context.Response.ContentType = "text/plain";
-                    context.Response.StatusCode = 200;
-                    await context.Response.WriteAsync(response);
+                    var response = await _storage.GetResponseAsync(challenge);
+
+                    if (!string.IsNullOrEmpty(response))
+                    {
+                        instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, "AcmeResponseMiddleware_Invoke", "Found challenge and sent response", response.ToKVP("response"), challenge.ToKVP("challenge"));
+
+                        context.Response.ContentType = "text/plain";
+                        context.Response.StatusCode = 200;
+                        await context.Response.WriteAsync(response);
+                    }
+                    else
+                    {
+                        instanceLogger.AddError("AcmeResponseMiddleware_Invoke", "Could not find challenge", challenge.ToKVP("challenge"));
+
+                        context.Response.StatusCode = 404;
+                    }
                 }
                 else
                 {
-                    instanceLogger.AddError("AcmeResponseMiddleware_Invoke", "Could not find challenge", challenge.ToKVP("challenge"));
-
-                    context.Response.StatusCode = 404;
+                    await _next.Invoke(context);
                 }
             }
-            else
+            catch (Exception ex)
             {
-                await _next.Invoke(context);
+                instanceLogger.AddException("AcmeResponseMiddleware_Invoke", ex, context.Request.Path.ToString().ToKVP("path"));
             }
         }
     }
