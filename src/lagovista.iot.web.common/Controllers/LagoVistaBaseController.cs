@@ -191,6 +191,27 @@ namespace LagoVista.IoT.Web.Common.Controllers
                 listRequest.EndDate = Request.Headers["x-filter-enddate"];
             }
 
+            if (Request.Headers.ContainsKey("x-group-by"))
+            {
+                listRequest.GroupBy = Request.Headers["x-group-by"];
+            }
+            
+            if (Request.Headers.ContainsKey("x-group-by-size"))
+            {
+                if (Int32.TryParse(Request.Headers["x-group-by-size"], out int groupBySize))
+                {
+                    listRequest.GroupBySize = groupBySize;
+                }
+                else
+                {
+                    listRequest.GroupBySize = 1;
+                }
+            }
+            else
+            {
+                listRequest.GroupBySize = 1;
+            }
+
             if (Request.Headers.ContainsKey("x-pagesize"))
             {
                 if (Int32.TryParse(Request.Headers["x-pagesize"], out int pageSize))
