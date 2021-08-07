@@ -70,7 +70,5 @@ namespace LagoVista.IoT.Web.Common.Configuration
         public string DeviceRepoId { get; set; }
 
         public EntityHeader SystemOwnerOrg { get; set; }
-
-        public IEnumerable<AppSpecificSensorTypes> AppSpecificSensorTypes { get; } = new List<AppSpecificSensorTypes>();
     }
 }
