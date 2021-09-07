@@ -70,5 +70,9 @@ namespace LagoVista.IoT.Web.Common.Configuration
         public string DeviceRepoId { get; set; }
 
         public EntityHeader SystemOwnerOrg { get; set; }
+
+        public string DefaultDeviceLabel => "Device";
+
+        public string DefaultDeviceLabelPlural => "Devices";
     }
 }
