@@ -5,11 +5,13 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace LagoVista.IoT.Web.Common.Attributes
 {
-    public class FinanceAdmin : ActionFilterAttribute
+    public class FinanceAdminAttribute : ActionFilterAttribute
     {
         public override void OnActionExecuted(ActionExecutedContext context)
         {
             base.OnActionExecuted(context);
+
+
 
             if (context.HttpContext.User != null && context.HttpContext.User.Identity.IsAuthenticated)
             {
