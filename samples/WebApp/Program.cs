@@ -32,7 +32,7 @@ namespace LagoVisata.Net.LetsEncrypt.Sample
                 Development = true,
                 Diagnostics = true,
                 PfxPassword = "Test1234",
-                StoragePath = @"L:\Certs"
+                StoragePath = @"X:\Certs"
             };
 
             var acmeHost = new WebHostBuilder()

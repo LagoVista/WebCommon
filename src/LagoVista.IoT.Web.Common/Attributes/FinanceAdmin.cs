@@ -11,8 +11,6 @@ namespace LagoVista.IoT.Web.Common.Attributes
         {
             base.OnActionExecuted(context);
 
-
-
             if (context.HttpContext.User != null && context.HttpContext.User.Identity.IsAuthenticated)
             {
                 if (!context.HttpContext.User.HasClaim(ClaimsFactory.IsFinancceAdmin, true.ToString()))

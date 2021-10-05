@@ -3,17 +3,12 @@ using System.Threading.Tasks;
 using Certes;
 using Certes.Acme;
 using System.Linq;
-using Certes.Pkcs;
 using System.Security.Cryptography.X509Certificates;
-using Newtonsoft.Json;
 using LagoVista.Net.LetsEncrypt.AcmeServices.Interfaces;
-using LagoVista.Net.LetsEncrypt.Models;
 using LagoVista.Net.LetsEncrypt.Interfaces;
 using Certes.Acme.Resource;
-using System.Net.Http;
 using LagoVista.IoT.Logging.Loggers;
 using LagoVista.Core;
-using LagoVista.Net.LetsEncrypt.Storage;
 
 namespace LagoVista.Net.LetsEncrypt.AcmeServices
 {
