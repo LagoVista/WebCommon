@@ -37,7 +37,7 @@ namespace LagoVista.IoT.Web.Common.Attributes
                     return;
                 }
 
-                if (context.HttpContext.User.HasClaim(ClaimsFactory.EmailVerified, true.ToString()) && context.HttpContext.User.HasClaim(ClaimsFactory.PhoneVerfiied, true.ToString()))
+                if (context.HttpContext.User.HasClaim(ClaimsFactory.EmailVerified, true.ToString()))
                 {
                     var orgId = context.HttpContext.User.Claims.Where(claim => claim.Type == ClaimsFactory.CurrentOrgId).FirstOrDefault();
                     if (orgId == null || orgId.Value == "-" || String.IsNullOrEmpty(orgId.Value) || orgId.Value == Guid.Empty.ToId())

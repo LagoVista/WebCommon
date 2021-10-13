@@ -14,8 +14,8 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices
 {
     public class AcmeCertificateManager : ICertificateManager
     {
-        readonly IAcmeSettings _settings;
-        ICertStorage _storage;
+        private readonly IAcmeSettings _settings;
+        private readonly ICertStorage _storage;
         static IInstanceLogger _instanceLogger;
 
         private const string Tag = "AcmeCertMgr";
@@ -28,12 +28,7 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices
 
         public async Task<X509Certificate2> GetCertificate(IInstanceLogger instanceLogger, string domainName)
         {
-            if(instanceLogger == null)
-            {
-                throw new ArgumentNullException(nameof(instanceLogger));
-            }
-
-            AcmeCertificateManager._instanceLogger = instanceLogger;
+            AcmeCertificateManager._instanceLogger = instanceLogger ?? throw new ArgumentNullException(nameof(instanceLogger));
             this._storage.Init(this._settings, instanceLogger);
 
             AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate Requested for {domainName}");
