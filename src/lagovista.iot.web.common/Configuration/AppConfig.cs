@@ -74,5 +74,7 @@ namespace LagoVista.IoT.Web.Common.Configuration
         public string DefaultDeviceLabel => "Device";
 
         public string DefaultDeviceLabelPlural => "Devices";
+
+        public string AnalyticsKey { get; set; }
     }
 }
