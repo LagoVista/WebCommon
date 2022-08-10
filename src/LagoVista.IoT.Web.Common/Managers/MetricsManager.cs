@@ -10,10 +10,12 @@ namespace LagoVista.IoT.Web.Common.Managers
     public class MetricsManager : IMetricsManager
     {
         private readonly IMetricsRepo _repo;
+        private readonly IMetricsBySessionRepo _sessionRepo;
 
-        public MetricsManager(IMetricsRepo repo)
+        public MetricsManager(IMetricsRepo repo, IMetricsBySessionRepo sessionRepo)
         {
             this._repo = repo ?? throw new ArgumentNullException(nameof(repo));
+            this._sessionRepo = sessionRepo ?? throw new ArgumentNullException(nameof(sessionRepo));
         }
 
 
@@ -31,10 +33,7 @@ namespace LagoVista.IoT.Web.Common.Managers
                    LabelNames = new[] { "path", "sessionid", "campaignid", "eventid", "eventdata" }
                });
 
-        public Task<ListResponse<WebSiteMetric>> GetMetricsAsync(ListRequest request, string sessionId = null, string campaignId = null, string eventId = null)
-        {
-            return this._repo.GetMetricsAsync(request, sessionId, campaignId, eventId);
-        }
+ 
 
         public async Task WriteAsync(MetricsInfo info, string ipAddress)
         {
@@ -46,9 +45,24 @@ namespace LagoVista.IoT.Web.Common.Managers
             }
 
             ipAddress = String.IsNullOrEmpty(ipAddress) ? "?" : ipAddress;
-            var metric = Models.WebSiteMetric.FromMetricsInfo(info, ipAddress);
+            var metric = Models.WebSiteMetricByPath.FromMetricsInfo(info, ipAddress);
 
             await _repo.WriteAsync(metric);
+        }
+
+        public Task<ListResponse<WebSiteMetric>> GetAllMetricsAsync(ListRequest request)
+        {
+            return _repo.GetAllMetricsAsync(request);
+        }
+
+        public Task<ListResponse<WebSiteMetric>> GetMetricsBySessionAsync(ListRequest request, string session)
+        {
+            return _sessionRepo.GetMetricsAsync(request, session);
+        }
+
+        public Task<ListResponse<WebSiteMetric>> GetMetricsByPathAsync(ListRequest request, string path)
+        {
+            return _repo.GetMetricsAsync(request, path);
         }
     }
 }

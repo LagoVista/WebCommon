@@ -28,9 +28,23 @@ namespace LagoVista.IoT.Web.Common.Controllers
 
         [Authorize]
         [HttpGet("/web/sitemetrics")]
-        public async Task<ListResponse<WebSiteMetric>> GetMetricsAsync(string sessionid = null, string campaignid = null, string eventid = null)
+        public async Task<ListResponse<WebSiteMetric>> GetMetricsAsync()
         {
-            return await this._manager.GetMetricsAsync(GetListRequestFromHeader(), sessionid, campaignid, eventid);
+            return await this._manager.GetAllMetricsAsync(GetListRequestFromHeader());
+        }
+
+        [Authorize]
+        [HttpGet("/web/sitemetrics/session/{sessionid}")]
+        public async Task<ListResponse<WebSiteMetric>> GetMetricsBySessionAsync(string sessionid)
+        {
+            return await this._manager.GetMetricsBySessionAsync(GetListRequestFromHeader(), sessionid);
+        }
+
+        [Authorize]
+        [HttpGet("/web/sitemetrics/session/{path}")]
+        public async Task<ListResponse<WebSiteMetric>> GetMetricsByPathAsync(string path)
+        {
+            return await this._manager.GetMetricsBySessionAsync(GetListRequestFromHeader(), path);
         }
     }
 }

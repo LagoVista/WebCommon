@@ -11,6 +11,7 @@ namespace LagoVista.IoT.Web.Common
 
             services.AddTransient<IMetricsManager, Managers.MetricsManager>();
             services.AddTransient<IMetricsRepo, Repos.MetricsRepos>();
+            services.AddTransient<IMetricsBySessionRepo, Repos.MetricsBySessionRepo>();
         }
     }
 }

@@ -6,21 +6,26 @@ using System.Threading.Tasks;
 
 namespace LagoVista.IoT.Web.Common.Repos
 {
-    public class MetricsRepos :  TableStorageBase<WebSiteMetric>, IMetricsRepo
+    public class MetricsRepos :  TableStorageBase<WebSiteMetricByPath>, IMetricsRepo
     {
         public MetricsRepos(IMetricsLoggerSettings settings, IAdminLogger logger) : 
             base(settings.MetricsLoggerStorage.AccountId, settings.MetricsLoggerStorage.AccessKey, logger)
         {
         }
 
-        public Task<ListResponse<WebSiteMetric>> GetMetricsAsync(ListRequest request, string sessionId = null, string campaignId = null, string eventId = null)
+        public Task<ListResponse<WebSiteMetric>> GetAllMetricsAsync(ListRequest request)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task WriteAsync(WebSiteMetric metric)
+        public Task<ListResponse<WebSiteMetric>> GetMetricsAsync(ListRequest request, string path)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task WriteAsync(WebSiteMetricByPath metric)
         {
             return InsertAsync(metric);
-        }
+        }    
     }
 }
