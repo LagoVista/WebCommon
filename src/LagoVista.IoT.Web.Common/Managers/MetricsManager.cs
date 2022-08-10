@@ -38,11 +38,11 @@ namespace LagoVista.IoT.Web.Common.Managers
 
         public async Task WriteAsync(MetricsInfo info, string ipAddress)
         {
-            RequestCountByMethod.WithLabels(info.FullPath, info.SessionId, info.CampaignId).Inc();
+            RequestCountByMethod.WithLabels(info.FullPath, info.SessionId, info.CampaignId, info.EventId, info.EventData).Inc();
 
             if (info.FullPath.StartsWith("/site/job"))
             {
-                HiringEventsMethod.WithLabels(info.FullPath, info.SessionId, info.CampaignId).Inc();
+                HiringEventsMethod.WithLabels(info.FullPath, info.SessionId, info.CampaignId, info.EventId, info.EventData).Inc();
             }
 
             ipAddress = String.IsNullOrEmpty(ipAddress) ? "?" : ipAddress;

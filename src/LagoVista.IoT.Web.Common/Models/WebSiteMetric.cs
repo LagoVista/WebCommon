@@ -9,7 +9,6 @@ namespace LagoVista.IoT.Web.Common.Models
 {
     public class WebSiteMetric : TableStorageEntity
     {
-        public string TimeStamp { get; set; }
         public string IPAddress { get; set; }
         public string FullPath { get; set; }
         public string SessionId { get; set; }
@@ -19,14 +18,24 @@ namespace LagoVista.IoT.Web.Common.Models
 
         public static WebSiteMetric FromMetricsInfo(MetricsInfo info, string ipAddress)
         {
+            if(!String.IsNullOrEmpty(info.FullPath))
+            {
+                info.FullPath = info.FullPath.Replace("/", ".").Substring(1);
+            }
+            else
+            {
+                info.FullPath = "root";
+            }
+
             return new WebSiteMetric()
             {
-                TimeStamp = DateTime.UtcNow.ToJSONString(),
                 IPAddress = ipAddress,
                 FullPath = info.FullPath,
                 SessionId = info.SessionId,
                 CampaignId = info.CampaignId,
-                PartitionKey = info.SessionId,
+                PartitionKey = info.FullPath,
+                EventId = info.EventId,
+                EventData = info.EventData,
                 RowKey = DateTime.Now.ToInverseTicksRowKey()
             };
         }

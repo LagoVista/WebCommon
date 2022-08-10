@@ -9,7 +9,8 @@ namespace LagoVista.IoT.Web.Common
         public static void ConfigureServices(IServiceCollection services)
         {
 
-
+            services.AddTransient<IMetricsManager, Managers.MetricsManager>();
+            services.AddTransient<IMetricsRepo, Repos.MetricsRepos>();
         }
     }
 }
