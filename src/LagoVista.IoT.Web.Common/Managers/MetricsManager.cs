@@ -48,6 +48,7 @@ namespace LagoVista.IoT.Web.Common.Managers
             var metric = Models.WebSiteMetricByPath.FromMetricsInfo(info, ipAddress);
 
             await _repo.WriteAsync(metric);
+            await _sessionRepo.WriteAsync(Models.WebSiteMetricBySession.FromMetricsInfo(info, ipAddress));
         }
 
         public Task<ListResponse<WebSiteMetric>> GetAllMetricsAsync(ListRequest request)
