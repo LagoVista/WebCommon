@@ -3,6 +3,7 @@ using LagoVista.Core.Models.UIMetaData;
 using LagoVista.IoT.Logging.Loggers;
 using LagoVista.IoT.Web.Common.Models;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace LagoVista.IoT.Web.Common.Repos
 {
@@ -13,14 +14,16 @@ namespace LagoVista.IoT.Web.Common.Repos
         {
         }
 
-        public Task<ListResponse<WebSiteMetric>> GetAllMetricsAsync(ListRequest request)
+        public async Task<ListResponse<WebSiteMetric>> GetAllMetricsAsync(ListRequest request)
         {
-            throw new System.NotImplementedException();
+            var metrics = await GetPagedResultsAsync(request);
+            return ListResponse<WebSiteMetric>.Create(metrics.Model.Select(rqst => WebSiteMetric.FromByPath(rqst)));
         }
 
-        public Task<ListResponse<WebSiteMetric>> GetMetricsAsync(ListRequest request, string path)
+        public async Task<ListResponse<WebSiteMetric>> GetMetricsAsync(ListRequest request, string path)
         {
-            throw new System.NotImplementedException();
+            var metrics = await GetPagedResultsAsync(path, request);
+            return ListResponse<WebSiteMetric>.Create(metrics.Model.Select(rqst => WebSiteMetric.FromByPath(rqst)));
         }
 
         public Task WriteAsync(WebSiteMetricByPath metric)

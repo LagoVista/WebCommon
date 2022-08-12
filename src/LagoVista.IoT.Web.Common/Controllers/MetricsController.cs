@@ -41,7 +41,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
         }
 
         [Authorize]
-        [HttpGet("/web/sitemetrics/session/{path}")]
+        [HttpGet("/web/sitemetrics/path/{path}")]
         public async Task<ListResponse<WebSiteMetric>> GetMetricsByPathAsync(string path)
         {
             return await this._manager.GetMetricsBySessionAsync(GetListRequestFromHeader(), path);

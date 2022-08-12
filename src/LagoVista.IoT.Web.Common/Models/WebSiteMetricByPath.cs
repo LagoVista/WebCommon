@@ -84,7 +84,7 @@ namespace LagoVista.IoT.Web.Common.Models
 
     public class WebSiteMetric
     {
-        public WebSiteMetric FromByPath(WebSiteMetricByPath metric)
+        public static WebSiteMetric FromByPath(WebSiteMetricByPath metric)
         {
             return new WebSiteMetric()
             {
@@ -98,7 +98,7 @@ namespace LagoVista.IoT.Web.Common.Models
             };
         }
 
-        public WebSiteMetric FromBySession(WebSiteMetricBySession metric)
+        public static WebSiteMetric FromBySession(WebSiteMetricBySession metric)
         {
             return new WebSiteMetric()
             {
