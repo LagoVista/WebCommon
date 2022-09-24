@@ -35,14 +35,21 @@ namespace LagoVisata.Net.LetsEncrypt.Sample
 
         public static void Main(string[] args)
         {
+            var accountId = Environment.GetEnvironmentVariable("TEST_AZURESTORAGE_ACCOUNTID");
+            var accountKey = Environment.GetEnvironmentVariable("TEST_AZURESTORAGE_ACCESSKEY");
+
+
+            if(String.IsNullOrEmpty(accountId)) throw new ArgumentNullException("Please add TEST_AZURESTORAGE_ACCOUNTID as an environnment variable");
+            if (String.IsNullOrEmpty(accountKey)) throw new ArgumentNullException("Please add TEST_AZURESTORAGE_ACCESSKEY as an environnment variable");
+
             var settings = new AcmeSettings()
             {
                 EmailAddress = "kevinw@software-logistics.com",
                 //StorageLocation = LagoVista.Net.LetsEncrypt.Interfaces.StorageLocation.FileSystem,
                 StorageLocation = LagoVista.Net.LetsEncrypt.Interfaces.StorageLocation.BlobStorage,
-                StorageAccountName = "nuviotdev",
+                StorageAccountName = accountId,
                 StorageContainerName = "tempcert",
-                StorageKey = "Za6PpxUbXjXic8rhK3lbcWyUQyVY2NVsgXRRD1rVj2LAjXUnji5/ooJx7u0ob9cPKTkPu/woa74DBE6IVKsLQA==",
+                StorageKey = accountKey,
                 Development = false,
                 Diagnostics = true,
                 PfxPassword = "Test1234",
