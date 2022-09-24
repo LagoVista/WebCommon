@@ -6,8 +6,8 @@
     <FileVersion>1.2.164.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="LagoVista.Core" Version="3.0.1602.0546" />
-    <PackageReference Include="LagoVista.IoT.Logging" Version="3.0.1602.0546" />
+    <PackageReference Include="LagoVista.Core" Version="3.0.1956.1209" />
+    <PackageReference Include="LagoVista.IoT.Logging" Version="3.0.1956.1209" />
     <PackageReference Include="Certes" Version="3.0.0" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />

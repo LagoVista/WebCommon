@@ -76,8 +76,6 @@ namespace LagoVisata.Net.LetsEncrypt.Sample
                     }
                 })
                 .UseContentRoot(Directory.GetCurrentDirectory())
-                //.UseUrls($"https://{URI}:9001")
-                .UseApplicationInsights()
                 .Build();
 
             host.Run();
