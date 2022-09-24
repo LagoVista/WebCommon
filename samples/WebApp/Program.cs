@@ -38,8 +38,7 @@ namespace LagoVisata.Net.LetsEncrypt.Sample
             var accountId = Environment.GetEnvironmentVariable("TEST_AZURESTORAGE_ACCOUNTID");
             var accountKey = Environment.GetEnvironmentVariable("TEST_AZURESTORAGE_ACCESSKEY");
 
-
-            if(String.IsNullOrEmpty(accountId)) throw new ArgumentNullException("Please add TEST_AZURESTORAGE_ACCOUNTID as an environnment variable");
+            if (String.IsNullOrEmpty(accountId)) throw new ArgumentNullException("Please add TEST_AZURESTORAGE_ACCOUNTID as an environnment variable");
             if (String.IsNullOrEmpty(accountKey)) throw new ArgumentNullException("Please add TEST_AZURESTORAGE_ACCESSKEY as an environnment variable");
 
             var settings = new AcmeSettings()
