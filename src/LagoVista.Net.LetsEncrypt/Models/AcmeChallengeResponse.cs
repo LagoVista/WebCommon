@@ -1,9 +1,12 @@
-﻿using Microsoft.WindowsAzure.Storage.Table;
+﻿
 
+using Azure;
+using Azure.Data.Tables;
+using System;
 
 namespace LagoVista.Net.LetsEncrypt.Models
 {
-    public class AcmeChallengeResponse : TableEntity
+    public class AcmeChallengeResponse : ITableEntity
     {
         public AcmeChallengeResponse()
         {
@@ -20,5 +23,9 @@ namespace LagoVista.Net.LetsEncrypt.Models
         }
 
         public string Response { get; set; }
+        public string PartitionKey { get; set; }
+        public string RowKey { get; set; }
+        public DateTimeOffset? Timestamp { get; set; }
+        public ETag ETag { get; set; }
     }
 }

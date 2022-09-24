@@ -1,15 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29503.13
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32414.318
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{CEC21295-346D-4369-9511-FBB4BFFE1863}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{236D95BF-5F2A-4EA8-9E93-86AA7051AA6D}"
 	ProjectSection(SolutionItems) = preProject
-		CreateLocalPackage.ps1 = CreateLocalPackage.ps1
 		README.md = README.md
-		UpdateNuspecVersion.ps1 = UpdateNuspecVersion.ps1
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LagoVista.IoT.Web.Common", "src\LagoVista.IoT.Web.Common\LagoVista.IoT.Web.Common.csproj", "{3E7F0C75-AD38-4B90-AA7F-A2784DF36C5B}"

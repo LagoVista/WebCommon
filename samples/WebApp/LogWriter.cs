@@ -11,6 +11,10 @@ namespace WebApp
     {
         public Task WriteError(LogRecord record)
         {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"[Error] {record.Message}");
+            Console.ResetColor();
+            
             return Task.CompletedTask;
         }
 

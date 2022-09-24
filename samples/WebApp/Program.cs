@@ -14,7 +14,21 @@ namespace LagoVisata.Net.LetsEncrypt.Sample
     {
         /* 
          * Usage: start NGROK and point to port 5000 
-         * ngrok http 8008 --hostname=nuviot-dev.ngrok.io
+         * ngrok --scheme http http 8008 --hostname=nuviot-dev.ngrok.io
+         * 
+         * If you set "Development" = false, the root of the cert you get will be invalid so 
+         * an exception will be thrown in RequestNewCertificateV2
+         * 
+         * similar to
+         * Cannot find issuer 'C=US,O=(STAGING) Internet Security Research Group,CN=(STAGING) Doctored Durian Root CA X3' for certificate 'C=US,O=(STAGING) Internet Security Research Group,CN=(STAGING) Pretend Pear X1'.
+         * [Error] Response from certificate is null for nuviot-dev.ngrok.io, did not get certificate.
+         * 
+         * Setting "Development" = true will succeed but there is a rate limit for domains.
+         * 
+         * When testing it first looks to a known source to find the cert if it finds it there, 
+         * it won't attempt to request one.  A good way to get around this is use file system
+         * and delete the file.
+         * 
          */
 
         private const string URI = "nuviot-dev.ngrok.io";
@@ -24,12 +38,12 @@ namespace LagoVisata.Net.LetsEncrypt.Sample
             var settings = new AcmeSettings()
             {
                 EmailAddress = "kevinw@software-logistics.com",
-                StorageLocation = LagoVista.Net.LetsEncrypt.Interfaces.StorageLocation.FileSystem,
-                //StorageLocation = LagoVista.Net.LetsEncrypt.Interfaces.StorageLocation.BlobStorage,
+                //StorageLocation = LagoVista.Net.LetsEncrypt.Interfaces.StorageLocation.FileSystem,
+                StorageLocation = LagoVista.Net.LetsEncrypt.Interfaces.StorageLocation.BlobStorage,
                 StorageAccountName = "nuviotdev",
                 StorageContainerName = "tempcert",
                 StorageKey = "Za6PpxUbXjXic8rhK3lbcWyUQyVY2NVsgXRRD1rVj2LAjXUnji5/ooJx7u0ob9cPKTkPu/woa74DBE6IVKsLQA==",
-                Development = true,
+                Development = false,
                 Diagnostics = true,
                 PfxPassword = "Test1234",
                 StoragePath = @"X:\Certs"
