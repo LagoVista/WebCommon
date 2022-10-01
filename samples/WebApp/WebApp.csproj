@@ -3,9 +3,6 @@
     <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Certes" Version="3.0.3" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\LagoVista.Net.LetsEncrypt\LagoVista.Net.LetsEncrypt.csproj" />

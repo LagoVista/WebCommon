@@ -1,21 +1,35 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <package>
   <metadata>
     <id>LagoVista.Net.LetsEncrypt</id>
-    <version>3.0.1956.1311</version>
+    <version>3.0.1963.1145</version>
     <authors>Software Logistics, LLC</authors>
     <owners>Software Logistics, LLC</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <projectUrl>https://github.com/LagoVista/WebCommon</projectUrl>
+    <projectUrl>https://www.nuviot.com</projectUrl>
     <iconUrl>http://bytemaster.blob.core.windows.net/icons/LagoVistaIcon.png</iconUrl>
     <description>Provides Middleware and services to request and store certificates from the Let's Encrypt service for ASP.NET Core applications</description>
-    <releaseNotes>Initial Release</releaseNotes>
-    <copyright>Copyright 2017</copyright>
+    <copyright>Copyright Software Logistics - 2022</copyright>
     <tags>IoT</tags>
+    <icon>LagoVistaIcon.png</icon>
+    <releaseNotes>Build Date: 10/1/2022 3:45:22 PM UTC</releaseNotes>
+    <repository url="https://www.github.com/lagovista" type="git" branch="master"></repository>
     <dependencies>
+      <group targetFramework="netstandard2.1">
+        <dependency id="Azure.Data.Tables" version="12.6.1" />
+        <dependency id="Azure.Storage.Blobs" version="12.13.1" />
+        <dependency id="LagoVista.Core" version="3.0.1963.1145" />
+        <dependency id="LagoVista.IoT.Logging" version="3.0.1963.1145" />
+        <dependency id="Certes" version="3.0.3" />
+        <dependency id="Microsoft.AspNetCore" version="2.2.0" />
+        <dependency id="Newtonsoft.Json" version="13.0.1" />
+        <dependency id="Portable.BouncyCastle" version="1.9.0" />
+      </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\release\netstandard2.1\*.dll" target="lib\netstandard2.1" />
+    <file src="LagoVistaIcon.png" target="LagoVistaIcon.png" />
+    <file src="bin\release\netstandard2.1\LagoVista.Net.LetsEncrypt.dll" target="lib\netstandard2.1\LagoVista.Net.LetsEncrypt.dll" />
+    <file src="bin\release\netstandard2.1\LagoVista.Net.LetsEncrypt.pdb" target="lib\netstandard2.1\LagoVista.Net.LetsEncrypt.pdb" />
   </files>
 </package>

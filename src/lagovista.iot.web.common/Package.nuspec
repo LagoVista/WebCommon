@@ -1,21 +1,34 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <package>
   <metadata>
     <id>LagoVista.IoT.Web.Common</id>
-    <version>3.0.1956.1311</version>
+    <version>3.0.1963.1145</version>
     <authors>Software Logistics, LLC</authors>
     <owners>Software Logistics, LLC</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <projectUrl>https://github.com/LagoVista/WebCommon</projectUrl>
+    <projectUrl>https://www.nuviot.com</projectUrl>
     <iconUrl>http://bytemaster.blob.core.windows.net/icons/LagoVistaIcon.png</iconUrl>
     <description>Common Features and Functionality for building WebApps against the LagoVista Devices, IoT and Home Automation Framework</description>
-    <releaseNotes>Initial Release</releaseNotes>
-    <copyright>Copyright 2017</copyright>
+    <copyright>Copyright Software Logistics - 2022</copyright>
     <tags>IoT</tags>
+    <icon>LagoVistaIcon.png</icon>
+    <releaseNotes>Build Date: 10/1/2022 3:45:22 PM UTC</releaseNotes>
+    <repository url="https://www.github.com/lagovista" type="git" branch="master"></repository>
     <dependencies>
+      <group targetFramework="net6.0">
+        <dependency id="LagoVista.Core" version="3.0.1963.1145" />
+        <dependency id="LagoVista.IoT.Logging" version="3.0.1963.1145" />
+        <dependency id="LagoVista.UserAdmin" version="3.0.1963.1145" />
+        <dependency id="LagoVista.CloudStorage" version="3.0.1963.1145" />
+        <dependency id="LagoVista.AspNetCore.Identity" version="3.0.1963.1145" />
+        <dependency id="Newtonsoft.Json" version="13.0.1" />
+        <dependency id="prometheus-net.AspNetCore" version="6.0.0" />
+      </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\release\net6.0\*.dll" target="lib\net6.0" />
+    <file src="LagoVistaIcon.png" target="LagoVistaIcon.png" />
+    <file src="bin\release\net6.0\LagoVista.IoT.Web.Common.dll" target="lib\net6.0\LagoVista.IoT.Web.Common.dll" />
+    <file src="bin\release\net6.0\LagoVista.IoT.Web.Common.pdb" target="lib\net6.0\LagoVista.IoT.Web.Common.pdb" />
   </files>
 </package>

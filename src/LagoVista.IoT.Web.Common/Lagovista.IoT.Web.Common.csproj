@@ -7,14 +7,9 @@
     <OutputType>Library</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="LagoVista.Core" Version="3.0.1956.1311" />
-    <PackageReference Include="LagoVista.IoT.Logging" Version="3.0.1956.1311" />
-    <PackageReference Include="LagoVista.UserAdmin" Version="3.0.1956.1311" />
-    <PackageReference Include="LagoVista.CloudStorage" Version="3.0.1956.1311" />
-    <PackageReference Include="LagoVista.AspNetCore.Identity" Version="3.0.1956.1311" />
-    <!--    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />-->    
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />    
+    <PackageReference Include="LagoVista.UserAdmin" Version="3.0.1963.1145" />
+    <PackageReference Include="LagoVista.CloudStorage" Version="3.0.1963.1145" />
+    <PackageReference Include="LagoVista.AspNetCore.Identity" Version="3.0.1963.1145" />
     <PackageReference Include="prometheus-net.AspNetCore" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup>
