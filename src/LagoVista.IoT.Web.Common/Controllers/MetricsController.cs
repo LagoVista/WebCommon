@@ -1,4 +1,5 @@
 ﻿using LagoVista.Core.Models.UIMetaData;
+using LagoVista.Core.Validation;
 using LagoVista.IoT.Logging.Loggers;
 using LagoVista.IoT.Web.Common.Models;
 using LagoVista.UserAdmin.Models.Users;
@@ -20,10 +21,11 @@ namespace LagoVista.IoT.Web.Common.Controllers
         }        
 
         [HttpPost("/web/logmetric")]
-        public async Task PostMetric([FromBody] MetricsInfo info)
+        public InvokeResult PostMetric([FromBody] MetricsInfo info)
         {
             var ipAddress = String.IsNullOrEmpty(HttpContext.Connection?.RemoteIpAddress?.ToString()) ? "?" : HttpContext.Connection?.RemoteIpAddress?.ToString();
-            await this._manager.WriteAsync(info, ipAddress);
+            this._manager.WriteAsync(info, ipAddress);
+            return InvokeResult.Success;
         }
 
         [Authorize]
