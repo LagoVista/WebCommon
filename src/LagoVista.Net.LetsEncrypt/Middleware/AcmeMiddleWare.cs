@@ -39,10 +39,14 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices.Middleware
 
                 _storage.Init(_settings, instanceLogger);
 
+                Console.WriteLine($"[AcmeResponseMiddleware__Invoke] Request Received {requestPath.Value}");
+
                 instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, "AcmeResponseMiddleware_Invoke", $"Received request", requestPath.Value.ToKVP("requestPath"));
 
                 if (requestPath.StartsWithSegments(AcmeResponsePath, out PathString requestPathId))
                 {
+                    Console.WriteLine($"[AcmeResponseMiddleware__Invoke] Matching Request");
+
                     var challenge = requestPathId.Value.TrimStart('/');
                     instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, "AcmeResponseMiddleware_Invoke", $"Received request", challenge.ToKVP("challenge"), requestPath.Value.ToKVP("requestPath"));
 
@@ -50,6 +54,7 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices.Middleware
 
                     if (!string.IsNullOrEmpty(response))
                     {
+                        Console.WriteLine($"[AcmeResponseMiddleware__Invoke] Found and forwarded response");
                         instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, "AcmeResponseMiddleware_Invoke", "Found challenge and sent response", response.ToKVP("response"), challenge.ToKVP("challenge"));
 
                         context.Response.ContentType = "text/plain";
@@ -59,7 +64,7 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices.Middleware
                     else
                     {
                         instanceLogger.AddError("AcmeResponseMiddleware_Invoke", "Could not find challenge", challenge.ToKVP("challenge"));
-
+                        Console.WriteLine($"[AcmeResponseMiddleware__Invoke] Could not find and forward response");
                         context.Response.StatusCode = 404;
                     }
                 }
@@ -71,6 +76,9 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices.Middleware
             catch (Exception ex)
             {
                 instanceLogger.AddException("AcmeResponseMiddleware_Invoke", ex, context.Request.Path.ToString().ToKVP("path"));
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"[AcmeResponseMiddleware__Invoke] ERROR!!!! {ex.Message}");
+                Console.ResetColor();
             }
         }
     }

@@ -44,15 +44,15 @@ namespace LagoVisata.Net.LetsEncrypt.Sample
             var settings = new AcmeSettings()
             {
                 EmailAddress = "kevinw@software-logistics.com",
-                //StorageLocation = LagoVista.Net.LetsEncrypt.Interfaces.StorageLocation.FileSystem,
-                StorageLocation = LagoVista.Net.LetsEncrypt.Interfaces.StorageLocation.BlobStorage,
+                StorageLocation = LagoVista.Net.LetsEncrypt.Interfaces.StorageLocation.FileSystem,
+                //StorageLocation = LagoVista.Net.LetsEncrypt.Interfaces.StorageLocation.BlobStorage,
                 StorageAccountName = accountId,
                 StorageContainerName = "tempcert",
                 StorageKey = accountKey,
                 Development = false,
                 Diagnostics = true,
                 PfxPassword = "Test1234",
-                StoragePath = @"X:\Certs"
+                StoragePath = @"t:\Certs"
             };
 
             var acmeHost = new WebHostBuilder()
