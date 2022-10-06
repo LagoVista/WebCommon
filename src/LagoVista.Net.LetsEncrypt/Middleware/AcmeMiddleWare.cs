@@ -55,17 +55,20 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices.Middleware
                     if (!string.IsNullOrEmpty(response))
                     {
                         Console.WriteLine($"[AcmeResponseMiddleware__Invoke] Found and forwarded response");
-                        instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, "AcmeResponseMiddleware_Invoke", "Found challenge and sent response", response.ToKVP("response"), challenge.ToKVP("challenge"));
 
                         context.Response.ContentType = "text/plain";
                         context.Response.StatusCode = 200;
                         await context.Response.WriteAsync(response);
+                        await context.Response.Body.FlushAsync();
+
+                        instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, "AcmeResponseMiddleware_Invoke", "Found challenge and flushed response", response.ToKVP("response"), challenge.ToKVP("challenge"));
                     }
                     else
                     {
                         instanceLogger.AddError("AcmeResponseMiddleware_Invoke", "Could not find challenge", challenge.ToKVP("challenge"));
                         Console.WriteLine($"[AcmeResponseMiddleware__Invoke] Could not find and forward response");
                         context.Response.StatusCode = 404;
+                        await context.Response.Body.FlushAsync();
                     }
                 }
                 else

@@ -9,6 +9,7 @@ using LagoVista.Net.LetsEncrypt.Interfaces;
 using Certes.Acme.Resource;
 using LagoVista.IoT.Logging.Loggers;
 using LagoVista.Core;
+using System.Net.Http;
 
 namespace LagoVista.Net.LetsEncrypt.AcmeServices
 {
@@ -82,12 +83,32 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices
             {
                 await Task.Delay(5000 * attempt);
 
+                //var json = Newtonsoft.Json.JsonConvert.SerializeObject(order);
+
+                //var client = new AcmeHttpClient(context.DirectoryUri, new System.Net.Http.HttpClient());
+
+                //var result = await AcmeHttpClientExtensions.Post<Order>(client, context, uri, null, true);
+
+                //var authResult = result.Resource;
+
                 var authResult = await order.Resource();
 
                 if (authResult.Status == OrderStatus.Ready)
                 {
                     AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_PollResultAsync", $"Certificate is ready: {authResult.Status}.");
                     return authResult;
+                }
+                else if (authResult.Status == OrderStatus.Invalid)
+                {
+                    var auth = authResult.Authorizations.FirstOrDefault();
+                    if(auth != null)
+                    {
+                        var httpClient = new HttpClient();
+                        var jsonStr = await httpClient.GetStringAsync(auth);
+                        Console.WriteLine(jsonStr);
+                    }
+
+                    return null;
                 }
                 else
                 {
@@ -123,6 +144,7 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices
             try
             {
                 var privateKey = KeyFactory.NewKey(KeyAlgorithm.RS256);
+
                 var cert = await order.Generate(new CsrInfo
                 {
                     CountryName = "USA",
@@ -150,5 +172,51 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices
             }
         }
 
+
+        public class AcmeHttpClientExtensions
+        {
+            /// <summary>
+            /// Posts the data to the specified URI.
+            /// </summary>
+            /// <typeparam name="T">The type of expected result</typeparam>
+            /// <param name="client">The client.</param>
+            /// <param name="context">The context.</param>
+            /// <param name="location">The URI.</param>
+            /// <param name="entity">The payload.</param>
+            /// <param name="ensureSuccessStatusCode">if set to <c>true</c>, throw exception if the request failed.</param>
+            /// <returns>
+            /// The response from ACME server.
+            /// </returns>
+            /// <exception cref="Exception">
+            /// If the HTTP request failed and <paramref name="ensureSuccessStatusCode"/> is <c>true</c>.
+            /// </exception>
+            public static async Task<AcmeHttpResponse<T>> Post<T>(IAcmeHttpClient client,
+                IAcmeContext context,
+                Uri location,
+                object entity,
+                bool ensureSuccessStatusCode)
+            {
+
+                var payload = await context.Sign(entity, location);
+                var response = await client.Post<T>(location, payload);
+                var retryCount = context.BadNonceRetryCount;
+                while (response.Error?.Status == System.Net.HttpStatusCode.BadRequest &&
+                    response.Error.Type?.CompareTo("urn:ietf:params:acme:error:badNonce") == 0 &&
+                    retryCount-- > 0)
+                {
+                    payload = await context.Sign(entity, location);
+                    response = await client.Post<T>(location, payload);
+                }
+
+                if (ensureSuccessStatusCode && response.Error != null)
+                {
+                    throw new AcmeRequestException(
+                        string.Format("{0}", location),
+                        response.Error);
+                }
+
+                return response;
+            }
+        }
     }
 }
