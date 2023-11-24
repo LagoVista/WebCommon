@@ -76,7 +76,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
             get{ return $"{GetClaimValue(ClaimTypes.GivenName)} {GetClaimValue(ClaimTypes.Surname)}"; }
         }
 
-        protected void SetAuditProperties(IAuditableEntity entity)
+        protected void SetAuditProperties(IAuditableEntitySimple entity)
         {
             var createDate = DateTime.Now.ToJSONString();
 
@@ -86,7 +86,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
             entity.LastUpdatedBy = UserEntityHeader;
         }
 
-        protected void SetUpdatedProperties(IAuditableEntity entity)
+        protected void SetUpdatedProperties(IAuditableEntitySimple entity)
         {
             if(entity == null)
             {
