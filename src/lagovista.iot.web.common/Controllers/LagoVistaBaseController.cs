@@ -86,6 +86,32 @@ namespace LagoVista.IoT.Web.Common.Controllers
             entity.LastUpdatedBy = UserEntityHeader;
         }
 
+        public List<string> PrimaryOrgIds
+        {
+            get
+            {
+                return new List<string>()
+                {
+                    "AA2C78499D0140A5A9CE4B7581EF9691",
+                    "C8AD4589F26842E7A1AEFBAEFC979C9B"
+                };
+            }
+        }
+
+        /// <summary>
+        /// Primary Org is Software Logistics or the owner of the software.
+        /// </summary>
+        public bool IsPrimaryOrg
+        {
+            get
+            {
+                if (String.IsNullOrEmpty(CurrentOrgId))
+                    return false;
+
+                return PrimaryOrgIds.Contains(CurrentOrgId);
+            }
+        }
+
         protected void SetUpdatedProperties(IAuditableEntitySimple entity)
         {
             if(entity == null)
