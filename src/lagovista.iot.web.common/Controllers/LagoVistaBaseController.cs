@@ -196,6 +196,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
         public ListRequest GetListRequestFromHeader()
         {
             var listRequest = new ListRequest();
+            listRequest.Url = Request.Path;
 
             if(Request.Headers.ContainsKey("x-nextrowkey"))
             {
