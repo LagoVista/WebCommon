@@ -19,9 +19,9 @@ namespace LagoVista.IoT.Web.Common.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("domains")]
-        public List<DomainDescription> GetDomains()
+        public IEnumerable<DomainDescription> GetDomains()
         {
-            return MetaDataHelper.Instance.Domains;
+            return MetaDataHelper.Instance.Domains.OrderBy(ent=>ent.Name);
         }
 
         /// <summary>
@@ -32,7 +32,20 @@ namespace LagoVista.IoT.Web.Common.Controllers
         [HttpGet("domains/{domain}")]
         public IEnumerable<EntitySummary> GetEntities(String domain)
         {
-            return MetaDataHelper.Instance.EntitySummaries.Where(ent => ent.DomainKey.ToLower() == domain.ToLower());
+            return MetaDataHelper.Instance.EntitySummaries.OrderBy(ent=>ent.Name).Where(ent => ent.DomainKey.ToLower() == domain.ToLower());
+        }
+
+        /// <summary>
+        /// List of entities for a  domain
+        /// </summary>
+        /// <param name="domain">Domain Name (key)</param>
+        /// <returns></returns>
+        [HttpGet("domains/icons")]
+        public IEnumerable<EntitySummary> GetEntities()
+        {
+            var entities = MetaDataHelper.Instance.EntitySummaries;
+
+            return entities.OrderBy(ent => ent.Name);
         }
 
         /// <summary>
