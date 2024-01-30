@@ -178,6 +178,14 @@ namespace LagoVista.IoT.Web.Common.Controllers
             Update
         }
 
+        public bool IsFinanceAdmin
+        {
+            get
+            {
+                return User.Claims.Where(clm => clm.Type == ClaimsFactory.IsFinancceAdmin).Any();
+            }
+        }
+
         protected Task<AppUser> GetCurrentUserAsync()
         {
             return _userManager.GetUserAsync(HttpContext.User);
