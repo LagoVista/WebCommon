@@ -1,4 +1,5 @@
 ﻿using LagoVista.Core.Attributes;
+using LagoVista.Core.Models;
 using LagoVista.Core.Models.UIMetaData;
 using LagoVista.IoT.Logging.Loggers;
 using LagoVista.UserAdmin.Models.Users;
@@ -46,6 +47,18 @@ namespace LagoVista.IoT.Web.Common.Controllers
             var entities = MetaDataHelper.Instance.EntitySummaries;
 
             return entities.OrderBy(ent => ent.Name);
+        }
+
+        /// <summary>
+        /// List of entities for a  domain
+        /// </summary>
+        /// <param name="domain">Domain Name (key)</param>
+        /// <returns></returns>
+        [HttpGet("entitites/all")]
+        public IEnumerable<EntityHeader> GetAllEntities()
+        {
+            var entities = MetaDataHelper.Instance.EntitySummaries;
+            return entities.Select(ent=> EntityHeader.Create(ent.ClassName, ent.ClassName.ToLower(), ent.Name)).OrderBy(ent => ent.Text);
         }
 
         /// <summary>
