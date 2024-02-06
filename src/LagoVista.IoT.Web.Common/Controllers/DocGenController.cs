@@ -58,7 +58,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
         public IEnumerable<EntityHeader> GetAllEntities()
         {
             var entities = MetaDataHelper.Instance.EntitySummaries;
-            return entities.Select(ent=> EntityHeader.Create(ent.ClassName, ent.ClassName.ToLower(), ent.Name)).OrderBy(ent => ent.Text);
+            return entities.Select(ent=> EntityHeader.Create(ent.ShortClassName, ent.ShortClassName.ToLower(), ent.Name)).OrderBy(ent => ent.Text);
         }
 
         /// <summary>
