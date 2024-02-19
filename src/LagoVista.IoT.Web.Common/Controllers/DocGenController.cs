@@ -55,7 +55,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
         /// </summary>
         /// <param name="domain">Domain Name (key)</param>
         /// <returns></returns>
-        [HttpGet("entitites/all")]
+        [HttpGet("entities/all")]
         public IEnumerable<EntityHeader> GetAllEntities()
         {
             var entities = MetaDataHelper.Instance.EntitySummaries;
@@ -67,11 +67,10 @@ namespace LagoVista.IoT.Web.Common.Controllers
         /// </summary>
         /// <param name="domain">Domain Name (key)</param>
         /// <returns></returns>
-        [HttpGet("entitites/nuviotobjects")]
-        public IEnumerable<EntityHeader> GetAllNuvIoTObjects()
+        [HttpGet("entities/nuviot/coreobjects")]
+        public IEnumerable<EntitySummary> GetAllNuvIoTObjects()
         {
-            var entities = MetaDataHelper.Instance.EntitySummaries.Where(obj=>obj.EntityType == EntityTypes.CoreIoTModel);
-            return entities.Select(ent => EntityHeader.Create(ent.ShortClassName, ent.ShortClassName.ToLower(), ent.Name)).OrderBy(ent => ent.Text);
+            return MetaDataHelper.Instance.EntitySummaries.Where(obj=>obj.EntityType == EntityTypes.CoreIoTModel).OrderBy(ent=>ent.Name);
         }
 
         /// <summary>
