@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static LagoVista.Core.Attributes.EntityDescriptionAttribute;
 
 namespace LagoVista.IoT.Web.Common.Controllers
 {
@@ -59,6 +60,18 @@ namespace LagoVista.IoT.Web.Common.Controllers
         {
             var entities = MetaDataHelper.Instance.EntitySummaries;
             return entities.Select(ent=> EntityHeader.Create(ent.ShortClassName, ent.ShortClassName.ToLower(), ent.Name)).OrderBy(ent => ent.Text);
+        }
+
+        /// <summary>
+        /// List of entities for a  domain
+        /// </summary>
+        /// <param name="domain">Domain Name (key)</param>
+        /// <returns></returns>
+        [HttpGet("entitites/nuviotobjects")]
+        public IEnumerable<EntityHeader> GetAllNuvIoTObjects()
+        {
+            var entities = MetaDataHelper.Instance.EntitySummaries.Where(obj=>obj.EntityType == EntityTypes.CoreIoTModel);
+            return entities.Select(ent => EntityHeader.Create(ent.ShortClassName, ent.ShortClassName.ToLower(), ent.Name)).OrderBy(ent => ent.Text);
         }
 
         /// <summary>
