@@ -255,12 +255,12 @@ namespace LagoVista.IoT.Web.Common.Controllers
                 }
                 else
                 {
-                    listRequest.PageSize = 50;
+                    listRequest.PageSize = 100;
                 }
             }
             else
             {
-                listRequest.PageSize = 50;
+                listRequest.PageSize = 100;
             }
 
             if (Request.Headers.ContainsKey("x-pageindex"))
