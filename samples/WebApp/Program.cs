@@ -14,7 +14,8 @@ namespace LagoVisata.Net.LetsEncrypt.Sample
     {
         /* 
          * Usage: start NGROK and point to port 5000 
-         * ngrok --scheme http http 8008 --hostname=nuviot-dev.ngrok.io
+         * 
+         * ngrok http 5001 --hostname=nuviot-dev.ngrok.io
          * 
          * If you set "Development" = false, the root of the cert you get will be invalid so 
          * an exception will be thrown in RequestNewCertificateV2
@@ -31,7 +32,7 @@ namespace LagoVisata.Net.LetsEncrypt.Sample
          * 
          */
 
-        private const string URI = "Xnuviot-dev.ngrok.io";
+        private const string URI = "nuviot-dev.ngrok.io";
 
         public static void Main(string[] args)
         {
@@ -62,7 +63,6 @@ namespace LagoVisata.Net.LetsEncrypt.Sample
 
                     })
                    .ConfigureServices(services => services.AddAcmeCertificateManager(settings))
-                   //                   .UseUrls("http://*:8008/.well-known/acme-challenge/")
                    .UseUrls("http://*:8008")
                    .Configure(app => app.UseAcmeResponse())
                    .UseKestrel()
@@ -88,11 +88,10 @@ namespace LagoVisata.Net.LetsEncrypt.Sample
                     if (certificate != null)
                     {
                         options.Listen(IPAddress.Loopback, 443,
-                            listenOptions =>
-                            {
-                                listenOptions.UseHttps(certificate);
-                            });
-
+                        listenOptions =>
+                        {
+                            listenOptions.UseHttps(certificate);
+                        });
                     }
                 })
                 .UseContentRoot(Directory.GetCurrentDirectory())
