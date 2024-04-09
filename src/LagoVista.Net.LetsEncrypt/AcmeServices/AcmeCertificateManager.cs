@@ -36,17 +36,25 @@ namespace LagoVista.Net.LetsEncrypt.AcmeServices
             var pfx = await _storage.GetCertAsync(domainName);
             if (pfx != null)
             {
-                AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate found in storage for {domainName}");
-                var cert = new X509Certificate2(pfx, _settings.PfxPassword);
-                AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate has expire date of {cert.NotAfter}");
-                if (cert.NotAfter - DateTime.UtcNow > _settings.RenewalPeriod)
+                try
                 {
-                    AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate is valid, returning cert");
-                    return cert;
+                    AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate found in storage for {domainName}");
+                    var cert = new X509Certificate2(pfx, _settings.PfxPassword);
+                    AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate has expire date of {cert.NotAfter}");
+                    if (cert.NotAfter - DateTime.UtcNow > _settings.RenewalPeriod)
+                    {
+                        AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate is valid, returning cert");
+                        return cert;
+                    }
+                    else
+                    {
+                        AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate is will expire, will request new cert");
+                    }
                 }
-                else
+                catch(Exception ex)
                 {
-                    AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Certificate is will expire, will request new cert");
+                    AcmeCertificateManager._instanceLogger.AddCustomEvent(Core.PlatformSupport.LogLevel.Verbose, $"{Tag}_GetCertificate", $"Exception reading certificate, will just create a new one");
+                    AcmeCertificateManager._instanceLogger.AddError($"{Tag}_GetCertificate", ex.Message);
                 }
             }
             else
