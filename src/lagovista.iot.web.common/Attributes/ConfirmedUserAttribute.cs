@@ -42,7 +42,7 @@ namespace LagoVista.IoT.Web.Common.Attributes
                     var orgId = context.HttpContext.User.Claims.Where(claim => claim.Type == ClaimsFactory.CurrentOrgId).FirstOrDefault();
                     if (orgId == null || orgId.Value == "-" || String.IsNullOrEmpty(orgId.Value) || orgId.Value == Guid.Empty.ToId())
                     {
-                        Console.WriteLine("User Autenticated, but no org, redirecting to Create New Org");
+                        Console.WriteLine("User Authenticated, but no org, redirecting to Create New Org");
                         context.Result = new RedirectResult("/Account/CreateNewOrg");
                     }
                 }
