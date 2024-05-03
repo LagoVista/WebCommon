@@ -1,5 +1,6 @@
 ﻿using LagoVista.AspNetCore.Identity.Managers;
 using LagoVista.Core;
+using LagoVista.UserAdmin;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -29,6 +30,7 @@ namespace LagoVista.IoT.Web.Common.Attributes
                     context.HttpContext.Request.Path.StartsWithSegments(new PathString("/api/org/factory")) ||
                     context.HttpContext.Request.Path.StartsWithSegments(new PathString("/api/verify")) ||
                     context.HttpContext.Request.Path.StartsWithSegments(new PathString("/api/user")) ||
+                    context.HttpContext.Request.Path.StartsWithSegments(new PathString("/api/v1/logoff")) ||
                     context.HttpContext.Request.Path.StartsWithSegments(new PathString("/api/v1/auth")) ||
                     context.HttpContext.Request.Path.StartsWithSegments(new PathString("/api/user/register")) ||
                     context.HttpContext.Request.Path.StartsWithSegments(new PathString("/api/org/namespace")) ||
@@ -43,13 +45,13 @@ namespace LagoVista.IoT.Web.Common.Attributes
                     if (orgId == null || orgId.Value == "-" || String.IsNullOrEmpty(orgId.Value) || orgId.Value == Guid.Empty.ToId())
                     {
                         Console.WriteLine("User Authenticated, but no org, redirecting to Create New Org");
-                        context.Result = new RedirectResult("/Account/CreateNewOrg");
+                        context.Result = new RedirectResult(CommonLinks.CreateDefaultOrg);
                     }
                 }
                 else
                 {
                     Console.WriteLine($"User Authenticated, but not verified, redirect to verify screen from {context.HttpContext.Request.Path}");
-                    context.Result = new RedirectResult("/Account/Verify");
+                    context.Result = new RedirectResult(CommonLinks.ConfirmEmail);
                 }
             }
         }
