@@ -32,6 +32,8 @@ namespace LagoVista.IoT.Web.Common.Attributes
                     context.HttpContext.Request.Path.StartsWithSegments(new PathString("/api/user")) ||
                     context.HttpContext.Request.Path.StartsWithSegments(new PathString("/api/v1/logoff")) ||
                     context.HttpContext.Request.Path.StartsWithSegments(new PathString("/api/v1/auth")) ||
+                    context.HttpContext.Request.Path.StartsWithSegments(new PathString("/mobile/login/oauth")) ||
+                    context.HttpContext.Request.Path.StartsWithSegments(new PathString("/account/login/oauth")) ||
                     context.HttpContext.Request.Path.StartsWithSegments(new PathString("/api/user/register")) ||
                     context.HttpContext.Request.Path.StartsWithSegments(new PathString("/api/org/namespace")) ||
                     context.HttpContext.Request.Path.Value.ToLower() == "/api/org")
@@ -44,7 +46,7 @@ namespace LagoVista.IoT.Web.Common.Attributes
                     var orgId = context.HttpContext.User.Claims.Where(claim => claim.Type == ClaimsFactory.CurrentOrgId).FirstOrDefault();
                     if (orgId == null || orgId.Value == "-" || String.IsNullOrEmpty(orgId.Value) || orgId.Value == Guid.Empty.ToId())
                     {
-                        Console.WriteLine("User Authenticated, but no org, redirecting to Create New Org");
+                        Console.WriteLine($"User Authenticated, but no org, redirecting to Create New Org  {context.HttpContext.Request.Path}");
                         context.Result = new RedirectResult(CommonLinks.CreateDefaultOrg);
                     }
                 }
