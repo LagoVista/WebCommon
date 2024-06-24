@@ -14,14 +14,14 @@ namespace LagoVista.IoT.Web.Common.Attributes
 
             if (context.HttpContext.User != null && context.HttpContext.User.Identity.IsAuthenticated)
             {
-                if (!context.HttpContext.User.HasClaim(ClaimsFactory.IsAppBuilder, true.ToString()))
+                /*if (!context.HttpContext.User.HasClaim(ClaimsFactory.IsAppBuilder, true.ToString()))
                 {
                     context.HttpContext.Response.StatusCode = 403;
                     context.HttpContext.Response.Headers.Clear();
                     var result = new InvokeResult();
                     result.Errors.Add(new ErrorMessage("Action Requires App Builder privileges"));
                     context.Result = new JsonResult(result);
-                }
+                }*/
             }
             /* else - Can't think of where the Authorize attribute wouldn't take care of this case */
         }
