@@ -62,6 +62,20 @@ namespace LagoVista.IoT.Web.Common.Controllers
             return entities.Select(ent=> EntityHeader.Create(ent.ShortClassName, ent.ShortClassName.ToLower(), ent.Name)).OrderBy(ent => ent.Text);
         }
 
+
+        /// <summary>
+        /// List of entities for a  domain
+        /// </summary>
+        /// <param name="domain">Domain Name (key)</param>
+        /// <returns></returns>
+        [HttpGet("/api/starterkit/objects/all")]
+        public ListResponse<EntityHeader> GetStarterKitEntities()
+        {
+            var entities = MetaDataHelper.Instance.EntitySummaries;
+            var ehEntities = entities.Select(ent => EntityHeader.Create(ent.ShortClassName, ent.ShortClassName.ToLower(), ent.Name)).OrderBy(ent => ent.Text);
+            return ListResponse<EntityHeader>.Create(ehEntities);
+        }
+
         /// <summary>
         /// List of entities for a  domain
         /// </summary>
