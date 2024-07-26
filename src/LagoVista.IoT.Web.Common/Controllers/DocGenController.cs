@@ -68,11 +68,11 @@ namespace LagoVista.IoT.Web.Common.Controllers
         /// </summary>
         /// <param name="domain">Domain Name (key)</param>
         /// <returns></returns>
-        [HttpGet("/api/starterkit/objects/all")]
-        public ListResponse<EntityHeader> GetStarterKitEntities()
+        [HttpGet("/api/objects/cloneable")]
+        public ListResponse<EntityHeader> GetCloneableObjectsAsync()
         {
             var entities = MetaDataHelper.Instance.EntitySummaries;
-            var ehEntities = entities.Where(obj=> obj.EntityType == EntityTypes.SimpleModel || obj.EntityType == EntityTypes.BusinessObject || obj.EntityType == EntityTypes.CoreIoTModel ).Select(ent => EntityHeader.Create(ent.ShortClassName, ent.ShortClassName.ToLower(), ent.Name)).OrderBy(ent => ent.Text);
+            var ehEntities = entities.Where(obj=> obj.Cloneable && obj.EntityType != EntityTypes.Summary ).Select(ent => EntityHeader.Create(ent.ShortClassName, ent.ShortClassName.ToLower(), ent.Name)).OrderBy(ent => ent.Text);
             return ListResponse<EntityHeader>.Create(ehEntities);
         }
 
