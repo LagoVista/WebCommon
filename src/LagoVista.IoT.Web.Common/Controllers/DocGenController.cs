@@ -72,7 +72,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
         public ListResponse<EntityHeader> GetStarterKitEntities()
         {
             var entities = MetaDataHelper.Instance.EntitySummaries;
-            var ehEntities = entities.Select(ent => EntityHeader.Create(ent.ShortClassName, ent.ShortClassName.ToLower(), ent.Name)).OrderBy(ent => ent.Text);
+            var ehEntities = entities.Where(obj=> obj.EntityType == EntityTypes.SimpleModel || obj.EntityType == EntityTypes.BusinessObject || obj.EntityType == EntityTypes.CoreIoTModel ).Select(ent => EntityHeader.Create(ent.ShortClassName, ent.ShortClassName.ToLower(), ent.Name)).OrderBy(ent => ent.Text);
             return ListResponse<EntityHeader>.Create(ehEntities);
         }
 
