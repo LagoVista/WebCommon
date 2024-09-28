@@ -43,7 +43,9 @@ namespace LagoVista.IoT.Web.Common.Attributes
                     return;
                 }
 
-                if(context.HttpContext.User.Claims.Single(clm=>clm.Type == ClaimsFactory.Logintype).Value == nameof(DeviceOwnerUser))
+                var loginType = context.HttpContext.User.Claims.SingleOrDefault(clm => clm.Type == ClaimsFactory.Logintype);
+
+                if (loginType?.Value == nameof(DeviceOwnerUser))
                 {
                     context.HttpContext.Response.StatusCode = 401;
                     context.HttpContext.Response.Headers.Clear();
@@ -59,6 +61,8 @@ namespace LagoVista.IoT.Web.Common.Attributes
                         Console.WriteLine($"User Authenticated, but no org, redirecting to Create New Org  {context.HttpContext.Request.Path}");
                         context.Result = new RedirectResult(CommonLinks.CreateDefaultOrg);
                     }
+                    //  The else clause here is the one that means no error, probalby could use a bit of refactoring to make that more obvious.
+
                 }
                 else
                 {
