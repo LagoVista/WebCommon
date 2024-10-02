@@ -105,6 +105,19 @@ namespace LagoVista.IoT.Web.Common.Controllers
             return User.Claims.SingleOrDefault(clm => clm.Type == ClaimsFactory.Logintype)?.Value == nameof(DeviceOwnerUser);
         }
 
+        protected EntityHeader CurrentDeviceConfig
+        {
+            get
+            {
+                if (!IsDeviceAuthUser())
+                    throw new NotAuthorizedException("Not a device pin auth user");
+
+                var id = User.Claims.Single(clm => clm.Type == ClaimsFactory.DeviceConfigId).Value;
+                var name = User.Claims.Single(clm => clm.Type == ClaimsFactory.DeviceConfigName).Value;
+                return EntityHeader.Create(id, name);
+            }
+        }
+
         protected EntityHeader CurrentDevice
         {
             get
@@ -115,6 +128,17 @@ namespace LagoVista.IoT.Web.Common.Controllers
                 var id = User.Claims.Single(clm => clm.Type == ClaimsFactory.DeviceUniqueId).Value;
                 var name = User.Claims.Single(clm => clm.Type == ClaimsFactory.DeviceName).Value;
                 return EntityHeader.Create(id, name);
+            }
+        }
+
+        public string CurrentDeviceId
+        {
+            get
+            {
+                if (!IsDeviceAuthUser())
+                    throw new NotAuthorizedException("Not a device pin auth user");
+
+                return User.Claims.Single(clm => clm.Type == ClaimsFactory.DeviceId).Value;
             }
         }
 
