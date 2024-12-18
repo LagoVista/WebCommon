@@ -13,7 +13,7 @@ using static LagoVista.Core.Attributes.EntityDescriptionAttribute;
 
 namespace LagoVista.IoT.Web.Common.Controllers
 {
-    [Route("metadata/dox")]
+    [Route("docs/metadata")]
     public class DocGenController : Controller
     {
         /// <summary>
