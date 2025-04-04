@@ -211,7 +211,12 @@ namespace LagoVista.IoT.Web.Common.Controllers
                 listRequest.NextRowKey = Request.Headers["x-nextrowkey"];
             }
 
-            if(Request.Headers.ContainsKey("x-nextpartitionkey"))
+            if (Request.Headers.ContainsKey("x-categorykey"))
+            {
+                listRequest.CategoryKey = Request.Headers["x-categorykey"];
+            }
+
+            if (Request.Headers.ContainsKey("x-nextpartitionkey"))
             {
                 listRequest.NextPartitionKey = Request.Headers["x-nextpartitionkey"];
             }
