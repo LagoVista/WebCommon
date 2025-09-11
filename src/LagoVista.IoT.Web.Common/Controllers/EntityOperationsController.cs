@@ -21,16 +21,16 @@ namespace LagoVista.IoT.Web.Common.Controllers
         }
 
         [HttpPut("/api/entity/{entityid}/rate/{rating}")]
-        public Task<RatedEntity> RateEntityAsync(string id, int rating)
+        public Task<RatedEntity> RateEntityAsync(string entityid, int rating)
         {
-            return _storageUtils.AddRatingAsync(id, rating, OrgEntityHeader, UserEntityHeader);
+            return _storageUtils.AddRatingAsync(entityid, rating, OrgEntityHeader, UserEntityHeader);
         }
 
 
         [HttpPut("/api/entity/{entityid}/category")]
-        public Task<InvokeResult> SetEntityCategory(string id, [FromBody] EntityHeader category)
+        public Task<InvokeResult> SetEntityCategory(string entityid, [FromBody] EntityHeader category)
         {
-            return _storageUtils.SetCategoryAsync(id, category, OrgEntityHeader, UserEntityHeader);
+            return _storageUtils.SetCategoryAsync(entityid, category, OrgEntityHeader, UserEntityHeader);
         }
     }
 }
