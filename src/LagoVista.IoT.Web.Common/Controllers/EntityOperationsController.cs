@@ -21,9 +21,17 @@ namespace LagoVista.IoT.Web.Common.Controllers
         }
 
         [HttpPut("/api/entity/{entityid}/rate/{rating}")]
-        public Task<RatedEntity> RateEntityAsync(string entityid, int rating)
+        public async Task<InvokeResult<RatedEntity>> RateEntityAsync(string entityid, int rating)
         {
-            return _storageUtils.AddRatingAsync(entityid, rating, OrgEntityHeader, UserEntityHeader);
+            var result = await _storageUtils.AddRatingAsync(entityid, rating, OrgEntityHeader, UserEntityHeader);
+            return InvokeResult<RatedEntity>.Create(result);
+        }
+
+        [HttpDelete("/api/entity/{entityid}/rating")]
+        public async Task<InvokeResult<RatedEntity>> ClearRating(string entityid)
+        {
+            var result = await _storageUtils.ClearRatingAsync(entityid, OrgEntityHeader, UserEntityHeader);
+            return InvokeResult<RatedEntity>.Create(result);
         }
 
 

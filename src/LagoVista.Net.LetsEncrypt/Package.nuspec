@@ -2,26 +2,26 @@
 <package>
   <metadata>
     <id>LagoVista.Net.LetsEncrypt</id>
-    <version>3.0.1963.1257</version>
+    <version>3.0.3043.1711</version>
     <authors>Software Logistics, LLC</authors>
     <owners>Software Logistics, LLC</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <projectUrl>https://www.nuviot.com</projectUrl>
     <iconUrl>http://bytemaster.blob.core.windows.net/icons/LagoVistaIcon.png</iconUrl>
     <description>Provides Middleware and services to request and store certificates from the Let's Encrypt service for ASP.NET Core applications</description>
-    <copyright>Copyright Software Logistics - 2022</copyright>
+    <copyright>Copyright Software Logistics - 2025</copyright>
     <tags>IoT</tags>
     <icon>LagoVistaIcon.png</icon>
+    <releaseNotes>Build Date: 9/15/2025 9:11:31 PM UTC</releaseNotes>
+    <repository url="https://www.github.com/lagovista" type="git" branch="master"></repository>
     <dependencies>
       <group targetFramework="netstandard2.1">
-        <dependency id="LagoVista.CloudStorage" version="3.0.1963.1257" />
+        <dependency id="LagoVista.CloudStorage" version="3.0.3043.1711" />
         <dependency id="Certes" version="3.0.3" />
         <dependency id="Microsoft.AspNetCore" version="2.2.0" />
         <dependency id="Portable.BouncyCastle" version="1.9.0" />
       </group>
     </dependencies>
-    <releaseNotes>Build Date: 10/1/2022 4:57:03 PM UTC</releaseNotes>
-    <repository url="https://www.github.com/lagovista" type="git" branch="master"></repository>
   </metadata>
   <files>
     <file src="LagoVistaIcon.png" target="LagoVistaIcon.png" />
