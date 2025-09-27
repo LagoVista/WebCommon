@@ -231,6 +231,16 @@ namespace LagoVista.IoT.Web.Common.Controllers
                 listRequest.EndDate = Request.Headers["x-filter-enddate"];
             }
 
+            if (Request.Headers.ContainsKey("x-show-drafts"))
+            {
+                listRequest.ShowDrafts = Request.Headers["x-show-drafts"] == "true";
+            }
+
+            if (Request.Headers.ContainsKey("x-show-deleted"))
+            {
+                listRequest.ShowDeleted = Request.Headers["x-show-deleted"] == "true";
+            }
+
             if (Request.Headers.ContainsKey("x-group-by"))
             {
                 listRequest.GroupBy = Request.Headers["x-group-by"];
