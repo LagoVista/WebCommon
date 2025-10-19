@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>LagoVista.IoT.Web.Common</id>
-    <version>3.0.3043.1711</version>
+    <version>3.0.3077.1333</version>
     <authors>Software Logistics, LLC</authors>
     <owners>Software Logistics, LLC</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -12,20 +12,20 @@
     <copyright>Copyright Software Logistics - 2025</copyright>
     <tags>IoT</tags>
     <icon>LagoVistaIcon.png</icon>
-    <releaseNotes>Build Date: 9/15/2025 9:11:31 PM UTC</releaseNotes>
+    <releaseNotes>Build Date: 10/19/2025 5:33:34 PM UTC</releaseNotes>
     <repository url="https://www.github.com/lagovista" type="git" branch="master"></repository>
     <dependencies>
-      <group targetFramework="net6.0">
-        <dependency id="LagoVista.UserAdmin" version="3.0.3043.1711" />
-        <dependency id="LagoVista.CloudStorage" version="3.0.3043.1711" />
-        <dependency id="LagoVista.AspNetCore.Identity" version="3.0.3043.1711" />
-        <dependency id="prometheus-net.AspNetCore" version="6.0.0" />
+      <group targetFramework="net9.0">
+        <dependency id="LagoVista.UserAdmin" version="3.0.3077.1333" />
+        <dependency id="LagoVista.CloudStorage" version="3.0.3077.1333" />
+        <dependency id="LagoVista.AspNetCore.Identity" version="3.0.3077.1333" />
+        <dependency id="prometheus-net.AspNetCore" version="8.2.1" />
       </group>
     </dependencies>
   </metadata>
   <files>
     <file src="LagoVistaIcon.png" target="LagoVistaIcon.png" />
-    <file src="bin\release\net6.0\LagoVista.IoT.Web.Common.dll" target="lib\net6.0\LagoVista.IoT.Web.Common.dll" />
-    <file src="bin\release\net6.0\LagoVista.IoT.Web.Common.pdb" target="lib\net6.0\LagoVista.IoT.Web.Common.pdb" />
+    <file src="bin\release\net9.0\LagoVista.IoT.Web.Common.dll" target="lib\net9.0\LagoVista.IoT.Web.Common.dll" />
+    <file src="bin\release\net9.0\LagoVista.IoT.Web.Common.pdb" target="lib\net9.0\LagoVista.IoT.Web.Common.pdb" />
   </files>
 </package>

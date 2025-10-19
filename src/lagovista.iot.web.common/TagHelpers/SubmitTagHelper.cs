@@ -1,4 +1,8 @@
-﻿using LagoVista.IoT.Web.Common.Resources;
+// --- BEGIN CODE INDEX META (do not edit) ---
+// ContentHash: 56f09c1f193610c61b3d7a685593ec94f3e9b69372eea6f870695244917adf21
+// IndexVersion: 0
+// --- END CODE INDEX META ---
+using LagoVista.IoT.Web.Common.Resources;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using System;
 using System.Text;

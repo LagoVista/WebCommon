@@ -1,4 +1,8 @@
-﻿using LagoVista.AspNetCore.Identity.Managers;
+// --- BEGIN CODE INDEX META (do not edit) ---
+// ContentHash: fea2c5b6082cf3043376b6c113fdde9f13cc18b3c57158ec09fc59033f4bc384
+// IndexVersion: 0
+// --- END CODE INDEX META ---
+using LagoVista.AspNetCore.Identity.Managers;
 using LagoVista.Core.Validation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;

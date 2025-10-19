@@ -1,4 +1,8 @@
-﻿using System;
+// --- BEGIN CODE INDEX META (do not edit) ---
+// ContentHash: 3cd00ca39529c317478c909e05ad91dd7b0970905ce413565d28ee840ec9ed85
+// IndexVersion: 0
+// --- END CODE INDEX META ---
+using System;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using LagoVista.Net.LetsEncrypt.AcmeServices.Interfaces;

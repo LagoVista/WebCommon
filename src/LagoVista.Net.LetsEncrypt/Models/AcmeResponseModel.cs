@@ -1,4 +1,8 @@
-﻿using Newtonsoft.Json;
+// --- BEGIN CODE INDEX META (do not edit) ---
+// ContentHash: 9c79e6a4e1bf8d46d10269353e05490628ee35df72f21d04acefa851ca994bd8
+// IndexVersion: 0
+// --- END CODE INDEX META ---
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace LagoVista.Net.LetsEncrypt.Models

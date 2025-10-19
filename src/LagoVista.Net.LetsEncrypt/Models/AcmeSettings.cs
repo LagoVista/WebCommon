@@ -1,4 +1,8 @@
-﻿using LagoVista.Net.LetsEncrypt.Interfaces;
+// --- BEGIN CODE INDEX META (do not edit) ---
+// ContentHash: 7f7cb1cb06df42f5bf8608e4a51788ff622eaa1fd4541149eca3437bea2c64e6
+// IndexVersion: 0
+// --- END CODE INDEX META ---
+using LagoVista.Net.LetsEncrypt.Interfaces;
 using System;
 
 namespace LagoVista.Net.LetsEncrypt.Models

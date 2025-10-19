@@ -1,4 +1,8 @@
-﻿namespace LagoVista.IoT.Web.Common.Models
+// --- BEGIN CODE INDEX META (do not edit) ---
+// ContentHash: 3fa1889743ff1931f7616185aa7b85841d756f169ccb8a89043b5e9d5caca081
+// IndexVersion: 0
+// --- END CODE INDEX META ---
+namespace LagoVista.IoT.Web.Common.Models
 {
 
     public class MetricsInfo
