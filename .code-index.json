@@ -1,21 +1,45 @@
 {
   "version": 1,
   "createdAtUtc": "2025-10-19T18:01:07.8321595Z",
-  "updatedAtUtc": "2025-10-19T21:40:49.2178923Z",
+  "updatedAtUtc": "2025-10-21T19:05:38.7800636Z",
   "files": {
-    "../../../../../../../wc.WebCommon/src/LagoVista.Net.LetsEncrypt/Models/AcmeChallengeResponse.cs": {
+    "../../../../../../../wc.WebCommon/src/LagoVista.IoT.Web.Common/Controllers/LagoVistaBaseController.cs": {
       "pointIds": [
-        "1cb5063795714d8ead3ed124b36ef54b",
-        "3286c8b709d641c0903e07b34f54bf43",
-        "3966ba64e4d54d45ba5274ca615797c6",
-        "5dbaa6af1ac24524a7b4f0136e1ec097",
-        "62c5272e6bf34932b20661e50f187512",
-        "80abed13e9754fbabbb8d349a7fe32f1",
-        "9c1f7a7d352a4a88a174bfa5c5ab3d83",
-        "a78fc176be574b2f9fb7565be5b02b61",
-        "ba500e336c3645da95ad446001b99762",
-        "d23483d115444be6ba4707575b6db787",
-        "fc581c03263a4ec8bd3a202a2eee17d3"
+        "0135b1abf7244feeb42cefc379031276",
+        "04546fb14e674c48afed3f5476a11041",
+        "04e7c38380424265b506036adf1102e1",
+        "090eb362f3b14322b347f3116a6adc46",
+        "0e99b54796ce4fcdb1b638cdd73464c2",
+        "221680d775d64d7aa10db297c9b22d01",
+        "321836013d784727a98f8841b03866a9",
+        "387101782b904755978b930630edaaf8",
+        "3d61c7d6e9614ccd9584fcc79d3c723f",
+        "456dd0e216bb44ad989ad22fe300906f",
+        "45dc1e91af734f01be7a83baeb77c0b5",
+        "47ee3804802645569027f93aeb161021",
+        "4be5df04af4646caa3d4a67ca57f3e76",
+        "51517095cf7f4f50bd1f170f7605d1bf",
+        "682388076f274b08b150821cc8d82820",
+        "6932f927aa044d30b704b600a4cdcb3e",
+        "73bac7e6a07f4d6e9ffab70a34aad041",
+        "78a259c186d24601b32f51ccfbadce0c",
+        "7e7caa6e06354e38bf29e6ae261044d7",
+        "8383b7d309f34d8d90cfd577b16f5afb",
+        "992ec1b25e5242e58651b11923e601ef",
+        "9f7019e8ab4c460f96ce486c0a3da01d",
+        "aba2924ecf7547a3870ec6f320f9faa1",
+        "b2ed74a224af40b5a4a912d3038a24e4",
+        "bcc437a3c4954f2cb3be46cefa457030",
+        "c35f5ecda1254febbbba0415efcb274f",
+        "d28bcff65ca44cbca87bf90276b8871c",
+        "d3f403366f5b484cb7907a5dd31a4790",
+        "da9ab4982ce94680a2627382221cb235",
+        "e3ee7350ff3347f6a548a05ddcf17cf1",
+        "eb44de349830479885f1707dafe27da0",
+        "ebfcfb7e28104325b91ffa8a33d7430f",
+        "ec6acf01c4364ca7a1225564fc85a50c",
+        "f62a4bf8651849148f18a673ac9c314c",
+        "fb5adaf3130b4972b0f4213ba93c6882"
       ]
     }
   }

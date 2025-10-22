@@ -1,5 +1,5 @@
 // --- BEGIN CODE INDEX META (do not edit) ---
-// ContentHash: 87b0d3853d7b00e58bea01d4fb66b588d1f88a98e98c7e09c55acd7d7c64fa02
+// ContentHash: e150edd5581e5f26d306e006cb7eae48a463b81dcc44ea82406a05d7d3183704
 // IndexVersion: 0
 // --- END CODE INDEX META ---
 using LagoVista.Core.Models;
@@ -187,6 +187,22 @@ namespace LagoVista.IoT.Web.Common.Controllers
             get
             {
                 return User.Claims.Where(clm => clm.Type == ClaimsFactory.IsFinancceAdmin).Any();
+            }
+        }
+
+        public bool IsSysAdmin
+        {
+            get
+            {
+                return User.Claims.Where(clm => clm.Type == ClaimsFactory.IsSystemAdmin).Any();
+            }
+        }
+
+        public bool IsOrgAdmin
+        {
+            get
+            {
+                return User.Claims.Where(clm => clm.Type == ClaimsFactory.IsOrgAdmin).Any();
             }
         }
 
