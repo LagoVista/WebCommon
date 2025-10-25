@@ -59,19 +59,37 @@ namespace LagoVista.IoT.Web.Common.Attributes
                 }
                 else if (context.HttpContext.User.HasClaim(ClaimsFactory.EmailVerified, true.ToString()))
                 {
+                    
                     var orgId = context.HttpContext.User.Claims.Where(claim => claim.Type == ClaimsFactory.CurrentOrgId).FirstOrDefault();
                     if (orgId == null || orgId.Value == "-" || String.IsNullOrEmpty(orgId.Value) || orgId.Value == Guid.Empty.ToId())
                     {
-                        Console.WriteLine($"User Authenticated, but no org, redirecting to Create New Org  {context.HttpContext.Request.Path}");
-                        context.Result = new RedirectResult(CommonLinks.CreateDefaultOrg);
+                        if (context.HttpContext.Request.Headers.Accept.Select(fld => fld == "application/json").Any())
+                        {
+                            context.Result = new JsonResult(new InvokeResult()
+                            {
+                                RedirectURL = CommonLinks.ConfirmEmail,
+                            });
+                        }
+                        else
+                        {
+                            context.Result = new RedirectResult(CommonLinks.ConfirmEmail);
+                        }
                     }
                     //  The else clause here is the one that means no error, probalby could use a bit of refactoring to make that more obvious.
-
                 }
                 else
                 {
-                    Console.WriteLine($"User Authenticated, but not verified, redirect to verify screen from {context.HttpContext.Request.Path}");
-                    context.Result = new RedirectResult(CommonLinks.ConfirmEmail);
+                    if(context.HttpContext.Request.Headers.Accept.Select(fld=>fld == "application/json").Any())
+                    {
+                        context.Result = new JsonResult(new InvokeResult()
+                        {
+                            RedirectURL = CommonLinks.ConfirmEmail,
+                        });
+                    }
+                    else
+                    {
+                        context.Result = new RedirectResult(CommonLinks.ConfirmEmail);
+                    }
                 }
             }
         }
