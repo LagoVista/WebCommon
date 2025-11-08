@@ -1,6 +1,6 @@
 // --- BEGIN CODE INDEX META (do not edit) ---
 // ContentHash: a8e4a686663e6012835f2ebacc519c4b0fe388a501cfce6ee91dbfb7fac6cd10
-// IndexVersion: 0
+// IndexVersion: 2
 // --- END CODE INDEX META ---
 using LagoVista.AspNetCore.Identity.Managers;
 using LagoVista.Core.Validation;

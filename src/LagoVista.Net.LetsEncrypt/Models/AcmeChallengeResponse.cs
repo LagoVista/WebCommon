@@ -1,6 +1,6 @@
 // --- BEGIN CODE INDEX META (do not edit) ---
 // ContentHash: 9425129a2913412f239bb794276ff3d808423c247c82226b120422311c5206fe
-// IndexVersion: 0
+// IndexVersion: 2
 // --- END CODE INDEX META ---
 using Azure;
 using Azure.Data.Tables;
