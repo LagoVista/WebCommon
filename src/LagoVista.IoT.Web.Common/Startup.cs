@@ -2,7 +2,9 @@
 // ContentHash: a1ca7c3cf2b98fe1644e090db237253dc15d9cb5c7ae439008fba301c11ff057
 // IndexVersion: 2
 // --- END CODE INDEX META ---
+using LagoVista.CloudStorage.Interfaces;
 using LagoVista.Core.Interfaces;
+using LagoVista.IoT.Web.Common.Utils;
 using System.Resources;
 
 [assembly: NeutralResourcesLanguage("en")]
@@ -15,6 +17,7 @@ namespace LagoVista.IoT.Web.Common
 
             services.AddTransient<IMetricsManager, Managers.MetricsManager>();
             services.AddTransient<IMetricsRepo, Repos.MetricsRepos>();
+            services.AddTransient<ICacheAborter, CacheAborter>();
             services.AddTransient<IMetricsBySessionRepo, Repos.MetricsBySessionRepo>();
         }
     }
