@@ -18,6 +18,22 @@ namespace LagoVista.IoT.Web.Common.Utils
         {   
             get
             {
+                if(_httpContextAccessor.HttpContext == null)
+                {
+                    return false;
+                }
+
+
+                if (_httpContextAccessor.HttpContext.Request == null)
+                {
+                    return false;
+                }
+
+                if (_httpContextAccessor.HttpContext.Request.Query == null)
+                {
+                    return false;
+                }
+
                 return _httpContextAccessor.HttpContext.Request.Query.ContainsKey("cache-abort");
             } 
         }
