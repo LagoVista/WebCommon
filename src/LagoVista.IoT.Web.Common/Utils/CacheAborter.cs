@@ -34,7 +34,8 @@ namespace LagoVista.IoT.Web.Common.Utils
                     return false;
                 }
 
-                return _httpContextAccessor.HttpContext.Request.Query.ContainsKey("cache-abort");
+                return _httpContextAccessor.HttpContext.Request.Query.ContainsKey("cache-abort") ||
+                       _httpContextAccessor.HttpContext.Request.Headers.ContainsKey("cache-abort");
             } 
         }
     }
