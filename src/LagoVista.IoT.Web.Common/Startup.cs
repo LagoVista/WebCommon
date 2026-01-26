@@ -5,6 +5,7 @@
 using LagoVista.CloudStorage.Interfaces;
 using LagoVista.Core.Interfaces;
 using LagoVista.IoT.Web.Common.Utils;
+using LagoVista.UserAdmin.Interfaces;
 using System.Resources;
 
 [assembly: NeutralResourcesLanguage("en")]
@@ -18,6 +19,7 @@ namespace LagoVista.IoT.Web.Common
             services.AddTransient<IMetricsManager, Managers.MetricsManager>();
             services.AddTransient<IMetricsRepo, Repos.MetricsRepos>();
             services.AddTransient<ICacheAborter, CacheAborter>();
+            services.AddTransient<IEntryIntentService, EntryIntentService>();
             services.AddTransient<IMetricsBySessionRepo, Repos.MetricsBySessionRepo>();
         }
     }
