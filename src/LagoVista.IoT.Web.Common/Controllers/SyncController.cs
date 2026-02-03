@@ -1,0 +1,125 @@
+﻿using LagoVista.CloudStorage.Interfaces;
+using LagoVista.CloudStorage.Models;
+using LagoVista.Core.Interfaces;
+using LagoVista.Core.Validation;
+using LagoVista.IoT.Logging.Loggers;
+using LagoVista.UserAdmin.Models.Users;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace LagoVista.IoT.Web.Common.Controllers
+{
+    [Authorize]
+    [Route("api/admin/sync")]
+    public class SyncController : LagoVistaBaseController
+    {
+        ISyncRepository _syncRepository;
+
+        public SyncController(ISyncRepository syncRepository, UserManager<AppUser> userManager, IAdminLogger logger) : base(userManager, logger)
+        {
+            _syncRepository = syncRepository ?? throw new ArgumentNullException(nameof(syncRepository));
+        }
+
+        /// <summary>
+        /// Returns a lightweight list of summaries for a given entity type.
+        /// This is the primary endpoint for the WPF "compare grid".
+        /// </summary>
+        /// <example>
+        /// GET /api/admin/sync/summaries?entityType=OrganizationDomain&amp;search=acme&amp;take=50
+        /// </example>
+        [HttpGet("summaries")]
+        public async Task<ActionResult<InvokeResult<SyncEntitySummary[]>>> GetSummariesAsync(
+            [FromQuery] string entityType,
+            [FromQuery] string search = null,
+            [FromQuery] int take = 200,
+            CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(entityType))
+                return BadRequest(InvokeResult<SyncEntitySummary[]>.FromError("entityType is required."));
+
+            if (take <= 0) take = 200;
+            if (take > 2000) take = 2000; // safety rail
+
+            try
+            {
+                var summaries = await _syncRepository.GetSummariesAsync(entityType.Trim(), search, take, ct);
+                return Ok(InvokeResult<SyncEntitySummary[]>.Create(summaries is null ? Array.Empty<SyncEntitySummary>() : (SyncEntitySummary[])summaries));
+            }
+            catch (Exception ex)
+            {
+                // Keep payload safe but useful.
+                return StatusCode(500, InvokeResult<SyncEntitySummary[]>.FromError($"Failed to load summaries: {ex.Message}"));
+            }
+        }
+
+        /// <summary>
+        /// Fetch raw JSON by id. WPF uses this for side-by-side display.
+        /// </summary>
+        [HttpGet("items/{id}")]
+        public async Task<ActionResult<InvokeResult<SyncJsonEnvelope>>> GetItemJsonByIdAsync(
+            [FromRoute] string id,
+            CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                return BadRequest(InvokeResult<SyncJsonEnvelope>.FromError("id is required."));
+
+            try
+            {
+                var json = await _syncRepository.GetJsonByIdAsync(id.Trim(), ct);
+                if (string.IsNullOrWhiteSpace(json))
+                    return NotFound(InvokeResult<SyncJsonEnvelope>.FromError("Item not found."));
+
+                return Ok(InvokeResult<SyncJsonEnvelope>.Create(new SyncJsonEnvelope { Json = json }));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, InvokeResult<SyncJsonEnvelope>.FromError($"Failed to load item: {ex.Message}"));
+            }
+        }
+
+        /// <summary>
+        /// Upsert a raw JSON document. Optional expectedETag provides optimistic concurrency.
+        /// WPF uses this when applying changes from env A to env B.
+        /// </summary>
+        [HttpPost("items/upsert")]
+        public async Task<ActionResult<InvokeResult<SyncUpsertResult>>> UpsertAsync(
+            [FromBody] SyncUpsertRequest request,
+            CancellationToken ct = default)
+        {
+            if (request == null)
+                return BadRequest(InvokeResult<SyncUpsertResult>.FromError("Request body is required."));
+
+            if (string.IsNullOrWhiteSpace(request.Json))
+                return BadRequest(InvokeResult<SyncUpsertResult>.FromError("json is required."));
+
+            // Lightweight JSON sanity check (keeps server errors nicer).
+            try { JsonConvert.DeserializeObject(request.Json); }
+            catch (Exception ex)
+            {
+                return BadRequest(InvokeResult<SyncUpsertResult>.FromError($"Invalid JSON: {ex.Message}"));
+            }
+
+            try
+            {
+                var result = await _syncRepository.UpsertJsonAsync(request.Json, request.ExpectedETag, ct);
+                return Ok(InvokeResult<SyncUpsertResult>.Create(result));
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Your repo throws this on ETag mismatch (412).
+                return StatusCode(409, InvokeResult<SyncUpsertResult>.FromError(ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, InvokeResult<SyncUpsertResult>.FromError($"Upsert failed: {ex.Message}"));
+            }
+        }
+
+
+    }
+}
