@@ -1,6 +1,7 @@
 ﻿using LagoVista.CloudStorage.Interfaces;
 using LagoVista.CloudStorage.Models;
 using LagoVista.Core.Interfaces;
+using LagoVista.Core.Models.UIMetaData;
 using LagoVista.Core.Validation;
 using LagoVista.IoT.Logging.Loggers;
 using LagoVista.UserAdmin.Models.Users;
@@ -33,14 +34,14 @@ namespace LagoVista.IoT.Web.Common.Controllers
         /// GET /api/admin/sync/summaries?entityType=OrganizationDomain&amp;search=acme&amp;take=50
         /// </example>
         [HttpGet("summaries")]
-        public async Task<ActionResult<InvokeResult<SyncEntitySummary[]>>> GetSummariesAsync(
+        public async Task<ListResponse<SyncEntitySummary>> GetSummariesAsync(
             [FromQuery] string entityType,
             [FromQuery] string search = null,
             [FromQuery] int take = 200,
             CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(entityType))
-                return BadRequest(InvokeResult<SyncEntitySummary[]>.FromError("entityType is required."));
+                return ListResponse<SyncEntitySummary>.FromError("entityType is required.");
 
             if (take <= 0) take = 200;
             if (take > 2000) take = 2000; // safety rail
@@ -48,12 +49,12 @@ namespace LagoVista.IoT.Web.Common.Controllers
             try
             {
                 var summaries = await _syncRepository.GetSummariesAsync(entityType.Trim(), search, take, ct);
-                return Ok(InvokeResult<SyncEntitySummary[]>.Create(summaries is null ? Array.Empty<SyncEntitySummary>() : (SyncEntitySummary[])summaries));
+                return ListResponse<SyncEntitySummary>.Create(summaries);
             }
             catch (Exception ex)
             {
                 // Keep payload safe but useful.
-                return StatusCode(500, InvokeResult<SyncEntitySummary[]>.FromError($"Failed to load summaries: {ex.Message}"));
+                return ListResponse<SyncEntitySummary>.FromError($"Failed to load summaries: {ex.Message}");
             }
         }
 
