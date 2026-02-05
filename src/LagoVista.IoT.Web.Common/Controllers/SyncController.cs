@@ -1,6 +1,7 @@
 ﻿using LagoVista.CloudStorage.Interfaces;
 using LagoVista.CloudStorage.Models;
 using LagoVista.Core.Interfaces;
+using LagoVista.Core.Models;
 using LagoVista.Core.Models.UIMetaData;
 using LagoVista.Core.Validation;
 using LagoVista.IoT.Logging.Loggers;
@@ -48,7 +49,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
 
             try
             {
-                var summaries = await _syncRepository.GetSummariesAsync(entityType.Trim(), search, take, ct);
+                var summaries = await _syncRepository.GetSummariesAsync(entityType.Trim(), OrgEntityHeader.Id, search, take, ct);
                 return ListResponse<SyncEntitySummary>.Create(summaries);
             }
             catch (Exception ex)
@@ -61,7 +62,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
         /// <summary>
         /// Fetch raw JSON by id. WPF uses this for side-by-side display.
         /// </summary>
-        [HttpGet("items/{id}")]
+        [HttpGet("entity/{id}")]
         public async Task<ActionResult<InvokeResult<SyncJsonEnvelope>>> GetItemJsonByIdAsync(
             [FromRoute] string id,
             CancellationToken ct = default)
@@ -71,7 +72,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
 
             try
             {
-                var json = await _syncRepository.GetJsonByIdAsync(id.Trim(), ct);
+                var json = await _syncRepository.GetJsonByIdAsync(id.Trim(), OrgEntityHeader.Id, ct);
                 if (string.IsNullOrWhiteSpace(json))
                     return NotFound(InvokeResult<SyncJsonEnvelope>.FromError("Item not found."));
 
@@ -82,6 +83,51 @@ namespace LagoVista.IoT.Web.Common.Controllers
                 return StatusCode(500, InvokeResult<SyncJsonEnvelope>.FromError($"Failed to load item: {ex.Message}"));
             }
         }
+
+        [HttpGet("entity/{entitytype}/{key}")]
+        public async Task<ActionResult<InvokeResult<SyncJsonEnvelope>>> GetItemJsonByEntityTypeAndKeyAsync(
+           [FromRoute] string key,
+           [FromRoute] string entitytype,
+           CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+                return BadRequest(InvokeResult<SyncJsonEnvelope>.FromError("id is required."));
+
+            try
+            {
+                var json = await _syncRepository.GetJsonByEntityTypeAndKeyAsync(key.Trim(), entitytype, OrgEntityHeader.Id, ct);
+                if (string.IsNullOrWhiteSpace(json))
+                    return NotFound(InvokeResult<SyncJsonEnvelope>.FromError("Item not found."));
+
+                return Ok(InvokeResult<SyncJsonEnvelope>.Create(new SyncJsonEnvelope { Json = json }));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, InvokeResult<SyncJsonEnvelope>.FromError($"Failed to load item: {ex.Message}"));
+            }
+        }
+
+
+        [HttpGet("entity/{id}/entityheader")]
+        public async Task<InvokeResult<EntityHeader>> GetEntityHeaderForEntity(
+           [FromRoute] string id,
+           CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                return InvokeResult<EntityHeader>.FromError("id is required.");
+
+            try
+            {
+                var eh = await _syncRepository.GetEntityHeaderForRecordAsync(id.Trim(),ct);
+                
+                return InvokeResult<EntityHeader>.Create(eh);
+            }
+            catch (Exception ex)
+            {
+                return InvokeResult<EntityHeader>.FromError(ex.Message);
+            }
+        }
+
 
         /// <summary>
         /// Upsert a raw JSON document. Optional expectedETag provides optimistic concurrency.

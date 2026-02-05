@@ -18,6 +18,7 @@ using LagoVista.Core.Interfaces;
 using LagoVista.IoT.Logging.Loggers;
 using LagoVista.AspNetCore.Identity.Managers;
 using LagoVista.Core.Models.UIMetaData;
+using LagoVista.UserAdmin.Models.Orgs;
 
 namespace LagoVista.IoT.Web.Common.Controllers
 {
@@ -47,6 +48,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
                 return new EntityHeader()
                 {
                     Id = CurrentUserId,
+                    EntityType = typeof(AppUser).Name,
                     Text = CurrentFullName
                 };
             }
@@ -143,6 +145,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
                     return new EntityHeader()
                     {
                         Text = Resources.CommonResources.Common_None,
+                        EntityType = typeof(Organization).Name,
                         Id = String.Empty
                     };
                 }

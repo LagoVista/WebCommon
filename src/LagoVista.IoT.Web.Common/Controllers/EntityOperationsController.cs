@@ -38,7 +38,6 @@ namespace LagoVista.IoT.Web.Common.Controllers
             return InvokeResult<RatedEntity>.Create(result);
         }
 
-
         [HttpPut("/api/entity/{entityid}/category")]
         public Task<InvokeResult> SetEntityCategory(string entityid, [FromBody] EntityHeader category)
         {
