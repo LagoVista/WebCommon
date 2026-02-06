@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -129,14 +130,14 @@ namespace LagoVista.IoT.Web.Common.Controllers
         }
 
 
-        [HttpGet("/api/entity/{id}/resolveehs")]
+        [HttpGet("/api/entity/{id}/resolve/entityheaders")]
         public Task<InvokeResult<EhResolvedEntity>> ResolveEntityHeadersForIdsAsync([FromRoute] string id, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(id))
                 return Task.FromResult(InvokeResult<EhResolvedEntity>.FromError("id is required."));
             try
             {
-                return _syncRepository.ResolveEntityEntityHeadersAsync(id.Trim(), ct);
+                return _syncRepository.ResolveEntityHeadersAsync(id.Trim(), ct);
             }
             catch (Exception ex)
             {
@@ -144,18 +145,18 @@ namespace LagoVista.IoT.Web.Common.Controllers
             }
         }
 
-        [HttpGet("/api/entitytype/{entitytype}/resolveehs")]
-        public Task<InvokeResult<EhResolvedEntity>> ResolveEntityHeadersForIdsAsync([FromRoute] string entitytype, string continuationToken = null, CancellationToken ct = default)
+        [HttpGet("/api/entitytype/{entitytype}/resolve/entityheaders")]
+        public Task<InvokeResult<List<EhResolvedEntity>>> ResolveEntityHeadersForIdsAsync([FromRoute] string entitytype, string continuationToken = null, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(entitytype))
-                return Task.FromResult(InvokeResult<EhResolvedEntity>.FromError("id is required."));
+                return Task.FromResult(InvokeResult<List<EhResolvedEntity>>.FromError("id is required."));
             try
             {
-                return _syncRepository.ResolveEntityEntityHeadersAsync(id.Trim(), ct);
+                return _syncRepository.ResolveEntityHeadersAsync(entitytype, continuationToken, ct);
             }
             catch (Exception ex)
             {
-                return Task.FromResult(InvokeResult<EhResolvedEntity>.FromError(ex.Message));
+                return Task.FromResult(InvokeResult<List<EhResolvedEntity>>.FromError(ex.Message));
             }
         }
 

@@ -2,9 +2,15 @@
 // ContentHash: e150edd5581e5f26d306e006cb7eae48a463b81dcc44ea82406a05d7d3183704
 // IndexVersion: 2
 // --- END CODE INDEX META ---
-using LagoVista.Core.Models;
-using LagoVista.Core.PlatformSupport;
 using LagoVista.AspNetCore.Identity;
+using LagoVista.AspNetCore.Identity.Managers;
+using LagoVista.Core;
+using LagoVista.Core.Interfaces;
+using LagoVista.Core.Models;
+using LagoVista.Core.Models.UIMetaData;
+using LagoVista.Core.PlatformSupport;
+using LagoVista.IoT.Logging.Loggers;
+using LagoVista.UserAdmin.Models.Orgs;
 using LagoVista.UserAdmin.Models.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -12,13 +18,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
-using LagoVista.Core;
-using LagoVista.Core.Interfaces;
-using LagoVista.IoT.Logging.Loggers;
-using LagoVista.AspNetCore.Identity.Managers;
-using LagoVista.Core.Models.UIMetaData;
-using LagoVista.UserAdmin.Models.Orgs;
 
 namespace LagoVista.IoT.Web.Common.Controllers
 {
@@ -41,14 +42,42 @@ namespace LagoVista.IoT.Web.Common.Controllers
             }
         }
 
+        public static string NormalizeAlphaNumericKey(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return null;
+
+            var sb = new StringBuilder(input.Length);
+
+            foreach (var ch in input)
+            {
+                if (char.IsLetterOrDigit(ch))
+                {
+                    sb.Append(char.ToLowerInvariant(ch));
+                }
+            }
+
+            if (sb.Length == 0) return null;
+
+            // Ensure first character is a letter
+            if (!char.IsLetter(sb[0]))
+            {
+                sb.Insert(0, 'a');
+            }
+
+            return sb.ToString();
+        }
+
         protected EntityHeader UserEntityHeader
         {
             get
             {
+                var userName = CurrentUserName;
+
                 return new EntityHeader()
                 {
                     Id = CurrentUserId,
                     EntityType = typeof(AppUser).Name,
+                    Key = NormalizeAlphaNumericKey(userName),
                     Text = CurrentFullName
                 };
             }
@@ -140,6 +169,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
             {
                 var orgId = User.Claims.Where(claim => claim.Type == ClaimsFactory.CurrentOrgId).FirstOrDefault();
                 var orgName = User.Claims.Where(claim => claim.Type == ClaimsFactory.CurrentOrgName).FirstOrDefault();
+                var orgNs = User.Claims.Where(claim => claim.Type == ClaimsFactory.CurrentOrgNamespace).FirstOrDefault();
                 if (orgId == null)
                 {
                     return new EntityHeader()
