@@ -103,12 +103,4 @@ namespace LagoVista.IoT.Web.Common.Controllers
             return MetaDataHelper.Instance.Entities.Where(ent => ent.DomainName.ToLower() == domain.ToLower() && ent.Name.ToLower() == classname.ToLower()).FirstOrDefault();
         }
     }
-
-    public class foo :LagoVistaBaseController
-    {
-        public foo(UserManager<AppUser> userManager, IAdminLogger logger) : base(userManager, logger)
-        {
-
-        }
-    }
 }

@@ -72,7 +72,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
 
             try
             {
-                var json = await _syncRepository.GetJsonByIdAsync(id.Trim(), OrgEntityHeader.Id, ct);
+                var json = await _syncRepository.GetOwnedJsonByIdAsync(id.Trim(), OrgEntityHeader.Id, ct);
                 if (string.IsNullOrWhiteSpace(json))
                     return NotFound(InvokeResult<SyncJsonEnvelope>.FromError("Item not found."));
 
@@ -129,41 +129,72 @@ namespace LagoVista.IoT.Web.Common.Controllers
         }
 
 
+        [HttpGet("/api/entity/{id}/resolveehs")]
+        public Task<InvokeResult<EhResolvedEntity>> ResolveEntityHeadersForIdsAsync([FromRoute] string id, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                return Task.FromResult(InvokeResult<EhResolvedEntity>.FromError("id is required."));
+            try
+            {
+                return _syncRepository.ResolveEntityEntityHeadersAsync(id.Trim(), ct);
+            }
+            catch (Exception ex)
+            {
+                return Task.FromResult(InvokeResult< EhResolvedEntity>.FromError(ex.Message));
+            }
+        }
+
+        [HttpGet("/api/entitytype/{entitytype}/resolveehs")]
+        public Task<InvokeResult<EhResolvedEntity>> ResolveEntityHeadersForIdsAsync([FromRoute] string entitytype, string continuationToken = null, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(entitytype))
+                return Task.FromResult(InvokeResult<EhResolvedEntity>.FromError("id is required."));
+            try
+            {
+                return _syncRepository.ResolveEntityEntityHeadersAsync(id.Trim(), ct);
+            }
+            catch (Exception ex)
+            {
+                return Task.FromResult(InvokeResult<EhResolvedEntity>.FromError(ex.Message));
+            }
+        }
+
+
         /// <summary>
         /// Upsert a raw JSON document. Optional expectedETag provides optimistic concurrency.
         /// WPF uses this when applying changes from env A to env B.
         /// </summary>
-        [HttpPost("items/upsert")]
-        public async Task<ActionResult<InvokeResult<SyncUpsertResult>>> UpsertAsync(
+        [HttpPost("entity/upsert")]
+        public async Task<InvokeResult<SyncUpsertResult>> UpsertAsync(
             [FromBody] SyncUpsertRequest request,
             CancellationToken ct = default)
         {
             if (request == null)
-                return BadRequest(InvokeResult<SyncUpsertResult>.FromError("Request body is required."));
+                return InvokeResult<SyncUpsertResult>.FromError("Request body is required.");
 
             if (string.IsNullOrWhiteSpace(request.Json))
-                return BadRequest(InvokeResult<SyncUpsertResult>.FromError("json is required."));
+                return InvokeResult<SyncUpsertResult>.FromError("json is required.");
 
             // Lightweight JSON sanity check (keeps server errors nicer).
             try { JsonConvert.DeserializeObject(request.Json); }
             catch (Exception ex)
             {
-                return BadRequest(InvokeResult<SyncUpsertResult>.FromError($"Invalid JSON: {ex.Message}"));
+                return InvokeResult<SyncUpsertResult>.FromError($"Invalid JSON: {ex.Message}");
             }
 
             try
             {
-                var result = await _syncRepository.UpsertJsonAsync(request.Json, request.ExpectedETag, ct);
-                return Ok(InvokeResult<SyncUpsertResult>.Create(result));
+                var result = await _syncRepository.UpsertJsonAsync(request.Json, OrgEntityHeader, UserEntityHeader, ct);
+                return InvokeResult<SyncUpsertResult>.Create(result);
             }
             catch (InvalidOperationException ex)
             {
                 // Your repo throws this on ETag mismatch (412).
-                return StatusCode(409, InvokeResult<SyncUpsertResult>.FromError(ex.Message));
+                return InvokeResult<SyncUpsertResult>.FromError(ex.Message);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, InvokeResult<SyncUpsertResult>.FromError($"Upsert failed: {ex.Message}"));
+                return InvokeResult<SyncUpsertResult>.FromError($"Upsert failed: {ex.Message}");
             }
         }
 
