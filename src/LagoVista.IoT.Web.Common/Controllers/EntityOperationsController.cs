@@ -31,6 +31,20 @@ namespace LagoVista.IoT.Web.Common.Controllers
             return InvokeResult<RatedEntity>.Create(result);
         }
 
+        [HttpGet("/api/entity/{id}/graph")]
+        public async Task<InvokeResult<EntityGraph>> GetEntityGraph(string id)
+        {
+            var result = await _storageUtils.GetEntityGraphAsync(id, OrgEntityHeader, UserEntityHeader);
+            return InvokeResult<EntityGraph>.Create(result);
+        }
+
+        [HttpGet("/api/entity/{id}/public/set")]
+        public async Task<InvokeResult> GetPublicEntityGraph(string id)
+        {
+            return await _storageUtils.SetEntityPublicAsync(id, OrgEntityHeader, UserEntityHeader);
+        }   
+
+
         [HttpDelete("/api/entity/{entityid}/rating")]
         public async Task<InvokeResult<RatedEntity>> ClearRating(string entityid)
         {

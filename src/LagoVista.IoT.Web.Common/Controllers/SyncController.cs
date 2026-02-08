@@ -152,7 +152,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
                 return Task.FromResult(InvokeResult<List<EhResolvedEntity>>.FromError("id is required."));
             try
             {
-                return _syncRepository.ResolveEntityHeadersAsync(entitytype, continuationToken, ct);
+                return _syncRepository.ResolveEntityHeadersAsync(entitytype, continuationToken, ct:ct);
             }
             catch (Exception ex)
             {
