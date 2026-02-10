@@ -6,6 +6,7 @@ using LagoVista.Core.Interfaces;
 using LagoVista.Core.Models;
 using LagoVista.Core.Validation;
 using LagoVista.IoT.Logging.Loggers;
+using LagoVista.IoT.Web.Common.Attributes;
 using LagoVista.UserAdmin.Models.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,7 @@ using System.Threading.Tasks;
 namespace LagoVista.IoT.Web.Common.Controllers
 {
 
+    [ConfirmedUser]
     public class EntityOperationsController : LagoVistaBaseController
     {
         IStorageUtils _storageUtils;
@@ -42,7 +44,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
         public async Task<InvokeResult> GetPublicEntityGraph(string id)
         {
             return await _storageUtils.SetEntityPublicAsync(id, OrgEntityHeader, UserEntityHeader);
-        }   
+        }
 
 
         [HttpDelete("/api/entity/{entityid}/rating")]

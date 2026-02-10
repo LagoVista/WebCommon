@@ -5,6 +5,7 @@ using LagoVista.Core.Models;
 using LagoVista.Core.Models.UIMetaData;
 using LagoVista.Core.Validation;
 using LagoVista.IoT.Logging.Loggers;
+using LagoVista.IoT.Web.Common.Attributes;
 using LagoVista.UserAdmin.Models.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -17,6 +18,7 @@ using System.Threading.Tasks;
 
 namespace LagoVista.IoT.Web.Common.Controllers
 {
+    [SystemAdmin]
     [Authorize]
     [Route("api/admin/sync")]
     public class SyncController : LagoVistaBaseController
@@ -158,6 +160,15 @@ namespace LagoVista.IoT.Web.Common.Controllers
             {
                 return Task.FromResult(InvokeResult<List<EhResolvedEntity>>.FromError(ex.Message));
             }
+        }
+
+        [HttpPost("entity/patch")]
+        public async Task<InvokeResult> PatchAsync([FromBody] PatchRequest request, CancellationToken ct = default)
+        {
+            if (request == null)
+                return InvokeResult.FromError("Request body is required.");
+
+            return await _syncRepository.PatchEntityAsync(request, OrgEntityHeader, UserEntityHeader, ct);
         }
 
 
