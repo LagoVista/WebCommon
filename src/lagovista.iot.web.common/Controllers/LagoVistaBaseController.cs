@@ -121,6 +121,17 @@ namespace LagoVista.IoT.Web.Common.Controllers
             entity.LastUpdatedBy = UserEntityHeader;
         }
 
+        protected void SetAuditProperties(RelationalEntityBase relationalBase)
+        {
+
+            var createDate = DateTime.Now.ToJSONString();
+            relationalBase.CreationDate = createDate;
+            relationalBase.LastUpdatedDate = createDate;
+            relationalBase.CreatedBy = UserEntityHeader;
+            relationalBase.LastUpdatedBy = UserEntityHeader;
+        }
+
+
         public List<string> PrimaryOrgIds
         {
             get
@@ -158,10 +169,25 @@ namespace LagoVista.IoT.Web.Common.Controllers
             entity.LastUpdatedBy = UserEntityHeader;
         }
 
+        protected void SetUpdatedProperties(RelationalEntityBase relationalBase)
+        {
+            if (relationalBase == null)
+            {
+                throw new NullReferenceException("NULL Entity Passed to SetUpdatedProperties");
+            }
+            relationalBase.LastUpdatedDate = DateTime.Now.ToJSONString();
+            relationalBase.LastUpdatedBy = UserEntityHeader;
+        }   
+
         protected void SetOwnedProperties(IOwnedEntity entity)
         {
             entity.OwnerOrganization = OrgEntityHeader;
         }
+
+        protected void SetOwnedProperties(RelationalEntityBase relationalBase)
+        {
+            relationalBase.OwnerOrganization = OrgEntityHeader;
+        }   
 
         protected EntityHeader OrgEntityHeader
         {
