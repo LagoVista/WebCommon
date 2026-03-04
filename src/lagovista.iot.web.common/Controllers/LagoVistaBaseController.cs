@@ -302,12 +302,12 @@ namespace LagoVista.IoT.Web.Common.Controllers
 
             if (Request.Headers.ContainsKey("x-filter-startdate"))
             {
-                listRequest.StartDate = Request.Headers["x-filter-startdate"];
+                listRequest.StartDate = Request.Headers["x-filter-startdate"].ToString();
             }
 
             if (Request.Headers.ContainsKey("x-filter-enddate"))
             {
-                listRequest.EndDate = Request.Headers["x-filter-enddate"];
+                listRequest.EndDate = Request.Headers["x-filter-enddate"].ToString();
             }
 
             if (Request.Headers.ContainsKey("x-show-drafts"))
