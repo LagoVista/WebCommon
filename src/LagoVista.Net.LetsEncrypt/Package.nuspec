@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>LagoVista.Net.LetsEncrypt</id>
-    <version>3.0.3196.0709</version>
+    <version>3.0.3228.1856</version>
     <authors>Software Logistics, LLC</authors>
     <owners>Software Logistics, LLC</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -12,13 +12,13 @@
     <copyright>Copyright Software Logistics - 2026</copyright>
     <tags>IoT</tags>
     <icon>LagoVistaIcon.png</icon>
-    <releaseNotes>Build Date: 2/15/2026 12:09:06 PM UTC</releaseNotes>
+    <releaseNotes>Build Date: 3/19/2026 10:56:20 PM UTC</releaseNotes>
     <repository url="https://www.github.com/lagovista" type="git" branch="master"></repository>
     <dependencies>
       <group targetFramework="netstandard2.1">
-        <dependency id="LagoVista.CloudStorage" version="3.0.3196.0709" />
-        <dependency id="Certes" version="3.0.3" />
-        <dependency id="Microsoft.AspNetCore" version="2.3.0" />
+        <dependency id="LagoVista.CloudStorage" version="3.0.3228.1856" />
+        <dependency id="Certes" version="3.0.4" />
+        <dependency id="Microsoft.AspNetCore" version="2.3.9" />
         <dependency id="Portable.BouncyCastle" version="1.9.0" />
       </group>
     </dependencies>

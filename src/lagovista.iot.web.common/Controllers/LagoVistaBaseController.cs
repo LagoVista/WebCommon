@@ -113,7 +113,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
 
         protected void SetAuditProperties(IAuditableEntitySimple entity)
         {
-            var createDate = DateTime.Now.ToJSONString();
+            var createDate = UtcTimestamp.Now;
 
             entity.CreationDate = createDate;
             entity.LastUpdatedDate = createDate;
@@ -123,8 +123,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
 
         protected void SetAuditProperties(RelationalEntityBase relationalBase)
         {
-
-            var createDate = DateTime.Now.ToJSONString();
+            var createDate = UtcTimestamp.Now;
             relationalBase.CreationDate = createDate;
             relationalBase.LastUpdatedDate = createDate;
             relationalBase.CreatedBy = UserEntityHeader;
@@ -165,7 +164,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
                 throw new NullReferenceException("NULL Entity Passed to SetUpdatedProperties");
             }
 
-            entity.LastUpdatedDate = DateTime.Now.ToJSONString();
+            entity.LastUpdatedDate = UtcTimestamp.Now;
             entity.LastUpdatedBy = UserEntityHeader;
         }
 
@@ -175,7 +174,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
             {
                 throw new NullReferenceException("NULL Entity Passed to SetUpdatedProperties");
             }
-            relationalBase.LastUpdatedDate = DateTime.Now.ToJSONString();
+            relationalBase.LastUpdatedDate = UtcTimestamp.Now;
             relationalBase.LastUpdatedBy = UserEntityHeader;
         }   
 

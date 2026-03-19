@@ -46,7 +46,7 @@ namespace LagoVista.Net.LetsEncrypt.Storage
                 var blobContainerClient = blobClient.GetBlobContainerClient(_settings.StorageContainerName);
                 return blobContainerClient;
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 var container = await blobClient.CreateBlobContainerAsync(_settings.StorageContainerName);
 

@@ -9,9 +9,7 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using lgv = LagoVista.Core.Attributes;
 using System.Text;
-using System.Threading.Tasks;
 using System.Reflection;
 using LagoVista.IoT.Web.Common.Resources;
 
@@ -24,7 +22,7 @@ namespace LagoVista.IoT.Web.Common.TagHelpers
         public ModelExpression For { get; set; }
 
         [HtmlAttributeName("items")]
-        public IEnumerable<lgv.SelectListItem> Items { get; set; }
+        public IEnumerable<Core.Attributes.SelectListItem> Items { get; set; }
 
         public FormEntryTagHelper(IHtmlGenerator generator)
         {

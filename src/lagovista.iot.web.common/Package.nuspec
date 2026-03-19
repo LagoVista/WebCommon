@@ -2,23 +2,23 @@
 <package>
   <metadata>
     <id>LagoVista.IoT.Web.Common</id>
-    <version>3.0.3097.0925</version>
+    <version>3.0.3228.1856</version>
     <authors>Software Logistics, LLC</authors>
     <owners>Software Logistics, LLC</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <projectUrl>https://www.nuviot.com</projectUrl>
     <iconUrl>http://bytemaster.blob.core.windows.net/icons/LagoVistaIcon.png</iconUrl>
     <description>Common Features and Functionality for building WebApps against the LagoVista Devices, IoT and Home Automation Framework</description>
-    <copyright>Copyright Software Logistics - 2025</copyright>
+    <copyright>Copyright Software Logistics - 2026</copyright>
     <tags>IoT</tags>
     <icon>LagoVistaIcon.png</icon>
-    <releaseNotes>Build Date: 11/8/2025 2:25:52 PM UTC</releaseNotes>
+    <releaseNotes>Build Date: 3/19/2026 10:56:20 PM UTC</releaseNotes>
     <repository url="https://www.github.com/lagovista" type="git" branch="master"></repository>
     <dependencies>
       <group targetFramework="net9.0">
-        <dependency id="LagoVista.UserAdmin" version="3.0.3097.0925" />
-        <dependency id="LagoVista.CloudStorage" version="3.0.3097.0925" />
-        <dependency id="LagoVista.AspNetCore.Identity" version="3.0.3097.0925" />
+        <dependency id="LagoVista.UserAdmin" version="3.0.3228.1856" />
+        <dependency id="LagoVista.CloudStorage" version="3.0.3228.1856" />
+        <dependency id="LagoVista.AspNetCore.Identity" version="3.0.3228.1856" />
         <dependency id="prometheus-net.AspNetCore" version="8.2.1" />
       </group>
     </dependencies>
