@@ -5,6 +5,6 @@
     <OutputType>library</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="LagoVista.IoT.Web.Common" Version="3.0.3229.0503" />
+    <ProjectReference Include="..\LagoVista.IoT.Web.Common\LagoVista.IoT.Web.Common.csproj" />
   </ItemGroup>
 </Project>
