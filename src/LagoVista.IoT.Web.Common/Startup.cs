@@ -27,7 +27,7 @@ namespace LagoVista.DependencyInjection
 {
     public static class WebCommonModule
     {
-        public static void AddWebCommonModule<TMetaDataClassType>(this IServiceCollection services, IConfigurationRoot configRoot, IAdminLogger logger)
+        public static void AddWebCommonModule(this IServiceCollection services, IConfigurationRoot configRoot, IAdminLogger logger)
         {
             LagoVista.IoT.Web.Common.Startup.ConfigureServices(services);
         }
