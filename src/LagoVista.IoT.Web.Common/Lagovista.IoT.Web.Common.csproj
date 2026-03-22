@@ -7,9 +7,10 @@
     <OutputType>Library</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="LagoVista.UserAdmin" Version="3.0.3229.0545" />
-    <PackageReference Include="LagoVista.CloudStorage" Version="3.0.3229.0545" />
-    <PackageReference Include="LagoVista.AspNetCore.Identity" Version="3.0.3229.0545" />
+    <PackageReference Include="LagoVista.UserAdmin" Version="3.0.3231.0456" />
+    <PackageReference Include="LagoVista.Core.Configuration" Version="3.0.3231.0456" />
+    <PackageReference Include="LagoVista.CloudStorage" Version="3.0.3231.0456" />
+    <PackageReference Include="LagoVista.AspNetCore.Identity" Version="3.0.3231.0456" />
     <PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1" />
   </ItemGroup>
   <ItemGroup>
