@@ -1,5 +1,7 @@
 using LagoVista.CloudStorage.Interfaces;
 using LagoVista.IoT.Logging.Loggers;
+using LagoVista.IoT.Web.Common.Interfaces;
+using LagoVista.IoT.Web.Common.Managers;
 using LagoVista.IoT.Web.Common.Utils;
 using LagoVista.UserAdmin.Interfaces;
 using Microsoft.Extensions.Configuration;
@@ -13,7 +15,7 @@ namespace LagoVista.IoT.Web.Common
     {
         public static void ConfigureServices(IServiceCollection services)
         {
-
+            services.AddTransient<IHostedServiceDiagnosticsManager, HostedServiceDiagnosticsManager>();
             services.AddTransient<IMetricsManager, Managers.MetricsManager>();
             services.AddTransient<IMetricsRepo, Repos.MetricsRepos>();
             services.AddTransient<ICacheAborter, CacheAborter>();
