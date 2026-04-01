@@ -4,6 +4,7 @@
 // --- END CODE INDEX META ---
 using LagoVista.Core.Interfaces;
 using LagoVista.Core.Models;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,58 @@ namespace LagoVista.IoT.Web.Common.Configuration
 {
     public class AppConfig : IAppConfig
     {
+        public AppConfig(IConfiguration configuration)
+        {
+            var systemOwnerSection = configuration.GetSection("SystemOwnerOrg");
+            SystemOwnerOrg = new Core.Models.EntityHeader()
+            {
+                Id = systemOwnerSection.Require("Id"),
+                Text = systemOwnerSection.Require("Text")
+            };
+
+            AnalyticsKey = configuration.GetValue<string>("GA:ID");
+            var environmentName = configuration.Require("Environment");
+            SlotTitle = configuration.Require("SlotTitle");
+
+            if (string.Equals(environmentName, Core.Interfaces.Environments.Development.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                Environment = SlotTitle == "LocalDev"
+                    ? Core.Interfaces.Environments.Local
+                    : Core.Interfaces.Environments.Development;
+            }
+            else if (string.Equals(environmentName, Core.Interfaces.Environments.Staging.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                Environment = Core.Interfaces.Environments.Staging;
+            }
+            else if (string.Equals(environmentName, Core.Interfaces.Environments.Production.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                Environment = Core.Interfaces.Environments.Production;
+            }
+            else if (string.Equals(environmentName, Core.Interfaces.Environments.Testing.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                Environment = Core.Interfaces.Environments.Testing;
+            }
+            else if (string.Equals(environmentName, Core.Interfaces.Environments.Beta.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                Environment = Core.Interfaces.Environments.Beta;
+            }
+            else
+            {
+                Environment = Core.Interfaces.Environments.Local;
+            }
+
+            AppName = configuration.Optional("AppName", "LagoVista WebHost");
+
+            var isSSL = configuration.Require("IsSSL");
+            IsSSL = String.IsNullOrEmpty(isSSL) ? true : String.Equals(isSSL, "true", StringComparison.OrdinalIgnoreCase);
+
+            var hostName = configuration.Require("HostName");
+         
+
+            WebAddress = (IsSSL ? "https://" : "http://") + hostName;
+            
+        }
+
         public string AppLogo
         {
             get { return "http://bytemaster.blob.core.windows.net/icons/AppLogo.png"; }

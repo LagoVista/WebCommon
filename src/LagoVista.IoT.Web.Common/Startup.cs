@@ -1,5 +1,7 @@
 using LagoVista.CloudStorage.Interfaces;
+using LagoVista.Core.Interfaces;
 using LagoVista.IoT.Logging.Loggers;
+using LagoVista.IoT.Web.Common.Configuration;
 using LagoVista.IoT.Web.Common.Interfaces;
 using LagoVista.IoT.Web.Common.Managers;
 using LagoVista.IoT.Web.Common.Utils;
@@ -22,6 +24,7 @@ namespace LagoVista.IoT.Web.Common
             services.AddTransient<IEntryIntentService, EntryIntentService>();
             services.AddTransient<IMetricsBySessionRepo, Repos.MetricsBySessionRepo>();
 
+            services.AddTransient<IAppConfig, AppConfig>();
             services.AddTransient<IMetricsLoggerSettings, MetricsLoggerSettings>();
         }
     }
