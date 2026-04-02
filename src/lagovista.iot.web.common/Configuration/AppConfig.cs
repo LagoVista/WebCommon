@@ -23,7 +23,9 @@ namespace LagoVista.IoT.Web.Common.Configuration
                 Text = systemOwnerSection.Require("Text")
             };
 
-            AnalyticsKey = configuration.GetValue<string>("GA:ID");
+            var gaSection = configuration.GetSection("GA");
+            AnalyticsKey = gaSection.Require("ID");
+
             var environmentName = configuration.Require("Environment");
             SlotTitle = configuration.Require("SlotTitle");
 
