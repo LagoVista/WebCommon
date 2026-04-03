@@ -42,7 +42,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
             }
         }
 
-        public static string NormalizeAlphaNumericKey(string input)
+        protected static string NormalizeAlphaNumericKey(string input)
         {
             if (string.IsNullOrWhiteSpace(input)) return null;
 
@@ -131,7 +131,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
         }
 
 
-        public List<string> PrimaryOrgIds
+        protected List<string> PrimaryOrgIds
         {
             get
             {
@@ -146,7 +146,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
         /// <summary>
         /// Primary Org is Software Logistics or the owner of the software.
         /// </summary>
-        public bool IsPrimaryOrg
+        protected bool IsPrimaryOrg
         {
             get
             {
@@ -240,7 +240,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
             Update
         }
 
-        public bool IsFinanceAdmin
+        protected bool IsFinanceAdmin
         {
             get
             {
@@ -248,7 +248,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
             }
         }
 
-        public bool IsSysAdmin
+        protected bool IsSysAdmin
         {
             get
             {
@@ -256,7 +256,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
             }
         }
 
-        public bool IsOrgAdmin
+        protected bool IsOrgAdmin
         {
             get
             {
@@ -269,7 +269,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
             return _userManager.GetUserAsync(HttpContext.User);
         }
 
-        public UserManager<AppUser> UserManager
+        protected UserManager<AppUser> UserManager
         {
             get { return _userManager; }
         }
@@ -279,7 +279,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
             get { return _logger; }
         }
 
-        public ListRequest GetListRequestFromHeader()
+        protected ListRequest GetListRequestFromHeader()
         {
             var listRequest = new ListRequest();
             listRequest.Url = Request.Path;
