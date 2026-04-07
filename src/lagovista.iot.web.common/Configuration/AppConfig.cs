@@ -16,6 +16,7 @@ namespace LagoVista.IoT.Web.Common.Configuration
     {
         public AppConfig(IConfiguration configuration)
         {
+            AppId = Guid.NewGuid().ToString();
             var systemOwnerSection = configuration.GetSection("SystemOwnerOrg");
             SystemOwnerOrg = new Core.Models.EntityHeader()
             {
