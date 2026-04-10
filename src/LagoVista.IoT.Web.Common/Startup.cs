@@ -28,7 +28,6 @@ namespace LagoVista.IoT.Web.Common
             services.AddTransient<IEntryIntentService, EntryIntentService>();
             services.AddTransient<IMetricsBySessionRepo, Repos.MetricsBySessionRepo>();
 
-            services.AddTransient<IAppConfig, AppConfig>();
             services.AddTransient<IMetricsLoggerSettings, MetricsLoggerSettings>();
 
             services.AddSingleton<IKubernetes>(_ =>
@@ -49,6 +48,9 @@ namespace LagoVista.IoT.Web.Common
             services.AddTransient<IHostedServiceClusterDiagnosticsService, HostedServiceClusterDiagnosticsService>();
             services.AddTransient<IHostedServiceDiagnosticsManager, HostedServiceDiagnosticsManager>();
             services.AddTransient<ILocalHostedServiceDiagnosticsService, LocalHostedServiceDiagnosticsService>();
+
+            services.AddSingleton<IAppConfig, AppConfig>();
+
         }
     }
 }
