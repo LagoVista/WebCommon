@@ -11,6 +11,7 @@ using LagoVista.UserAdmin.Models.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace LagoVista.IoT.Web.Common.Controllers
@@ -44,6 +45,13 @@ namespace LagoVista.IoT.Web.Common.Controllers
         public async Task<InvokeResult> GetPublicEntityGraph(string id)
         {
             return await _storageUtils.SetEntityPublicAsync(id, OrgEntityHeader, UserEntityHeader);
+        }
+
+        [HttpGet("/api/entities/{entitytype}")]
+        public async Task<InvokeResult<List<EntityHeader>>> GetEntitiesByType(string entitytype)
+        {
+            var result = await _storageUtils.GetEntitiesByTypeAsync(OrgEntityHeader.Id, entitytype );
+            return InvokeResult<List<EntityHeader>>.Create(result);
         }
 
 
