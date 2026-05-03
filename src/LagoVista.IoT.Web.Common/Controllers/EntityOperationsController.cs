@@ -2,6 +2,7 @@
 // ContentHash: 205924010bd3d3763a047e11dea701c2ca5a05ecb40db16b50e2444d9db99099
 // IndexVersion: 2
 // --- END CODE INDEX META ---
+using LagoVista.CloudStorage.Interfaces;
 using LagoVista.Core.Interfaces;
 using LagoVista.Core.Models;
 using LagoVista.Core.Validation;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LagoVista.IoT.Web.Common.Controllers
@@ -20,11 +22,13 @@ namespace LagoVista.IoT.Web.Common.Controllers
     [ConfirmedUser]
     public class EntityOperationsController : LagoVistaBaseController
     {
-        IStorageUtils _storageUtils;
+        private readonly IStorageUtils _storageUtils;
+        private readonly IEntityUtilsRepository _entityUtils; 
 
-        public EntityOperationsController(IStorageUtils storageUtils, UserManager<AppUser> userManager, IAdminLogger logger) : base(userManager, logger)
+        public EntityOperationsController(IStorageUtils storageUtils, IEntityUtilsRepository entityUtils, UserManager<AppUser> userManager, IAdminLogger logger) : base(userManager, logger)
         {
             _storageUtils = storageUtils ?? throw new ArgumentNullException(nameof(storageUtils));
+            _entityUtils = entityUtils ?? throw new ArgumentNullException(nameof(entityUtils));
         }
 
         [HttpPut("/api/entity/{entityid}/rate/{rating}")]
@@ -54,6 +58,17 @@ namespace LagoVista.IoT.Web.Common.Controllers
             return InvokeResult<List<EntityHeader>>.Create(result);
         }
 
+        [HttpGet("/api/entity/{entityid}/index")]
+        public async Task<InvokeResult> GetEntityIndex(string entityid, CancellationToken ct = default)
+        {
+            return await _entityUtils.IndexEntityAsync(entityid, OrgEntityHeader, UserEntityHeader, ct);
+        }
+
+        [HttpGet("/api/entity/{entityid}/calchash")]
+        public async Task<InvokeResult> GetEntityHash(string entityid, CancellationToken ct = default)
+        {
+            return await _entityUtils.CalculateHashAsync(entityid, ct);
+        }
 
         [HttpDelete("/api/entity/{entityid}/rating")]
         public async Task<InvokeResult<RatedEntity>> ClearRating(string entityid)
