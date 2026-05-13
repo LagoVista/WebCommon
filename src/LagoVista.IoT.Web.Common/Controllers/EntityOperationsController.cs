@@ -11,6 +11,7 @@ using LagoVista.IoT.Web.Common.Attributes;
 using LagoVista.UserAdmin.Models.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -24,11 +25,13 @@ namespace LagoVista.IoT.Web.Common.Controllers
     {
         private readonly IStorageUtils _storageUtils;
         private readonly IEntityUtilsRepository _entityUtils; 
+        private readonly IEntityDetailResponseFactory _entityDetailResponseFactory;
 
-        public EntityOperationsController(IStorageUtils storageUtils, IEntityUtilsRepository entityUtils, UserManager<AppUser> userManager, IAdminLogger logger) : base(userManager, logger)
+        public EntityOperationsController(IStorageUtils storageUtils, IEntityUtilsRepository entityUtils, IEntityDetailResponseFactory entityDetailResponseFactory, UserManager<AppUser> userManager, IAdminLogger logger) : base(userManager, logger)
         {
             _storageUtils = storageUtils ?? throw new ArgumentNullException(nameof(storageUtils));
             _entityUtils = entityUtils ?? throw new ArgumentNullException(nameof(entityUtils));
+            _entityDetailResponseFactory = entityDetailResponseFactory ?? throw new ArgumentNullException(nameof(entityDetailResponseFactory));
         }
 
         [HttpPut("/api/entity/{entityid}/rate/{rating}")]
@@ -49,6 +52,12 @@ namespace LagoVista.IoT.Web.Common.Controllers
         public async Task<InvokeResult> GetPublicEntityGraph(string id)
         {
             return await _storageUtils.SetEntityPublicAsync(id, OrgEntityHeader, UserEntityHeader);
+        }
+
+        [HttpGet("/api/entity/{id}/form")]
+        public async Task<JObject> GetEntityForm(string id)
+        {
+            return await _entityDetailResponseFactory.GetFormDetailResponseAsync(id, OrgEntityHeader, UserEntityHeader);
         }
 
         [HttpGet("/api/entities/{entitytype}")]
