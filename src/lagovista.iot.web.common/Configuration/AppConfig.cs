@@ -21,6 +21,7 @@ namespace LagoVista.IoT.Web.Common.Configuration
             SystemOwnerOrg = new Core.Models.EntityHeader()
             {
                 Id = systemOwnerSection.Require("Id"),
+                Key = systemOwnerSection.Require("Key"),
                 Text = systemOwnerSection.Require("Text")
             };
 
