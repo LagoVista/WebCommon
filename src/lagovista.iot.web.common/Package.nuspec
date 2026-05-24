@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>LagoVista.IoT.Web.Common</id>
-    <version>3.0.3231.0456</version>
+    <version>3.0.3294.0648</version>
     <authors>Software Logistics, LLC</authors>
     <owners>Software Logistics, LLC</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -12,13 +12,15 @@
     <copyright>Copyright Software Logistics - 2026</copyright>
     <tags>IoT</tags>
     <icon>LagoVistaIcon.png</icon>
-    <releaseNotes>Build Date: 3/22/2026 8:56:35 AM UTC</releaseNotes>
+    <releaseNotes>Build Date: 5/24/2026 10:48:58 AM UTC</releaseNotes>
     <repository url="https://www.github.com/lagovista" type="git" branch="master"></repository>
     <dependencies>
       <group targetFramework="net9.0">
-        <dependency id="LagoVista.UserAdmin" version="3.0.3231.0456" />
-        <dependency id="LagoVista.CloudStorage" version="3.0.3231.0456" />
-        <dependency id="LagoVista.AspNetCore.Identity" version="3.0.3231.0456" />
+        <dependency id="KubernetesClient" version="19.0.2" />
+        <dependency id="LagoVista.UserAdmin" version="3.0.3294.0648" />
+        <dependency id="LagoVista.Core.Configuration" version="3.0.3294.0648" />
+        <dependency id="LagoVista.CloudStorage" version="3.0.3294.0648" />
+        <dependency id="LagoVista.AspNetCore.Identity" version="3.0.3294.0648" />
         <dependency id="prometheus-net.AspNetCore" version="8.2.1" />
       </group>
     </dependencies>
