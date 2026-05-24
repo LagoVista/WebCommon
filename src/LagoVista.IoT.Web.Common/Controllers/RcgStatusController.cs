@@ -41,6 +41,11 @@ namespace LagoVista.IoT.Web.Common.Controllers
                 return InvokeResult<List<RemoteControlConnectionSummary>>.FromInvokeResult(result.ToInvokeResult());
             }
 
+            if (result.Result == null)
+            {
+                return InvokeResult<List<RemoteControlConnectionSummary>>.FromError("Remote Control Gateway diagnostics response did not include a result.");
+            }
+
             return InvokeResult<List<RemoteControlConnectionSummary>>.Create(result.Result.Connections);
         }
 
