@@ -9,6 +9,7 @@ using LagoVista.IoT.Web.Common.Managers;
 using LagoVista.IoT.Web.Common.Services;
 using LagoVista.IoT.Web.Common.Utils;
 using LagoVista.UserAdmin.Interfaces;
+using LagoVista.Web.Common.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -25,6 +26,7 @@ namespace LagoVista.IoT.Web.Common
             services.AddTransient<IMetricsManager, Managers.MetricsManager>();
             services.AddTransient<IMetricsRepo, Repos.MetricsRepos>();
             services.AddTransient<ICacheAborter, CacheAborter>();
+            services.AddTransient<ISignedRequestHttpValidator, SignedRequestHttpValidator>();
             services.AddTransient<IEntryIntentService, EntryIntentService>();
             services.AddTransient<IMetricsBySessionRepo, Repos.MetricsBySessionRepo>();
 
