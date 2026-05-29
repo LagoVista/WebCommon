@@ -1,4 +1,5 @@
 using LagoVista.Core.Security;
+using LagoVista.IoT.Logging.Loggers;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -10,10 +11,12 @@ namespace LagoVista.Web.Common.Security
     public class SignedRequestHttpValidator : ISignedRequestHttpValidator
     {
         private readonly ISignedRequestValidatorService _validatorService;
+        private readonly IAdminLogger _adminLogger;
 
-        public SignedRequestHttpValidator(ISignedRequestValidatorService validatorService)
+        public SignedRequestHttpValidator(ISignedRequestValidatorService validatorService, IAdminLogger adminLogger)
         {
             _validatorService = validatorService ?? throw new ArgumentNullException(nameof(validatorService));
+            _adminLogger = adminLogger ?? throw new ArgumentNullException(nameof(adminLogger));
         }
 
         public SignedRequestValidationResult ValidateRuntimeInstanceV1(HttpRequest request, string key1, string key2)
@@ -52,6 +55,8 @@ namespace LagoVista.Web.Common.Security
         public Task<SignedRequestValidationResult> ValidateServiceHttpV1Async(HttpRequest request, CancellationToken cancellationToken = default)
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
+
+            _adminLogger.Trace($"{this.Tag()} - Validating signed request for ServiceHttpV1 profile. Method: {request.Method}, Path: {request.Path}");
 
             return _validatorService.ValidateServiceHttpV1Async(new SignedRequestValidationContext
             {

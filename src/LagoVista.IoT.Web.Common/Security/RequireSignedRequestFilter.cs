@@ -1,4 +1,5 @@
 using LagoVista.Core.Security;
+using LagoVista.IoT.Logging.Loggers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
@@ -10,11 +11,13 @@ namespace LagoVista.Web.Common.Security
     {
         private readonly ISignedRequestHttpValidator _validator;
         private readonly SignedRequestCanonicalProfile _profile;
+        private readonly IAdminLogger _logger;
 
-        public RequireSignedRequestFilter(ISignedRequestHttpValidator validator, SignedRequestCanonicalProfile profile)
+        public RequireSignedRequestFilter(ISignedRequestHttpValidator validator, IAdminLogger adminLogger, SignedRequestCanonicalProfile profile = SignedRequestCanonicalProfile.ServiceHttpV1)
         {
             _validator = validator ?? throw new ArgumentNullException(nameof(validator));
             _profile = profile;
+            _logger = adminLogger ?? throw new ArgumentNullException( nameof(adminLogger));
         }
 
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
@@ -22,6 +25,8 @@ namespace LagoVista.Web.Common.Security
             if (context == null) throw new ArgumentNullException(nameof(context));
 
             SignedRequestValidationResult result;
+
+            _logger.Trace($"{this.Tag()} - Profile {_profile} - {context.HttpContext.Request.Path}");
 
             switch (_profile)
             {
