@@ -27,6 +27,12 @@ namespace LagoVista.IoT.Web.Common.Controllers
             return DetailResponse<Core.Models.Schedule>.Create();
         }
 
+        [HttpGet("/api/core/ownershippoint/factory")]
+        public DetailResponse<Core.Models.EntityOwnershipPoint> CreateOwnershipPoint()
+        {
+            return DetailResponse<Core.Models.EntityOwnershipPoint>.Create();
+        }
+
         [HttpGet("/api/core/cache/clear/{key}")]
         public Task RemoveKey(string key)
         {
