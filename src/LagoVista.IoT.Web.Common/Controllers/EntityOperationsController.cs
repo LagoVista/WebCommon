@@ -3,8 +3,10 @@
 // IndexVersion: 2
 // --- END CODE INDEX META ---
 using LagoVista.CloudStorage.Interfaces;
+using LagoVista.CloudStorage.Models;
 using LagoVista.Core.Interfaces;
 using LagoVista.Core.Models;
+using LagoVista.Core.Models.UIMetaData;
 using LagoVista.Core.Validation;
 using LagoVista.IoT.Logging.Loggers;
 using LagoVista.IoT.Web.Common.Attributes;
@@ -26,12 +28,14 @@ namespace LagoVista.IoT.Web.Common.Controllers
         private readonly IStorageUtils _storageUtils;
         private readonly IEntityUtilsRepository _entityUtils; 
         private readonly IEntityDetailResponseFactory _entityDetailResponseFactory;
+        private readonly IEntityListItemManager _entityListItemManager;
 
-        public EntityOperationsController(IStorageUtils storageUtils, IEntityUtilsRepository entityUtils, IEntityDetailResponseFactory entityDetailResponseFactory, UserManager<AppUser> userManager, IAdminLogger logger) : base(userManager, logger)
+        public EntityOperationsController(IStorageUtils storageUtils, IEntityUtilsRepository entityUtils, IEntityDetailResponseFactory entityDetailResponseFactory, IEntityListItemManager entityListItemManager, UserManager<AppUser> userManager, IAdminLogger logger) : base(userManager, logger)
         {
             _storageUtils = storageUtils ?? throw new ArgumentNullException(nameof(storageUtils));
             _entityUtils = entityUtils ?? throw new ArgumentNullException(nameof(entityUtils));
             _entityDetailResponseFactory = entityDetailResponseFactory ?? throw new ArgumentNullException(nameof(entityDetailResponseFactory));
+            _entityListItemManager = entityListItemManager ?? throw new ArgumentNullException(nameof(entityListItemManager));
         }
 
         [HttpPut("/api/entity/{entityid}/rate/{rating}")]
@@ -90,6 +94,19 @@ namespace LagoVista.IoT.Web.Common.Controllers
         public Task<InvokeResult> SetEntityCategory(string entityid, [FromBody] EntityHeader category)
         {
             return _storageUtils.SetCategoryAsync(entityid, category, OrgEntityHeader, UserEntityHeader);
+        }
+
+        [HttpGet("/api/entity/{entitytype}/listiems")]
+        public Task<ListResponse<EntityListItem>> GetEntityListItems(string entitytype)
+        {
+            return _entityListItemManager.GetListItemsAsync(entitytype, OrgEntityHeader, UserEntityHeader, GetListRequestFromHeader());
+        }
+
+
+        [HttpGet("/api/entity/{entitytype}/entityheaders")]
+        public Task<ListResponse<EntityHeader>> GetEntityHeaders(string entitytype)
+        {
+            return _entityListItemManager.GetEntityHeadersAsync(entitytype, OrgEntityHeader, UserEntityHeader, GetListRequestFromHeader());
         }
     }
 }
