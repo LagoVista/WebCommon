@@ -2,6 +2,7 @@
 // ContentHash: bf8326e5094cf825965545e72f8957427035b8ab9cf3b9323a11624812efb581
 // IndexVersion: 2
 // --- END CODE INDEX META ---
+using LagoVista.AspNetCore.Identity.Authorization;
 using LagoVista.AspNetCore.Identity.Managers;
 using LagoVista.Core;
 using LagoVista.Core.Validation;
@@ -30,6 +31,13 @@ namespace LagoVista.IoT.Web.Common.Attributes
 
             if (context.HttpContext.User != null && context.HttpContext.User.Identity.IsAuthenticated)
             {
+                var identityStage = context.HttpContext.User.FindFirst(ClaimsFactory.IdentityStage)?.Value;
+                var allowsProvisional = context.Filters.OfType<AllowProvisionalIdentityAttribute>().Any();
+                if (String.Equals(identityStage, ClaimsFactory.ProvisionalIdentityStage, StringComparison.Ordinal) && allowsProvisional)
+                {
+                    return;
+                }
+
                 /* These three methods can be called without having the user be verified and have an org created */
                 if (context.HttpContext.Request.Path.StartsWithSegments(new PathString("/Account/Verify")) ||
                     context.HttpContext.Request.Path.StartsWithSegments(new PathString("/Account/CreateNewOrg")) ||
