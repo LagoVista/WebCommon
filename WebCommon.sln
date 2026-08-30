@@ -10,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LagoVista.IoT.Web.Common", "src\LagoVista.IoT.Web.Common\LagoVista.IoT.Web.Common.csproj", "{3E7F0C75-AD38-4B90-AA7F-A2784DF36C5B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LagoVista.IoT.Web.Common", "src\LagoVista.IoT.Web.Common\Lagovista.IoT.Web.Common.csproj", "{3E7F0C75-AD38-4B90-AA7F-A2784DF36C5B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{3EEEE49B-0643-405B-83C8-1370986A438D}"
 EndProject
