@@ -1,31 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package>
   <metadata>
-    <id>LagoVista.Net.LetsEncrypt</id>
+    <id>LagoVista.IoT.Web.Common</id>
     <version>6.0.0</version>
     <authors>Software Logistics, LLC</authors>
     <owners>Software Logistics, LLC</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <projectUrl>https://www.nuviot.com</projectUrl>
     <iconUrl>http://bytemaster.blob.core.windows.net/icons/LagoVistaIcon.png</iconUrl>
-    <description>Provides Middleware and services to request and store certificates from the Let's Encrypt service for ASP.NET Core applications</description>
+    <description>Common Features and Functionality for building WebApps against the LagoVista Devices, IoT and Home Automation Framework</description>
     <copyright>Copyright Software Logistics - 2026</copyright>
     <tags>IoT</tags>
     <icon>LagoVistaIcon.png</icon>
     <releaseNotes>Build Date: 5/24/2026 10:48:58 AM UTC</releaseNotes>
     <repository url="https://www.github.com/lagovista" type="git" branch="master"></repository>
     <dependencies>
-      <group targetFramework="netstandard2.1">
+      <group targetFramework="net9.0">
+        <dependency id="KubernetesClient" version="19.0.2" />
+        <dependency id="LagoVista.UserAdmin" version="3.0.3294.0648" />
+        <dependency id="LagoVista.Core.Configuration" version="3.0.3294.0648" />
         <dependency id="LagoVista.CloudStorage" version="3.0.3294.0648" />
-        <dependency id="Certes" version="3.0.4" />
-        <dependency id="Microsoft.AspNetCore" version="2.3.9" />
-        <dependency id="Portable.BouncyCastle" version="1.9.0" />
+        <dependency id="LagoVista.AspNetCore.Identity" version="3.0.3294.0648" />
+        <dependency id="prometheus-net.AspNetCore" version="8.2.1" />
       </group>
     </dependencies>
   </metadata>
   <files>
     <file src="LagoVistaIcon.png" target="LagoVistaIcon.png" />
-    <file src="bin/Release/netstandard2.1/LagoVista.Net.LetsEncrypt.dll" target="lib/netstandard2.1/LagoVista.Net.LetsEncrypt.dll" />
-    <file src="bin/Release/netstandard2.1/LagoVista.Net.LetsEncrypt.pdb" target="lib/netstandard2.1/LagoVista.Net.LetsEncrypt.pdb" />
+    <file src="bin/Release/net9.0/LagoVista.IoT.Web.Common.dll" target="lib/net9.0/LagoVista.IoT.Web.Common.dll" />
+    <file src="bin/Release/net9.0/LagoVista.IoT.Web.Common.pdb" target="lib/net9.0/LagoVista.IoT.Web.Common.pdb" />
   </files>
 </package>

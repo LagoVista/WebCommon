@@ -7,13 +7,13 @@
     <OutputType>Library</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="KubernetesClient" Version="19.0.2" />
-    <PackageReference Include="LagoVista.UserAdmin" Version="3.0.3294.0648" />
-    <PackageReference Include="LagoVista.Core.Configuration" Version="3.0.3294.0648" />
-    <PackageReference Include="LagoVista.CloudStorage" Version="3.0.3294.0648" />
-    <PackageReference Include="LagoVista.Core.Rcg.Client" Version="3.0.3294.0648" />
-    <PackageReference Include="LagoVista.AspNetCore.Identity" Version="3.0.3294.0648" />
-    <PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1" />
+    <PackageReference Include="KubernetesClient" />
+    <PackageReference Include="LagoVista.UserAdmin" />
+    <PackageReference Include="LagoVista.Core.Configuration" />
+    <PackageReference Include="LagoVista.CloudStorage" />
+    <PackageReference Include="LagoVista.Core.Rcg.Client" />
+    <PackageReference Include="LagoVista.AspNetCore.Identity" />
+    <PackageReference Include="prometheus-net.AspNetCore" />
   </ItemGroup>
   <ItemGroup>
     <None Update="T4ResourceGenerator.tt">

@@ -1,8 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <package>
   <metadata>
     <id>LagoVista.IoT.Logging.Rest</id>
-    <version>3.0.3294.0648</version>
+    <version>6.0.0</version>
     <authors>Software Logistics, LLC</authors>
     <owners>Software Logistics, LLC</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -16,13 +16,13 @@
     <repository url="https://www.github.com/lagovista" type="git" branch="master"></repository>
     <dependencies>
       <group targetFramework="net9.0">
-        <dependency id="LagoVista.IoT.Web.Common" version="3.0.3294.0648" />
+        <dependency id="LagoVista.IoT.Web.Common" version="6.0.0" />
       </group>
     </dependencies>
   </metadata>
   <files>
     <file src="LagoVistaIcon.png" target="LagoVistaIcon.png" />
-    <file src="bin\release\net9.0\LagoVista.IoT.Logging.Rest.dll" target="lib\net9.0\LagoVista.IoT.Logging.Rest.dll" />
-    <file src="bin\release\net9.0\LagoVista.IoT.Logging.Rest.pdb" target="lib\net9.0\LagoVista.IoT.Logging.Rest.pdb" />
+    <file src="bin/Release/net9.0/LagoVista.IoT.Logging.Rest.dll" target="lib/net9.0/LagoVista.IoT.Logging.Rest.dll" />
+    <file src="bin/Release/net9.0/LagoVista.IoT.Logging.Rest.pdb" target="lib/net9.0/LagoVista.IoT.Logging.Rest.pdb" />
   </files>
 </package>
