@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>LagoVista.IoT.Web.Common</id>
-    <version>6.0.1</version>
+    <version>6.0.2</version>
     <authors>Software Logistics, LLC</authors>
     <owners>Software Logistics, LLC</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -17,11 +17,11 @@
     <dependencies>
       <group targetFramework="net9.0">
         <dependency id="KubernetesClient" version="19.0.2" />
-        <dependency id="LagoVista.AspNetCore.Identity" version="6.0.1" />
-        <dependency id="LagoVista.CloudStorage" version="6.0.1" />
-        <dependency id="LagoVista.Core.Configuration" version="6.0.10" />
-        <dependency id="LagoVista.Core.Rcg.Client" version="6.0.10" />
-        <dependency id="LagoVista.UserAdmin" version="6.0.1" />
+        <dependency id="LagoVista.AspNetCore.Identity" version="6.0.2" />
+        <dependency id="LagoVista.CloudStorage" version="6.0.3" />
+        <dependency id="LagoVista.Core.Configuration" version="6.0.11" />
+        <dependency id="LagoVista.Core.Rcg.Client" version="6.0.11" />
+        <dependency id="LagoVista.UserAdmin" version="6.0.2" />
         <dependency id="prometheus-net.AspNetCore" version="8.2.1" />
       </group>
     </dependencies>
