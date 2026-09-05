@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>LagoVista.Net.LetsEncrypt</id>
-    <version>7.0.2</version>
+    <version>7.0.3</version>
     <authors>Software Logistics, LLC</authors>
     <owners>Software Logistics, LLC</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -17,7 +17,7 @@
     <dependencies>
       <group targetFramework="netstandard2.1">
         <dependency id="Certes" version="3.0.4" />
-        <dependency id="LagoVista.CloudStorage" version="7.0.3" />
+        <dependency id="LagoVista.CloudStorage" version="7.0.5" />
         <dependency id="Microsoft.AspNetCore" version="2.3.9" />
         <dependency id="Portable.BouncyCastle" version="1.9.0" />
       </group>
