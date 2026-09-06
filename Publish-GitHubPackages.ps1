@@ -40,6 +40,12 @@ $packageSource = 'https://nuget.pkg.github.com/nuviot/index.json'
 & (Join-Path $repoRoot 'Build-GitHubPackages.ps1') -Version $Version
 if ($LASTEXITCODE -ne 0) { throw "Build-GitHubPackages.ps1 failed with exit code $LASTEXITCODE." }
 
+# Build-GitHubPackages.ps1 stamps Package.nuspec files only to create the disposable
+# package artifacts. Restore those temporary source edits before the build server's
+# clean-workspace assertion.
+git restore --source=HEAD -- ':(glob)src/**/Package.nuspec'
+if ($LASTEXITCODE -ne 0) { throw "Could not restore temporary Package.nuspec changes (exit code $LASTEXITCODE)." }
+
 if (-not (Test-Path $catalogPath)) { throw "Package catalog not found: $catalogPath" }
 $catalog = Get-Content $catalogPath -Raw | ConvertFrom-Json
 if ($null -eq $catalog.packages -or @($catalog.packages).Count -eq 0) { throw 'Package catalog contains no packages.' }
