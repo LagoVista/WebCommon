@@ -17,8 +17,10 @@ namespace LagoVista.IoT.Web.Common.Controllers
                 throw new ArgumentException("Entity type is required.", nameof(entityType));
 
             var summary = GetUniqueEntitySummary(entityType);
-            var description = GetEntityDescription(summary.ClassName);
+            if (summary == null)
+                return null;
 
+            var description = GetEntityDescription(summary.ClassName);
             return EntityUiBootstrap.Create(summary.ShortClassName, description);
         }
 
@@ -42,8 +44,14 @@ namespace LagoVista.IoT.Web.Common.Controllers
 
             var match = matches.Single();
             var uniqueSummary = GetUniqueEntitySummary(match.EntityType);
+            if (uniqueSummary == null)
+                return null;
+
             var description = GetEntityDescription(uniqueSummary.ClassName);
             var result = EntityUiBootstrap.Create(uniqueSummary.ShortClassName, description);
+            if (result == null)
+                return null;
+
             result.Mode = match.Mode;
             result.Id = match.Id;
 
