@@ -294,6 +294,32 @@ namespace LagoVista.IoT.Web.Common.Controllers
                 listRequest.CategoryKey = Request.Headers["x-categorykey"];
             }
 
+            if (Request.Headers.ContainsKey("x-statuskey"))
+            {
+                listRequest.StatusKey = Request.Headers["x-statuskey"];
+            }
+
+            if (Request.Headers.ContainsKey("x-labelkey"))
+            {
+                listRequest.LabelKey = Request.Headers["x-labelkey"];
+            }
+
+            if (Request.Headers.ContainsKey("x-searchtext"))
+            {
+                listRequest.SearchText = Request.Headers["x-searchtext"];
+            }
+
+            if (Request.Headers.ContainsKey("x-sortfield"))
+            {
+                listRequest.SortField = Request.Headers["x-sortfield"];
+            }
+
+            if (Request.Headers.ContainsKey("x-sortdescending") &&
+                Boolean.TryParse(Request.Headers["x-sortdescending"], out var sortDescending))
+            {
+                listRequest.SortDescending = sortDescending;
+            }
+
             if (Request.Headers.ContainsKey("x-nextpartitionkey"))
             {
                 listRequest.NextPartitionKey = Request.Headers["x-nextpartitionkey"];
