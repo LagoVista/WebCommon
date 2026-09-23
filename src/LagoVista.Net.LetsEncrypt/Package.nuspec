@@ -17,7 +17,7 @@
     <dependencies>
       <group targetFramework="netstandard2.1">
         <dependency id="Certes" version="3.0.4" />
-        <dependency id="LagoVista.CloudStorage" version="7.0.46" />
+        <dependency id="LagoVista.CloudStorage" version="7.0.49" />
         <dependency id="Microsoft.AspNetCore" version="2.3.9" />
         <dependency id="Portable.BouncyCastle" version="1.9.0" />
       </group>
