@@ -1,7 +1,7 @@
 using LagoVista.CloudStorage.Interfaces;
 using LagoVista.CloudStorage.Models;
-using LagoVista.Core.Authentication;
-using LagoVista.Core.Models;
+using LagoVista.Core.Validation;
+using LagoVista.IoT.Web.Common.Attributes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
