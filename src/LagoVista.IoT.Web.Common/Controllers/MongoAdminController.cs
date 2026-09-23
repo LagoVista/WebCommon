@@ -71,6 +71,12 @@ namespace LagoVista.IoT.Web.Common.Controllers
 
             try
             {
+                var listRequest = GetListRequestFromHeader();
+                request.PageIndex = listRequest.PageIndex;
+                request.PageSize = listRequest.PageSize;
+                request.NextPartitionKey = listRequest.NextPartitionKey;
+                request.NextRowKey = listRequest.NextRowKey;
+
                 return await _mongoAdminRepo.QueryAsync(database, collection, request, ct);
             }
             catch (Exception ex)
