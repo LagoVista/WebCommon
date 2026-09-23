@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <package>
   <metadata>
     <id>LagoVista.IoT.Web.Common</id>
@@ -17,11 +17,11 @@
     <dependencies>
       <group targetFramework="net9.0">
         <dependency id="KubernetesClient" version="19.0.2" />
-        <dependency id="LagoVista.AspNetCore.Identity" version="7.0.4" />
-        <dependency id="LagoVista.CloudStorage" version="7.0.5" />
-        <dependency id="LagoVista.Core.Configuration" version="7.0.10" />
-        <dependency id="LagoVista.Core.Rcg.Client" version="7.0.10" />
-        <dependency id="LagoVista.UserAdmin" version="7.0.4" />
+        <dependency id="LagoVista.AspNetCore.Identity" version="7.0.10" />
+        <dependency id="LagoVista.CloudStorage" version="7.0.43" />
+        <dependency id="LagoVista.Core.Configuration" version="7.0.12" />
+        <dependency id="LagoVista.Core.Rcg.Client" version="7.0.12" />
+        <dependency id="LagoVista.UserAdmin" version="7.0.10" />
         <dependency id="prometheus-net.AspNetCore" version="8.2.1" />
       </group>
     </dependencies>
