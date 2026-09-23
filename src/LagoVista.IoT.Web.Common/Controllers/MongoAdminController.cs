@@ -99,6 +99,47 @@ namespace LagoVista.IoT.Web.Common.Controllers
             }
         }
 
+        [HttpPost("{database}/{collection}/document")]
+        public async Task<InvokeResult<string>> InsertDocumentAsync(
+            [FromRoute] string database,
+            [FromRoute] string collection,
+            [FromBody] MongoDocumentWriteRequest request,
+            CancellationToken ct = default)
+        {
+            if (request == null || String.IsNullOrWhiteSpace(request.Json))
+                return InvokeResult<string>.FromError("json is required.");
+
+            try
+            {
+                var id = await _mongoAdminRepo.InsertDocumentAsync(database, collection, request.Json, ct);
+                return InvokeResult<string>.Create(id);
+            }
+            catch (Exception ex)
+            {
+                return InvokeResult<string>.FromError($"Mongo insert failed: {ex.Message}");
+            }
+        }
+
+        [HttpDelete("{database}/{collection}/{id}")]
+        public async Task<InvokeResult> DeleteDocumentAsync(
+            [FromRoute] string database,
+            [FromRoute] string collection,
+            [FromRoute] string id,
+            CancellationToken ct = default)
+        {
+            try
+            {
+                var deleted = await _mongoAdminRepo.DeleteDocumentAsync(database, collection, id, ct);
+                return deleted
+                    ? InvokeResult.Success
+                    : InvokeResult.FromError("Document not found.");
+            }
+            catch (Exception ex)
+            {
+                return InvokeResult.FromError($"Mongo delete failed: {ex.Message}");
+            }
+        }
+
         [HttpPost("{database}/{collection}/patch")]
         public async Task<InvokeResult<MongoPatchResult>> PatchManyAsync(
             [FromRoute] string database,
