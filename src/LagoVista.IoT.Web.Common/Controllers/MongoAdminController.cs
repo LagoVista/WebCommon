@@ -1,5 +1,6 @@
 using LagoVista.CloudStorage.Interfaces;
 using LagoVista.CloudStorage.Models;
+using LagoVista.Core.Models.UIMetaData;
 using LagoVista.Core.Validation;
 using LagoVista.IoT.Logging.Loggers;
 using LagoVista.IoT.Web.Common.Attributes;
@@ -8,7 +9,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -32,53 +32,50 @@ namespace LagoVista.IoT.Web.Common.Controllers
         }
 
         [HttpGet("databases")]
-        public async Task<InvokeResult<IReadOnlyList<string>>> GetDatabasesAsync(CancellationToken ct = default)
+        public async Task<ListResponse<MongoDatabaseInfo>> GetDatabasesAsync(CancellationToken ct = default)
         {
             try
             {
-                var databases = await _mongoAdminRepo.GetDatabasesAsync(ct);
-                return InvokeResult<IReadOnlyList<string>>.Create(databases);
+                return await _mongoAdminRepo.GetDatabasesAsync(GetListRequestFromHeader(), ct);
             }
             catch (Exception ex)
             {
-                return InvokeResult<IReadOnlyList<string>>.FromError($"Failed to load Mongo databases: {ex.Message}");
+                return ListResponse<MongoDatabaseInfo>.FromError($"Failed to load Mongo databases: {ex.Message}");
             }
         }
 
         [HttpGet("{database}/collections")]
-        public async Task<InvokeResult<IReadOnlyList<MongoCollectionInfo>>> GetCollectionsAsync(
+        public async Task<ListResponse<MongoCollectionInfo>> GetCollectionsAsync(
             [FromRoute] string database,
             CancellationToken ct = default)
         {
             try
             {
-                var collections = await _mongoAdminRepo.GetCollectionsAsync(database, ct);
-                return InvokeResult<IReadOnlyList<MongoCollectionInfo>>.Create(collections);
+                return await _mongoAdminRepo.GetCollectionsAsync(database, GetListRequestFromHeader(), ct);
             }
             catch (Exception ex)
             {
-                return InvokeResult<IReadOnlyList<MongoCollectionInfo>>.FromError($"Failed to load Mongo collections: {ex.Message}");
+                return ListResponse<MongoCollectionInfo>.FromError($"Failed to load Mongo collections: {ex.Message}");
             }
         }
 
         [HttpPost("{database}/{collection}/query")]
-        public async Task<InvokeResult<MongoQueryResult>> QueryAsync(
+        public async Task<ListResponse<MongoDocumentInfo>> QueryAsync(
             [FromRoute] string database,
             [FromRoute] string collection,
             [FromBody] MongoQueryRequest request,
             CancellationToken ct = default)
         {
             if (request == null)
-                return InvokeResult<MongoQueryResult>.FromError("Request body is required.");
+                return ListResponse<MongoDocumentInfo>.FromError("Request body is required.");
 
             try
             {
-                var result = await _mongoAdminRepo.QueryAsync(database, collection, request, ct);
-                return InvokeResult<MongoQueryResult>.Create(result);
+                return await _mongoAdminRepo.QueryAsync(database, collection, request, ct);
             }
             catch (Exception ex)
             {
-                return InvokeResult<MongoQueryResult>.FromError($"Mongo query failed: {ex.Message}");
+                return ListResponse<MongoDocumentInfo>.FromError($"Mongo query failed: {ex.Message}");
             }
         }
 
