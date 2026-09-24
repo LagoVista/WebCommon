@@ -1,9 +1,11 @@
 using LagoVista.CloudStorage.Interfaces;
 using LagoVista.CloudStorage.Models;
+using LagoVista.Core.Models;
 using LagoVista.Core.Models.UIMetaData;
 using LagoVista.Core.Validation;
 using LagoVista.IoT.Web.Common.Attributes;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,6 +23,14 @@ namespace LagoVista.IoT.Web.Common.Controllers
     [Route("api/service/sync/{organizationId}")]
     public class ServiceSyncController : ControllerBase
     {
+        private static readonly EntityHeader BuildServerActor = new EntityHeader
+        {
+            Id = "0000000000000000000000000000b001",
+            Key = "build-server",
+            Text = "Software Logistics Build Server",
+            EntityType = "ServicePrincipal"
+        };
+
         private readonly ISyncRepository _syncRepository;
 
         public ServiceSyncController(ISyncRepository syncRepository)
@@ -94,6 +104,56 @@ namespace LagoVista.IoT.Web.Common.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, InvokeResult<SyncJsonEnvelope>.FromError($"Failed to load item: {ex.Message}"));
+            }
+        }
+
+        /// <summary>
+        /// V1 write surface for Build Server configuration replication.
+        /// Deliberately restricted to Module until broader entity/reference semantics are defined.
+        /// </summary>
+        [HttpPost("module/upsert")]
+        public async Task<InvokeResult<SyncUpsertResult>> UpsertModuleAsync(
+            [FromRoute] string organizationId,
+            [FromBody] SyncUpsertRequest request,
+            CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(organizationId))
+                return InvokeResult<SyncUpsertResult>.FromError("organizationId is required.");
+
+            if (request == null || string.IsNullOrWhiteSpace(request.Json))
+                return InvokeResult<SyncUpsertResult>.FromError("json is required.");
+
+            JObject document;
+            try
+            {
+                document = JObject.Parse(request.Json);
+            }
+            catch (Exception ex)
+            {
+                return InvokeResult<SyncUpsertResult>.FromError($"Invalid JSON: {ex.Message}");
+            }
+
+            var entityType = document["EntityType"]?.Value<string>();
+            if (!string.Equals(entityType, "Module", StringComparison.Ordinal))
+                return InvokeResult<SyncUpsertResult>.FromError("Service sync V1 only permits EntityType 'Module'.");
+
+            try
+            {
+                var targetOrganization = await _syncRepository.GetEntityHeaderForRecordAsync(organizationId.Trim(), ct);
+                if (targetOrganization == null || !string.Equals(targetOrganization.Id, organizationId.Trim(), StringComparison.OrdinalIgnoreCase))
+                    return InvokeResult<SyncUpsertResult>.FromError($"Target organization '{organizationId}' was not found.");
+
+                var result = await _syncRepository.UpsertJsonAsync(
+                    request.Json,
+                    targetOrganization,
+                    BuildServerActor,
+                    ct);
+
+                return InvokeResult<SyncUpsertResult>.Create(result);
+            }
+            catch (Exception ex)
+            {
+                return InvokeResult<SyncUpsertResult>.FromError($"Module upsert failed: {ex.Message}");
             }
         }
     }
