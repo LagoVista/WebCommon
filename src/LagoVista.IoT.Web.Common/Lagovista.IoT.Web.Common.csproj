@@ -2,6 +2,7 @@
   <PropertyGroup>
     <VersionPrefix>1.2.164</VersionPrefix>
     <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>LagoVista.IoT.Web.Common</RootNamespace>
     <AssemblyVersion>1.2.164.0</AssemblyVersion>
     <FileVersion>1.2.164.0</FileVersion>
     <OutputType>Library</OutputType>
