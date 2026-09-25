@@ -5,6 +5,7 @@
 using LagoVista.Core.Models.UIMetaData;
 using LagoVista.IoT.Logging.Loggers;
 using LagoVista.IoT.Logging.Models;
+using LagoVista.IoT.Logging.Rest.Models;
 using LagoVista.IoT.Web.Common.Attributes;
 using LagoVista.IoT.Web.Common.Controllers;
 using LagoVista.UserAdmin.Models.Users;
@@ -98,5 +99,51 @@ namespace LagoVista.IoT.Logging.Rest.Services
             result.Title = "API Logs";
             return result;
         }
+        /// <summary>
+        /// Writes a log entry submitted by a client application.
+        /// </summary>
+        /// <param name="entry">Client log entry.</param>
+        /// <returns>Success when the entry has been accepted by the server logger.</returns>
+        [HttpPost("/api/sys/logging/client")]
+        public InvokeResult LogClient([FromBody] ClientLogEntry entry)
+        {
+            if (entry == null)
+                return InvokeResult.FromError("Log entry is required.");
+
+            if (string.IsNullOrWhiteSpace(entry.Message))
+                return InvokeResult.FromError("Message is required.");
+
+            var args = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("Source", "Client")
+            };
+
+            if (!string.IsNullOrWhiteSpace(entry.Application))
+                args.Add(new KeyValuePair<string, string>("Application", entry.Application));
+
+            if (!string.IsNullOrWhiteSpace(entry.Version))
+                args.Add(new KeyValuePair<string, string>("Version", entry.Version));
+
+            if (!string.IsNullOrWhiteSpace(entry.Route))
+                args.Add(new KeyValuePair<string, string>("Route", entry.Route));
+
+            if (!string.IsNullOrWhiteSpace(entry.RequestMethod))
+                args.Add(new KeyValuePair<string, string>("RequestMethod", entry.RequestMethod));
+
+            if (!string.IsNullOrWhiteSpace(entry.RequestUri))
+                args.Add(new KeyValuePair<string, string>("RequestUri", entry.RequestUri));
+
+            if (entry.StatusCode.HasValue)
+                args.Add(new KeyValuePair<string, string>("StatusCode", entry.StatusCode.Value.ToString()));
+
+            if (!string.IsNullOrWhiteSpace(entry.StackTrace))
+                args.Add(new KeyValuePair<string, string>("StackTrace", entry.StackTrace));
+
+            var tag = string.IsNullOrWhiteSpace(entry.Tag) ? "[Client]" : $"[Client] {entry.Tag}";
+            Logger.AddCustomEvent(entry.Level, tag, entry.Message, args.ToArray());
+
+            return InvokeResult.Success;
+        }
+
     }
 }
