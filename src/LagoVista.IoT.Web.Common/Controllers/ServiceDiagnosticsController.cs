@@ -29,7 +29,6 @@ namespace LagoVista.IoT.Web.Common.Controllers
         public async Task<ListResponse<ApplicationErrorSummary>> GetRecentErrorsAsync(
             [FromQuery] int take = 100,
             [FromQuery] string application = null,
-            [FromQuery] string environment = null,
             CancellationToken ct = default)
         {
             if (take <= 0) take = 100;
@@ -37,7 +36,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
 
             try
             {
-                var errors = await _errors.GetRecentErrorsAsync(take, application, environment, ct);
+                var errors = await _errors.GetRecentErrorsAsync(take, application, ct);
                 return ListResponse<ApplicationErrorSummary>.Create(errors);
             }
             catch (Exception ex)
