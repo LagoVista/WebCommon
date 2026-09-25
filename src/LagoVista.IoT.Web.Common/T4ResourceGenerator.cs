@@ -3,7 +3,7 @@
 using System.Globalization;
 using System.Reflection;
 
-namespace Lagovista.IoT.Web.Common.Resources
+namespace LagoVista.IoT.Web.Common.Resources
 {
     public class CommonResources
     {
@@ -15,7 +15,7 @@ namespace Lagovista.IoT.Web.Common.Resources
             get
             {
                 if (object.ReferenceEquals(_resourceManager, null))
-                    _resourceManager = new global::System.Resources.ResourceManager("Lagovista.IoT.Web.Common.Resources.CommonResources", typeof(CommonResources).GetTypeInfo().Assembly);
+                    _resourceManager = new global::System.Resources.ResourceManager("LagoVista.IoT.Web.Common.Resources.CommonResources", typeof(CommonResources).GetTypeInfo().Assembly);
                 return _resourceManager;
             }
         }
