@@ -18,7 +18,7 @@
       <group targetFramework="net9.0">
         <dependency id="KubernetesClient" version="19.0.2" />
         <dependency id="LagoVista.AspNetCore.Identity" version="7.0.10" />
-        <dependency id="LagoVista.CloudStorage" version="7.0.52-ws-c-42131479" />
+        <dependency id="LagoVista.CloudStorage" version="7.0.53-ws-c-013acbc8" />
         <dependency id="LagoVista.Core.Configuration" version="7.0.12" />
         <dependency id="LagoVista.Core.Rcg.Client" version="7.0.12" />
         <dependency id="LagoVista.UserAdmin" version="7.0.10" />
