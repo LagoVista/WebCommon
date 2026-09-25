@@ -199,7 +199,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
                 {
                     return new EntityHeader()
                     {
-                        Text = Resources.CommonResources.Common_None,
+                        Text = Lagovista.IoT.Web.Common.Resources.CommonResources.Common_None,
                         EntityType = typeof(Organization).Name,
                         Id = String.Empty
                     };
