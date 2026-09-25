@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
-using LagoVista.IoT.Web.Common.Resources;
+using Lagovista.IoT.Web.Common.Resources;
 
 namespace LagoVista.IoT.Web.Common.TagHelpers
 {
@@ -90,7 +90,7 @@ namespace LagoVista.IoT.Web.Common.TagHelpers
             {
 
                 htmlTagBuilder.Append(@"data-val-regex-pattern=""^[a-z0-9]{6,30}$"" ");
-                htmlTagBuilder.Append($@"data-val-regex=""{Resources.CommonResources.Validation_RegEx_Namespace}"" ");
+                htmlTagBuilder.Append($@"data-val-regex=""{CommonResources.Validation_RegEx_Namespace}"" ");
                 /*  var namespaceMessageProperty = attr.ResourceType.GetProperty(attr.NamespaceUniqueMessageResource, BindingFlags.Static | BindingFlags.Public);
                   if (namespaceMessageProperty != null)
                   {
@@ -113,7 +113,7 @@ namespace LagoVista.IoT.Web.Common.TagHelpers
                 }
                 else
                 {
-                    htmlTagBuilder.Append($@"data-val-required=""{Resources.CommonResources.Validation_Common_IsRequired.Replace("[FIELDNAME]", label)}"" data-val=""true"" ");
+                    htmlTagBuilder.Append($@"data-val-required=""{CommonResources.Validation_Common_IsRequired.Replace("[FIELDNAME]", label)}"" data-val=""true"" ");
                 }
             }
         }
@@ -127,7 +127,7 @@ namespace LagoVista.IoT.Web.Common.TagHelpers
                     break;
                 case FieldTypes.Email:
                     htmlTagBuilder.Append(@"type=""text"" ");
-                    var valMsg = Resources.CommonResources.Validation_Common_InvalidEmailAddress.Replace("[FIELDNAME]", label);
+                    var valMsg = CommonResources.Validation_Common_InvalidEmailAddress.Replace("[FIELDNAME]", label);
                     htmlTagBuilder.Append($@"data-val-email=""{valMsg}"" data-val=""true"" ");
                     break;
                 default:
