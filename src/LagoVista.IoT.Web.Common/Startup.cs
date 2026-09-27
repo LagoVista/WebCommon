@@ -27,6 +27,7 @@ namespace LagoVista.IoT.Web.Common
             services.AddTransient<IMetricsManager, Managers.MetricsManager>();
             services.AddTransient<IMetricsRepo, Repos.MetricsRepos>();
             services.AddTransient<ICacheAborter, CacheAborter>();
+            services.AddSingleton<IRuntimeSignedRequestSessionService, RuntimeSignedRequestSessionService>();
             services.AddTransient<ISignedRequestHttpValidator, SignedRequestHttpValidator>();
             services.AddTransient<IEntryIntentService, EntryIntentService>();
             services.AddTransient<IMetricsBySessionRepo, Repos.MetricsBySessionRepo>();
