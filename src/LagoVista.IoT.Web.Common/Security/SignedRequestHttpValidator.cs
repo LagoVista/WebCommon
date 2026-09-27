@@ -12,11 +12,13 @@ namespace LagoVista.Web.Common.Security
     {
         private readonly ISignedRequestValidatorService _validatorService;
         private readonly IAdminLogger _adminLogger;
+        private readonly IRuntimeSignedRequestSessionService _runtimeSessionService;
 
-        public SignedRequestHttpValidator(ISignedRequestValidatorService validatorService, IAdminLogger adminLogger)
+        public SignedRequestHttpValidator(ISignedRequestValidatorService validatorService, IAdminLogger adminLogger, IRuntimeSignedRequestSessionService runtimeSessionService)
         {
             _validatorService = validatorService ?? throw new ArgumentNullException(nameof(validatorService));
             _adminLogger = adminLogger ?? throw new ArgumentNullException(nameof(adminLogger));
+            _runtimeSessionService = runtimeSessionService ?? throw new ArgumentNullException(nameof(runtimeSessionService));
         }
 
         public SignedRequestValidationResult ValidateRuntimeInstanceV1(HttpRequest request, string key1, string key2)
@@ -50,6 +52,16 @@ namespace LagoVista.Web.Common.Security
                 ValidateTimestamp = true,
                 MaxClockSkew = TimeSpan.FromMinutes(5)
             });
+        }
+
+        public RuntimeSignedRequestSessionValidationResult TryValidateRuntimeSession(HttpRequest request)
+        {
+            return _runtimeSessionService.TryValidate(request);
+        }
+
+        public void IssueRuntimeSession(HttpRequest request, HttpResponse response, string hostId, TimeSpan ttl)
+        {
+            _runtimeSessionService.Issue(request, response, hostId, ttl);
         }
 
         public Task<SignedRequestValidationResult> ValidateServiceHttpV1Async(HttpRequest request, CancellationToken cancellationToken = default)
