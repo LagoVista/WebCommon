@@ -7,6 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -41,6 +42,59 @@ namespace LagoVista.IoT.Web.Common.Tests.BuildDynamics
             Assert.AreEqual("build-dynamics-platform", inserted.WorkstreamId);
             Assert.AreEqual(inserted.Id.Value, updated.Id.Value);
             Assert.AreEqual(32, inserted.Id.Value.Length);
+            app.VerifyAll();
+        }
+
+        [TestMethod]
+        public async Task GetWorkstream_UsesVersionedReadWithStableScopedIdentity()
+        {
+            var app = new Mock<IApplicationDataStore>(MockBehavior.Strict);
+            var scratch = new Mock<IScratchStore>(MockBehavior.Loose);
+            var activity = new Mock<IActivityRecordStore<WorkstreamActivityRecord>>(MockBehavior.Loose);
+            var scope = EntityHeader.Create("ORG123", "Org");
+            StorageKey captured = null;
+
+            app.Setup(x => x.GetVersionedAsync<WorkstreamAuthorityRecord>(It.IsAny<StorageKey>(), It.IsAny<CancellationToken>()))
+               .Callback<StorageKey, CancellationToken>((key, _) => captured = key)
+               .ReturnsAsync((VersionedApplicationDataRecord<WorkstreamAuthorityRecord>)null);
+
+            var repo = new WorkstreamAuthorityRepository(app.Object, scratch.Object, activity.Object);
+            await repo.GetWorkstreamAsync(scope, "build-dynamics-platform");
+
+            Assert.IsNotNull(captured);
+            Assert.AreEqual("ORG123", captured.Scope);
+            Assert.AreEqual(32, captured.Id.Length);
+            app.VerifyAll();
+        }
+
+        [TestMethod]
+        public async Task UpdateWorkstream_WhenStorageRejectsStaleVersion_ReturnsConflict()
+        {
+            var app = new Mock<IApplicationDataStore>(MockBehavior.Strict);
+            var scratch = new Mock<IScratchStore>(MockBehavior.Loose);
+            var activity = new Mock<IActivityRecordStore<WorkstreamActivityRecord>>(MockBehavior.Loose);
+            var scope = EntityHeader.Create("ORG123", "Org");
+            var staleVersion = CreateConcurrencyToken("stale-version");
+            var conflict = CreateMutationResult(ApplicationDataMutationStatus.Conflict);
+
+            app.Setup(x => x.UpdateIfVersionAsync(
+                    It.IsAny<WorkstreamAuthorityRecord>(),
+                    staleVersion,
+                    It.IsAny<CancellationToken>()))
+               .ReturnsAsync(conflict);
+
+            var repo = new WorkstreamAuthorityRepository(app.Object, scratch.Object, activity.Object);
+            var record = new WorkstreamAuthorityRecord
+            {
+                Organization = scope,
+                WorkstreamId = "build-dynamics-platform",
+                Name = "Build Dynamics"
+            };
+
+            var result = await repo.UpdateWorkstreamAsync(record, staleVersion);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(ApplicationDataMutationStatus.Conflict, result.Status);
             app.VerifyAll();
         }
 
@@ -85,6 +139,26 @@ namespace LagoVista.IoT.Web.Common.Tests.BuildDynamics
             Assert.AreEqual(end, captured.EndUtc);
             Assert.IsTrue(captured.Filters.Any(f => f.Field == "OrganizationId" && (string)f.Value == "SYSTEM"));
             Assert.IsTrue(captured.Filters.Any(f => f.Field == "WorkstreamId" && (string)f.Value == "ws-1"));
+        }
+
+        private static ApplicationDataConcurrencyToken CreateConcurrencyToken(string value)
+        {
+            return (ApplicationDataConcurrencyToken)Activator.CreateInstance(
+                typeof(ApplicationDataConcurrencyToken),
+                BindingFlags.Instance | BindingFlags.NonPublic,
+                binder: null,
+                args: new object[] { value },
+                culture: null);
+        }
+
+        private static ApplicationDataMutationResult CreateMutationResult(ApplicationDataMutationStatus status)
+        {
+            return (ApplicationDataMutationResult)Activator.CreateInstance(
+                typeof(ApplicationDataMutationResult),
+                BindingFlags.Instance | BindingFlags.NonPublic,
+                binder: null,
+                args: new object[] { status, null },
+                culture: null);
         }
 
         [TestMethod]
