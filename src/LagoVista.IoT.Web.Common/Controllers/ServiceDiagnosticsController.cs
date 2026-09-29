@@ -66,5 +66,37 @@ namespace LagoVista.IoT.Web.Common.Controllers
                 return StatusCode(500, InvokeResult<LogRecord>.FromError($"Failed to load application error: {ex.Message}"));
             }
         }
+
+        /// <summary>
+        /// Accepts one signed service-to-service diagnostic error and writes it to the
+        /// same bounded local diagnostic store used by server-side application errors.
+        /// </summary>
+        [HttpPost]
+        public async Task<ActionResult<InvokeResult<LogRecord>>> WriteErrorAsync(
+            [FromBody] LogRecord error,
+            CancellationToken ct = default)
+        {
+            if (error == null)
+                return BadRequest(InvokeResult<LogRecord>.FromError("Error record is required."));
+
+            if (String.IsNullOrWhiteSpace(error.Message))
+                return BadRequest(InvokeResult<LogRecord>.FromError("Error message is required."));
+
+            try
+            {
+                if (String.IsNullOrWhiteSpace(error.LogLevel))
+                    error.LogLevel = "Error";
+
+                if (error.TimeStamp == default)
+                    error.TimeStamp = DateTime.UtcNow;
+
+                await _errors.WriteErrorAsync(error, ct);
+                return Ok(InvokeResult<LogRecord>.Create(error));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, InvokeResult<LogRecord>.FromError($"Failed to persist application error: {ex.Message}"));
+            }
+        }
     }
 }
