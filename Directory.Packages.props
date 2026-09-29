@@ -1,4 +1,4 @@
-<Project>
+﻿<?xml version="1.0" encoding="utf-8"?><Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
@@ -6,7 +6,7 @@
     <PackageVersion Include="Certes" Version="3.0.4" />
     <PackageVersion Include="KubernetesClient" Version="19.0.2" />
     <PackageVersion Include="LagoVista.AspNetCore.Identity" Version="7.0.12" />
-    <PackageVersion Include="LagoVista.CloudStorage" Version="7.0.59" />
+    <PackageVersion Include="LagoVista.CloudStorage" Version="7.0.72-ws.build-dynami.d5d66fcc.1" />
     <PackageVersion Include="LagoVista.Core.Configuration" Version="7.0.14" />
     <PackageVersion Include="LagoVista.Core.Rcg.Client" Version="7.0.14" />
     <PackageVersion Include="LagoVista.UserAdmin" Version="7.0.12" />
