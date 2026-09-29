@@ -168,6 +168,62 @@ namespace LagoVista.IoT.Web.Common.Tests.BuildDynamics
         }
 
         [TestMethod]
+        public async Task CompletionSummary_RemainsReadableAfterDetailedHistoryExpires()
+        {
+            var app = new Mock<IApplicationDataStore>(MockBehavior.Strict);
+            var scope = EntityHeader.Create("ORG1", "Org");
+            WorkstreamCompletionSummaryRecord storedSummary = null;
+            var detailedHistoryAvailable = true;
+
+            app.Setup(x => x.GetVersionedAsync<WorkstreamCompletionSummaryRecord>(
+                    It.IsAny<StorageKey>(),
+                    It.IsAny<CancellationToken>()))
+               .ReturnsAsync(() => storedSummary == null ? null : CreateVersioned(storedSummary));
+
+            app.Setup(x => x.InsertAsync(
+                    It.IsAny<WorkstreamCompletionSummaryRecord>(),
+                    It.IsAny<CancellationToken>()))
+               .Callback<WorkstreamCompletionSummaryRecord, CancellationToken>((record, _) => storedSummary = record)
+               .Returns(Task.CompletedTask);
+
+            var repo = new AarCompletionRepository(app.Object);
+            var summary = new WorkstreamCompletionSummaryRecord
+            {
+                Organization = scope,
+                WorkstreamId = "build-dynamics-platform",
+                Objective = "Move build dynamics into platform authority.",
+                TaskOutcomes = { new CompletionTaskOutcome { TaskId = "T005", Outcome = "integration-ready" } },
+                AcceptedSourceIdentities = { "LagoVista/WebCommon@ecdda65" },
+                AcceptedArtifactIdentities = { "nuget:LagoVista.IoT.Web.Common@workspace" },
+                SignificantFindings = { "Completion truth outlives expiring detail." },
+                BuildSummary = "green",
+                TestSummary = "green",
+                AarConclusions = { "Retain summary before detail expires." },
+                UnresolvedIssues = { "none" },
+                WaivedIssues = { "expired raw history" },
+                DetailSummarizedThroughUtc = DateTime.UtcNow
+            };
+
+            await repo.EnsureCompletionSummaryAsync(summary);
+
+            detailedHistoryAvailable = false; // simulate raw activity/history TTL expiration or removal
+            Assert.IsFalse(detailedHistoryAvailable);
+
+            var retained = await repo.GetCompletionSummaryAsync(scope, "build-dynamics-platform");
+
+            Assert.IsNotNull(retained);
+            Assert.IsNotNull(retained.Record);
+            Assert.AreEqual("Move build dynamics into platform authority.", retained.Record.Objective);
+            Assert.AreEqual("integration-ready", retained.Record.TaskOutcomes.Single().Outcome);
+            Assert.AreEqual("LagoVista/WebCommon@ecdda65", retained.Record.AcceptedSourceIdentities.Single());
+            Assert.AreEqual("green", retained.Record.BuildSummary);
+            Assert.AreEqual("green", retained.Record.TestSummary);
+            Assert.AreEqual("Retain summary before detail expires.", retained.Record.AarConclusions.Single());
+            Assert.AreEqual("expired raw history", retained.Record.WaivedIssues.Single());
+            app.VerifyAll();
+        }
+
+        [TestMethod]
         public async Task ProtectedOrNonExpiringDetail_IsNeverReportedAsEligibleForExpiry()
         {
             var app = new Mock<IApplicationDataStore>(MockBehavior.Strict);
