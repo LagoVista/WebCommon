@@ -29,7 +29,7 @@ namespace LagoVista.IoT.Web.Common.Tests.BuildDynamics
                .Returns(Task.CompletedTask);
             app.Setup(x => x.UpdateIfVersionAsync(It.IsAny<AarRecord>(), version, It.IsAny<CancellationToken>()))
                .Callback<AarRecord, ApplicationDataConcurrencyToken, CancellationToken>((record, _, __) => updated = record)
-               .ReturnsAsync(CreateMutationResult(ApplicationDataMutationStatus.Succeeded));
+               .ReturnsAsync(CreateMutationResult(ApplicationDataMutationStatus.Updated));
 
             var repo = new AarCompletionRepository(app.Object);
             var record = new AarRecord
