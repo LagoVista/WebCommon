@@ -23,17 +23,20 @@ namespace LagoVista.IoT.Web.Common.Controllers
         private readonly IAarCompletionRepository _aar;
         private readonly IStorageRetentionPolicyStore _retention;
         private readonly IBuildPerformanceTelemetryService _performance;
+        private readonly IWorkstreamMessageRepository _messages;
 
         public BuildDynamicsServiceController(
             IWorkstreamAuthorityRepository authority,
             IAarCompletionRepository aar,
             IStorageRetentionPolicyStore retention,
-            IBuildPerformanceTelemetryService performance)
+            IBuildPerformanceTelemetryService performance,
+            IWorkstreamMessageRepository messages = null)
         {
             _authority = authority ?? throw new ArgumentNullException(nameof(authority));
             _aar = aar ?? throw new ArgumentNullException(nameof(aar));
             _retention = retention ?? throw new ArgumentNullException(nameof(retention));
             _performance = performance ?? throw new ArgumentNullException(nameof(performance));
+            _messages = messages;
         }
 
         [HttpGet("workstreams/{workstreamId}")]
@@ -123,6 +126,41 @@ namespace LagoVista.IoT.Web.Common.Controllers
             record.OrganizationId = Scope(organizationId).Id;
             await _authority.AppendActivityAsync(record, ct);
             return Ok();
+        }
+
+        [HttpPost("workstreams/{workstreamId}/messages")]
+        public async Task<IActionResult> PublishMessageAsync(string organizationId, string workstreamId, [FromBody] WorkstreamMessageRecord record, CancellationToken ct = default)
+        {
+            if (record == null) return BadRequest("record is required.");
+            if (_messages == null) return StatusCode(500, "workstream message repository is unavailable.");
+            if (String.IsNullOrWhiteSpace(record.Id)) return BadRequest("id is required.");
+            if (String.IsNullOrWhiteSpace(record.FromRole) || String.IsNullOrWhiteSpace(record.ToRole)) return BadRequest("fromRole and toRole are required.");
+            if (String.IsNullOrWhiteSpace(record.MessageType) || String.IsNullOrWhiteSpace(record.Summary)) return BadRequest("messageType and summary are required.");
+            if (record.AttentionRequired && String.IsNullOrWhiteSpace(record.AttentionAction)) return BadRequest("attentionAction is required when attentionRequired is true.");
+
+            record.OrganizationId = Scope(organizationId).Id;
+            record.Organization = record.OrganizationId;
+            record.WorkstreamId = Required(workstreamId, nameof(workstreamId));
+            await _messages.PublishAsync(record, ct);
+            return Ok();
+        }
+
+        [HttpGet("workstreams/{workstreamId}/messages")]
+        public async Task<IActionResult> QueryMessagesAsync(string organizationId, string workstreamId, string taskId = null, string recipientRole = null, string recipientId = null, bool attentionOnly = false, int pageSize = 100, string continuationToken = null, CancellationToken ct = default)
+        {
+            if (_messages == null) return StatusCode(500, "workstream message repository is unavailable.");
+            var page = await _messages.QueryAsync(Scope(organizationId), Required(workstreamId, nameof(workstreamId)), taskId, recipientRole, recipientId, attentionOnly, Page(pageSize, continuationToken), ct);
+            return Ok(ToPage(page));
+        }
+
+        [HttpGet("workstreams/{workstreamId}/inbox")]
+        public async Task<IActionResult> QueryInboxAsync(string organizationId, string workstreamId, string recipientRole, string recipientId = null, string taskId = null, int pageSize = 100, string continuationToken = null, CancellationToken ct = default)
+        {
+            if (_messages == null) return StatusCode(500, "workstream message repository is unavailable.");
+            if (String.IsNullOrWhiteSpace(recipientRole)) return BadRequest("recipientRole is required.");
+
+            var page = await _messages.QueryAsync(Scope(organizationId), Required(workstreamId, nameof(workstreamId)), taskId, recipientRole, recipientId, true, Page(pageSize, continuationToken), ct);
+            return Ok(ToPage(page));
         }
 
 

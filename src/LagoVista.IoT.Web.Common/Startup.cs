@@ -36,6 +36,7 @@ namespace LagoVista.IoT.Web.Common
             services.AddTransient<IEntryIntentService, EntryIntentService>();
             services.AddTransient<IMetricsBySessionRepo, Repos.MetricsBySessionRepo>();
             services.AddTransient<IWorkstreamAuthorityRepository, WorkstreamAuthorityRepository>();
+            services.AddTransient<IWorkstreamMessageRepository, WorkstreamMessageRepository>();
             services.AddTransient<IAarCompletionRepository, AarCompletionRepository>();
             services.AddTransient<IStorageRetentionPolicyStore, StorageRetentionPolicyStore>();
             services.AddTransient<IBuildPerformanceTelemetryService, BuildPerformanceTelemetryService>();
