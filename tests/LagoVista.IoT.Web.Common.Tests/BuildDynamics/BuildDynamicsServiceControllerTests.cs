@@ -1,6 +1,7 @@
 using LagoVista.CloudStorage.Storage;
 using LagoVista.Core.Models;
 using LagoVista.IoT.Web.Common.Attributes;
+using LagoVista.IoT.Web.Common.BuildDynamics;
 using LagoVista.IoT.Web.Common.Controllers;
 using LagoVista.IoT.Web.Common.Interfaces.BuildDynamics;
 using LagoVista.IoT.Web.Common.Models.BuildDynamics;
@@ -32,6 +33,7 @@ namespace LagoVista.IoT.Web.Common.Tests.BuildDynamics
             var authority = new Mock<IWorkstreamAuthorityRepository>(MockBehavior.Strict);
             var aar = new Mock<IAarCompletionRepository>(MockBehavior.Loose);
             var retention = new Mock<IStorageRetentionPolicyStore>(MockBehavior.Loose);
+            var performance = new Mock<IBuildPerformanceTelemetryService>(MockBehavior.Loose);
             ApplicationDataConcurrencyToken captured = null;
 
             authority.Setup(x => x.UpdateWorkstreamAsync(
@@ -41,7 +43,7 @@ namespace LagoVista.IoT.Web.Common.Tests.BuildDynamics
                 .Callback<WorkstreamAuthorityRecord, ApplicationDataConcurrencyToken, CancellationToken>((_, version, __) => captured = version)
                 .ReturnsAsync(Mutation(ApplicationDataMutationStatus.Conflict));
 
-            var controller = new BuildDynamicsServiceController(authority.Object, aar.Object, retention.Object);
+            var controller = new BuildDynamicsServiceController(authority.Object, aar.Object, retention.Object, performance.Object);
             var result = await controller.UpdateWorkstreamAsync(
                 "ORG1",
                 "ws-1",
@@ -62,6 +64,7 @@ namespace LagoVista.IoT.Web.Common.Tests.BuildDynamics
             var authority = new Mock<IWorkstreamAuthorityRepository>(MockBehavior.Strict);
             var aar = new Mock<IAarCompletionRepository>(MockBehavior.Loose);
             var retention = new Mock<IStorageRetentionPolicyStore>(MockBehavior.Loose);
+            var performance = new Mock<IBuildPerformanceTelemetryService>(MockBehavior.Loose);
             StoragePageRequest captured = null;
 
             authority.Setup(x => x.QueryActivityAsync(
@@ -76,7 +79,7 @@ namespace LagoVista.IoT.Web.Common.Tests.BuildDynamics
                     new[] { new WorkstreamActivityRecord { Id = "A1", WorkstreamId = "ws-1" } },
                     "next-opaque"));
 
-            var controller = new BuildDynamicsServiceController(authority.Object, aar.Object, retention.Object);
+            var controller = new BuildDynamicsServiceController(authority.Object, aar.Object, retention.Object, performance.Object);
             var action = await controller.QueryActivityAsync("ORG1", "ws-1", pageSize: 5000, continuationToken: "prior-opaque");
             var ok = action as OkObjectResult;
             var pageResult = ok?.Value as BuildDynamicsPage<WorkstreamActivityRecord>;
@@ -95,6 +98,7 @@ namespace LagoVista.IoT.Web.Common.Tests.BuildDynamics
             var authority = new Mock<IWorkstreamAuthorityRepository>(MockBehavior.Loose);
             var aar = new Mock<IAarCompletionRepository>(MockBehavior.Loose);
             var retention = new Mock<IStorageRetentionPolicyStore>(MockBehavior.Strict);
+            var performance = new Mock<IBuildPerformanceTelemetryService>(MockBehavior.Loose);
             var scope = EntityHeader.Create("ORG1", "ORG1");
             var record = new StorageRetentionPolicyRecord
             {
@@ -114,7 +118,7 @@ namespace LagoVista.IoT.Web.Common.Tests.BuildDynamics
             retention.Setup(x => x.GetVersionedAsync(It.IsAny<StorageKey>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(Versioned(record, "retention-v2"));
 
-            var controller = new BuildDynamicsServiceController(authority.Object, aar.Object, retention.Object);
+            var controller = new BuildDynamicsServiceController(authority.Object, aar.Object, retention.Object, performance.Object);
             var action = await controller.GetEffectiveRetentionAsync("ORG1", StorageRecordClass.ActivityRecord, "workstream-history");
             var ok = action as OkObjectResult;
             var decision = ok?.Value as BuildDynamicsRetentionDecisionResponse;
@@ -124,6 +128,55 @@ namespace LagoVista.IoT.Web.Common.Tests.BuildDynamics
             Assert.IsTrue(decision.SummarizeBeforeExpiry);
             Assert.AreEqual("scoped-override", decision.Source);
             retention.VerifyAll();
+        }
+
+
+        [TestMethod]
+        public async Task PerformanceQuery_UsesAcceptedTelemetryServiceWithProviderNeutralFilters()
+        {
+            var authority = new Mock<IWorkstreamAuthorityRepository>(MockBehavior.Loose);
+            var aar = new Mock<IAarCompletionRepository>(MockBehavior.Loose);
+            var retention = new Mock<IStorageRetentionPolicyStore>(MockBehavior.Loose);
+            var performance = new Mock<IBuildPerformanceTelemetryService>(MockBehavior.Strict);
+            System.Collections.Generic.IEnumerable<MetricDimensionFilter> capturedDimensions = null;
+            System.Collections.Generic.IEnumerable<string> capturedGroups = null;
+
+            performance.Setup(x => x.QueryBuildDurationPercentileAsync(
+                    "ORG1",
+                    It.IsAny<DateTime>(),
+                    It.IsAny<DateTime>(),
+                    true,
+                    It.IsAny<System.Collections.Generic.IEnumerable<MetricDimensionFilter>>(),
+                    It.IsAny<System.Collections.Generic.IEnumerable<string>>(),
+                    It.IsAny<CancellationToken>()))
+                .Callback<string, DateTime, DateTime, bool, System.Collections.Generic.IEnumerable<MetricDimensionFilter>, System.Collections.Generic.IEnumerable<string>, CancellationToken>(
+                    (_, __, ___, ____, dimensions, groups, _____) =>
+                    {
+                        capturedDimensions = dimensions.ToArray();
+                        capturedGroups = groups.ToArray();
+                    })
+                .ReturnsAsync(new MetricQueryResult(new[] { new MetricValue(DateTime.UtcNow, 1250) }));
+
+            var controller = new BuildDynamicsServiceController(authority.Object, aar.Object, retention.Object, performance.Object);
+            var action = await controller.QueryBuildDurationAsync(
+                "ORG1",
+                DateTime.UtcNow.AddHours(-1),
+                DateTime.UtcNow,
+                p95: true,
+                workstreamId: "build-dynamics-platform",
+                repository: "LagoVista/WebCommon",
+                groupBy: "repository,task");
+
+            var ok = action as OkObjectResult;
+            Assert.IsNotNull(ok);
+            Assert.IsInstanceOfType<MetricQueryResult>(ok.Value);
+            CollectionAssert.AreEquivalent(
+                new[] { "workstream", "repository" },
+                capturedDimensions.Select(item => item.Key).ToArray());
+            CollectionAssert.AreEquivalent(
+                new[] { "repository", "task" },
+                capturedGroups.ToArray());
+            performance.VerifyAll();
         }
 
         private static VersionedApplicationDataRecord<T> Versioned<T>(T record, string version)
