@@ -2,6 +2,7 @@ using LagoVista.CloudStorage.Storage;
 using LagoVista.Core;
 using LagoVista.Core.Models;
 using LagoVista.IoT.Web.Common.Attributes;
+using LagoVista.IoT.Web.Common.BuildDynamics;
 using LagoVista.IoT.Web.Common.Interfaces.BuildDynamics;
 using LagoVista.IoT.Web.Common.Models.BuildDynamics;
 using Microsoft.AspNetCore.Mvc;
@@ -21,15 +22,18 @@ namespace LagoVista.IoT.Web.Common.Controllers
         private readonly IWorkstreamAuthorityRepository _authority;
         private readonly IAarCompletionRepository _aar;
         private readonly IStorageRetentionPolicyStore _retention;
+        private readonly IBuildPerformanceTelemetryService _performance;
 
         public BuildDynamicsServiceController(
             IWorkstreamAuthorityRepository authority,
             IAarCompletionRepository aar,
-            IStorageRetentionPolicyStore retention)
+            IStorageRetentionPolicyStore retention,
+            IBuildPerformanceTelemetryService performance)
         {
             _authority = authority ?? throw new ArgumentNullException(nameof(authority));
             _aar = aar ?? throw new ArgumentNullException(nameof(aar));
             _retention = retention ?? throw new ArgumentNullException(nameof(retention));
+            _performance = performance ?? throw new ArgumentNullException(nameof(performance));
         }
 
         [HttpGet("workstreams/{workstreamId}")]
@@ -121,6 +125,52 @@ namespace LagoVista.IoT.Web.Common.Controllers
             return Ok();
         }
 
+
+        [HttpGet("performance/tasks-per-hour")]
+        public async Task<IActionResult> QueryTasksPerHourAsync(
+            string organizationId,
+            DateTime startUtc,
+            DateTime endUtc,
+            string workstreamId = null,
+            string taskId = null,
+            string repository = null,
+            string project = null,
+            string groupBy = null,
+            CancellationToken ct = default)
+        {
+            var result = await _performance.QueryTasksPerHourAsync(
+                Required(organizationId, nameof(organizationId)),
+                startUtc,
+                endUtc,
+                PerformanceDimensions(workstreamId, taskId, repository, project),
+                PerformanceGroups(groupBy),
+                ct);
+            return Ok(result);
+        }
+
+        [HttpGet("performance/build-duration")]
+        public async Task<IActionResult> QueryBuildDurationAsync(
+            string organizationId,
+            DateTime startUtc,
+            DateTime endUtc,
+            bool p95 = false,
+            string workstreamId = null,
+            string taskId = null,
+            string repository = null,
+            string project = null,
+            string groupBy = null,
+            CancellationToken ct = default)
+        {
+            var result = await _performance.QueryBuildDurationPercentileAsync(
+                Required(organizationId, nameof(organizationId)),
+                startUtc,
+                endUtc,
+                p95,
+                PerformanceDimensions(workstreamId, taskId, repository, project),
+                PerformanceGroups(groupBy),
+                ct);
+            return Ok(result);
+        }
         [HttpGet("workstreams/{workstreamId}/aars")]
         public async Task<IActionResult> QueryAarsAsync(string organizationId, string workstreamId, int pageSize = 100, string continuationToken = null, CancellationToken ct = default)
         {
@@ -235,6 +285,30 @@ namespace LagoVista.IoT.Web.Common.Controllers
             });
         }
 
+
+        private static System.Collections.Generic.IEnumerable<MetricDimensionFilter> PerformanceDimensions(
+            string workstreamId,
+            string taskId,
+            string repository,
+            string project)
+        {
+            if (!String.IsNullOrWhiteSpace(workstreamId))
+                yield return new MetricDimensionFilter("workstream", workstreamId.Trim());
+            if (!String.IsNullOrWhiteSpace(taskId))
+                yield return new MetricDimensionFilter("task", taskId.Trim());
+            if (!String.IsNullOrWhiteSpace(repository))
+                yield return new MetricDimensionFilter("repository", repository.Trim());
+            if (!String.IsNullOrWhiteSpace(project))
+                yield return new MetricDimensionFilter("project", project.Trim());
+        }
+
+        private static System.Collections.Generic.IEnumerable<string> PerformanceGroups(string groupBy)
+            => String.IsNullOrWhiteSpace(groupBy)
+                ? Array.Empty<string>()
+                : groupBy.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(value => value.Trim())
+                    .Where(value => value.Length > 0)
+                    .Distinct(StringComparer.OrdinalIgnoreCase);
         private static BuildDynamicsVersionedRecord<T> Versioned<T>(VersionedApplicationDataRecord<T> value)
             where T : class, IApplicationDataRecord
             => new BuildDynamicsVersionedRecord<T>
