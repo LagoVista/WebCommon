@@ -145,7 +145,7 @@ namespace LagoVista.IoT.Web.Common.BuildDynamics
 
         public Task<MetricQueryResult> QueryBuildDurationPercentileAsync(string organizationId, DateTime start, DateTime end, bool p95, IEnumerable<MetricDimensionFilter> dimensions = null, IEnumerable<string> groupByDimensions = null, CancellationToken cancellationToken = default)
         {
-            var aggregate = (MetricAggregate)(p95 ? 6 : 5);
+            var aggregate = p95 ? MetricAggregate.Percentile95 : MetricAggregate.Percentile50;
             return _metricsStore.QueryAsync(new MetricQuery(organizationId, DurationMetric, start, end, aggregate, null, dimensions, groupByDimensions), cancellationToken);
         }
 
