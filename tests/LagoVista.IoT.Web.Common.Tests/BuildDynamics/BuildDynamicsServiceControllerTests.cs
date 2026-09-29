@@ -1,0 +1,150 @@
+using LagoVista.CloudStorage.Storage;
+using LagoVista.Core.Models;
+using LagoVista.IoT.Web.Common.Attributes;
+using LagoVista.IoT.Web.Common.Controllers;
+using LagoVista.IoT.Web.Common.Interfaces.BuildDynamics;
+using LagoVista.IoT.Web.Common.Models.BuildDynamics;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+using System;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace LagoVista.IoT.Web.Common.Tests.BuildDynamics
+{
+    [TestClass]
+    public class BuildDynamicsServiceControllerTests
+    {
+        [TestMethod]
+        public void Controller_RequiresSignedServiceRequest()
+        {
+            Assert.IsTrue(typeof(BuildDynamicsServiceController)
+                .GetCustomAttributes(typeof(RequireSignedRequestAttribute), inherit: true)
+                .Any());
+        }
+
+        [TestMethod]
+        public async Task UpdateWorkstream_UsesOpaqueClientVersionAndMapsConflict()
+        {
+            var authority = new Mock<IWorkstreamAuthorityRepository>(MockBehavior.Strict);
+            var aar = new Mock<IAarCompletionRepository>(MockBehavior.Loose);
+            var retention = new Mock<IStorageRetentionPolicyStore>(MockBehavior.Loose);
+            ApplicationDataConcurrencyToken captured = null;
+
+            authority.Setup(x => x.UpdateWorkstreamAsync(
+                    It.IsAny<WorkstreamAuthorityRecord>(),
+                    It.IsAny<ApplicationDataConcurrencyToken>(),
+                    It.IsAny<CancellationToken>()))
+                .Callback<WorkstreamAuthorityRecord, ApplicationDataConcurrencyToken, CancellationToken>((_, version, __) => captured = version)
+                .ReturnsAsync(Mutation(ApplicationDataMutationStatus.Conflict));
+
+            var controller = new BuildDynamicsServiceController(authority.Object, aar.Object, retention.Object);
+            var result = await controller.UpdateWorkstreamAsync(
+                "ORG1",
+                "ws-1",
+                new BuildDynamicsMutationRequest<WorkstreamAuthorityRecord>
+                {
+                    ExpectedVersion = "opaque-etag-17",
+                    Record = new WorkstreamAuthorityRecord { Name = "Updated" }
+                });
+
+            Assert.IsInstanceOfType<ConflictObjectResult>(result);
+            Assert.AreEqual("opaque-etag-17", captured.Value);
+            authority.VerifyAll();
+        }
+
+        [TestMethod]
+        public async Task ActivityQuery_ClampsPageAndPreservesOpaqueCursor()
+        {
+            var authority = new Mock<IWorkstreamAuthorityRepository>(MockBehavior.Strict);
+            var aar = new Mock<IAarCompletionRepository>(MockBehavior.Loose);
+            var retention = new Mock<IStorageRetentionPolicyStore>(MockBehavior.Loose);
+            StoragePageRequest captured = null;
+
+            authority.Setup(x => x.QueryActivityAsync(
+                    It.IsAny<EntityHeader>(),
+                    "ws-1",
+                    null,
+                    null,
+                    It.IsAny<StoragePageRequest>(),
+                    It.IsAny<CancellationToken>()))
+                .Callback<EntityHeader, string, DateTime?, DateTime?, StoragePageRequest, CancellationToken>((_, __, ___, ____, page, _____) => captured = page)
+                .ReturnsAsync(new StoragePageResult<WorkstreamActivityRecord>(
+                    new[] { new WorkstreamActivityRecord { Id = "A1", WorkstreamId = "ws-1" } },
+                    "next-opaque"));
+
+            var controller = new BuildDynamicsServiceController(authority.Object, aar.Object, retention.Object);
+            var action = await controller.QueryActivityAsync("ORG1", "ws-1", pageSize: 5000, continuationToken: "prior-opaque");
+            var ok = action as OkObjectResult;
+            var pageResult = ok?.Value as BuildDynamicsPage<WorkstreamActivityRecord>;
+
+            Assert.IsNotNull(pageResult);
+            Assert.AreEqual(1000, captured.PageSize);
+            Assert.AreEqual("prior-opaque", captured.ContinuationToken);
+            Assert.AreEqual("next-opaque", pageResult.ContinuationToken);
+            Assert.AreEqual(1, pageResult.Items.Count);
+            authority.VerifyAll();
+        }
+
+        [TestMethod]
+        public async Task EffectiveRetention_ReturnsProviderNeutralDecision()
+        {
+            var authority = new Mock<IWorkstreamAuthorityRepository>(MockBehavior.Loose);
+            var aar = new Mock<IAarCompletionRepository>(MockBehavior.Loose);
+            var retention = new Mock<IStorageRetentionPolicyStore>(MockBehavior.Strict);
+            var scope = EntityHeader.Create("ORG1", "ORG1");
+            var record = new StorageRetentionPolicyRecord
+            {
+                Organization = scope,
+                Rules =
+                {
+                    new StorageRetentionRule
+                    {
+                        RecordClass = StorageRecordClass.ActivityRecord,
+                        Scope = "workstream-history",
+                        Ttl = TimeSpan.FromDays(30),
+                        SummarizeBeforeExpiry = true
+                    }
+                }
+            };
+
+            retention.Setup(x => x.GetVersionedAsync(It.IsAny<StorageKey>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(Versioned(record, "retention-v2"));
+
+            var controller = new BuildDynamicsServiceController(authority.Object, aar.Object, retention.Object);
+            var action = await controller.GetEffectiveRetentionAsync("ORG1", StorageRecordClass.ActivityRecord, "workstream-history");
+            var ok = action as OkObjectResult;
+            var decision = ok?.Value as BuildDynamicsRetentionDecisionResponse;
+
+            Assert.IsNotNull(decision);
+            Assert.AreEqual(TimeSpan.FromDays(30).TotalSeconds, decision.EffectiveTtlSeconds);
+            Assert.IsTrue(decision.SummarizeBeforeExpiry);
+            Assert.AreEqual("scoped-override", decision.Source);
+            retention.VerifyAll();
+        }
+
+        private static VersionedApplicationDataRecord<T> Versioned<T>(T record, string version)
+            where T : class, IApplicationDataRecord
+        {
+            return (VersionedApplicationDataRecord<T>)Activator.CreateInstance(
+                typeof(VersionedApplicationDataRecord<T>),
+                BindingFlags.Instance | BindingFlags.NonPublic,
+                binder: null,
+                args: new object[] { record, ApplicationDataConcurrencyToken.FromValue(version) },
+                culture: null);
+        }
+
+        private static ApplicationDataMutationResult Mutation(ApplicationDataMutationStatus status)
+        {
+            return (ApplicationDataMutationResult)Activator.CreateInstance(
+                typeof(ApplicationDataMutationResult),
+                BindingFlags.Instance | BindingFlags.NonPublic,
+                binder: null,
+                args: new object[] { status, null },
+                culture: null);
+        }
+    }
+}
