@@ -212,6 +212,38 @@ namespace LagoVista.IoT.Web.Common.Tests.BuildDynamics
         }
 
         [TestMethod]
+        public async Task InsertCoordination_PreservesMigrationStableIdentityAndScope()
+        {
+            var authority = new Mock<IWorkstreamAuthorityRepository>(MockBehavior.Strict);
+            var aar = new Mock<IAarCompletionRepository>(MockBehavior.Loose);
+            var retention = new Mock<IStorageRetentionPolicyStore>(MockBehavior.Loose);
+            var performance = new Mock<IBuildPerformanceTelemetryService>(MockBehavior.Loose);
+            WorkstreamCoordinationAuthorityRecord captured = null;
+
+            authority.Setup(x => x.InsertCoordinationAsync(It.IsAny<WorkstreamCoordinationAuthorityRecord>(), It.IsAny<CancellationToken>()))
+                .Callback<WorkstreamCoordinationAuthorityRecord, CancellationToken>((record, _) => captured = record)
+                .Returns(Task.CompletedTask);
+
+            var controller = new BuildDynamicsServiceController(authority.Object, aar.Object, retention.Object, performance.Object);
+            var action = await controller.InsertCoordinationAsync("ORG1", new WorkstreamCoordinationAuthorityRecord
+            {
+                WorkstreamId = "build-dynamics-platform",
+                RecordType = "participant-session",
+                StableId = "worker:migration-cutover",
+                TaskId = "migration-cutover",
+                Payload = "{\"conversationUrl\":\"https://chatgpt.com/c/example\"}"
+            });
+
+            Assert.IsInstanceOfType<OkResult>(action);
+            Assert.IsNotNull(captured);
+            Assert.AreEqual("ORG1", captured.Organization.Id);
+            Assert.AreEqual("participant-session", captured.RecordType);
+            Assert.AreEqual("worker:migration-cutover", captured.StableId);
+            Assert.AreEqual("migration-cutover", captured.TaskId);
+            authority.VerifyAll();
+        }
+
+        [TestMethod]
         public async Task OrchestrationScratch_UsesCallerStableIdForRetryableCutoverState()
         {
             var authority = new Mock<IWorkstreamAuthorityRepository>(MockBehavior.Strict);
