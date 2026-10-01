@@ -46,6 +46,17 @@ namespace LagoVista.IoT.Web.Common.Controllers
             return versioned == null ? NotFound() : Ok(Versioned(versioned));
         }
 
+        [HttpPost("workstreams")]
+        public async Task<IActionResult> InsertWorkstreamAsync(string organizationId, [FromBody] WorkstreamAuthorityRecord record, CancellationToken ct = default)
+        {
+            if (record == null || String.IsNullOrWhiteSpace(record.WorkstreamId))
+                return BadRequest("record.workstreamId is required.");
+
+            record.Organization = Scope(organizationId);
+            await _authority.InsertWorkstreamAsync(record, ct);
+            return Ok();
+        }
+
         [HttpPut("workstreams/{workstreamId}")]
         public async Task<IActionResult> UpdateWorkstreamAsync(string organizationId, string workstreamId, [FromBody] BuildDynamicsMutationRequest<WorkstreamAuthorityRecord> request, CancellationToken ct = default)
         {
@@ -75,6 +86,17 @@ namespace LagoVista.IoT.Web.Common.Controllers
             return versioned == null ? NotFound() : Ok(Versioned(versioned));
         }
 
+        [HttpPost("tasks")]
+        public async Task<IActionResult> InsertTaskAsync(string organizationId, [FromBody] TaskAuthorityRecord record, CancellationToken ct = default)
+        {
+            if (record == null || String.IsNullOrWhiteSpace(record.TaskId) || String.IsNullOrWhiteSpace(record.WorkstreamId))
+                return BadRequest("record.workstreamId and record.taskId are required.");
+
+            record.Organization = Scope(organizationId);
+            await _authority.InsertTaskAsync(record, ct);
+            return Ok();
+        }
+
         [HttpPut("tasks/{taskId}")]
         public async Task<IActionResult> UpdateTaskAsync(string organizationId, string taskId, [FromBody] BuildDynamicsMutationRequest<TaskAuthorityRecord> request, CancellationToken ct = default)
         {
@@ -91,6 +113,17 @@ namespace LagoVista.IoT.Web.Common.Controllers
         {
             var versioned = await _authority.GetWorkspaceAsync(Scope(organizationId), Required(workspaceId, nameof(workspaceId)), ct);
             return versioned == null ? NotFound() : Ok(Versioned(versioned));
+        }
+
+        [HttpPost("workspaces")]
+        public async Task<IActionResult> InsertWorkspaceAsync(string organizationId, [FromBody] WorkspaceAuthorityRecord record, CancellationToken ct = default)
+        {
+            if (record == null || String.IsNullOrWhiteSpace(record.WorkstreamId) || String.IsNullOrWhiteSpace(record.TaskId) || String.IsNullOrWhiteSpace(record.WorkspaceId))
+                return BadRequest("record.workstreamId, record.taskId, and record.workspaceId are required.");
+
+            record.Organization = Scope(organizationId);
+            await _authority.InsertWorkspaceAsync(record, ct);
+            return Ok();
         }
 
         [HttpPut("workspaces/{workspaceId}")]
@@ -125,6 +158,32 @@ namespace LagoVista.IoT.Web.Common.Controllers
 
             record.OrganizationId = Scope(organizationId).Id;
             await _authority.AppendActivityAsync(record, ct);
+            return Ok();
+        }
+
+        [HttpPut("orchestration/{scratchId}")]
+        public async Task<IActionResult> UpsertOrchestrationAsync(string organizationId, string scratchId, [FromBody] WorkstreamOrchestrationScratchRecord record, CancellationToken ct = default)
+        {
+            if (record == null)
+                return BadRequest("record is required.");
+
+            record.Id = new NormalizedId32(Required(scratchId, nameof(scratchId)));
+            record.Organization = Scope(organizationId);
+            await _authority.UpsertScratchAsync(record, ct);
+            return Ok();
+        }
+
+        [HttpGet("orchestration/{scratchId}")]
+        public async Task<IActionResult> GetOrchestrationAsync(string organizationId, string scratchId, CancellationToken ct = default)
+        {
+            var record = await _authority.GetScratchAsync(Scope(organizationId), Required(scratchId, nameof(scratchId)), ct);
+            return record == null ? NotFound() : Ok(record);
+        }
+
+        [HttpDelete("orchestration/{scratchId}")]
+        public async Task<IActionResult> DeleteOrchestrationAsync(string organizationId, string scratchId, CancellationToken ct = default)
+        {
+            await _authority.DeleteScratchAsync(Scope(organizationId), Required(scratchId, nameof(scratchId)), ct);
             return Ok();
         }
 
