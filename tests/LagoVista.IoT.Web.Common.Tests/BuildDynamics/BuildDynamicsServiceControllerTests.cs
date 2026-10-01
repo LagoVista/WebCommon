@@ -179,6 +179,68 @@ namespace LagoVista.IoT.Web.Common.Tests.BuildDynamics
             performance.VerifyAll();
         }
 
+        [TestMethod]
+        public async Task InsertWorkspace_PreservesStableIdentityAndScopesOrganization()
+        {
+            var authority = new Mock<IWorkstreamAuthorityRepository>(MockBehavior.Strict);
+            var aar = new Mock<IAarCompletionRepository>(MockBehavior.Loose);
+            var retention = new Mock<IStorageRetentionPolicyStore>(MockBehavior.Loose);
+            var performance = new Mock<IBuildPerformanceTelemetryService>(MockBehavior.Loose);
+            WorkspaceAuthorityRecord captured = null;
+
+            authority.Setup(x => x.InsertWorkspaceAsync(It.IsAny<WorkspaceAuthorityRecord>(), It.IsAny<CancellationToken>()))
+                .Callback<WorkspaceAuthorityRecord, CancellationToken>((record, _) => captured = record)
+                .Returns(Task.CompletedTask);
+
+            var controller = new BuildDynamicsServiceController(authority.Object, aar.Object, retention.Object, performance.Object);
+            var action = await controller.InsertWorkspaceAsync("ORG1", new WorkspaceAuthorityRecord
+            {
+                WorkstreamId = "build-dynamics-platform",
+                TaskId = "migration-cutover",
+                WorkspaceId = "ws-build-dynamics-platform-t007-migration-cutover",
+                BranchIdentity = "workspace/build-dynamics-platform/t007-migration-cutover",
+                State = "active"
+            });
+
+            Assert.IsInstanceOfType<OkResult>(action);
+            Assert.IsNotNull(captured);
+            Assert.AreEqual("ORG1", captured.Organization.Id);
+            Assert.AreEqual("build-dynamics-platform", captured.WorkstreamId);
+            Assert.AreEqual("migration-cutover", captured.TaskId);
+            Assert.AreEqual("ws-build-dynamics-platform-t007-migration-cutover", captured.WorkspaceId);
+            authority.VerifyAll();
+        }
+
+        [TestMethod]
+        public async Task OrchestrationScratch_UsesCallerStableIdForRetryableCutoverState()
+        {
+            var authority = new Mock<IWorkstreamAuthorityRepository>(MockBehavior.Strict);
+            var aar = new Mock<IAarCompletionRepository>(MockBehavior.Loose);
+            var retention = new Mock<IStorageRetentionPolicyStore>(MockBehavior.Loose);
+            var performance = new Mock<IBuildPerformanceTelemetryService>(MockBehavior.Loose);
+            WorkstreamOrchestrationScratchRecord captured = null;
+
+            authority.Setup(x => x.UpsertScratchAsync(It.IsAny<WorkstreamOrchestrationScratchRecord>(), It.IsAny<CancellationToken>()))
+                .Callback<WorkstreamOrchestrationScratchRecord, CancellationToken>((record, _) => captured = record)
+                .Returns(Task.CompletedTask);
+
+            var controller = new BuildDynamicsServiceController(authority.Object, aar.Object, retention.Object, performance.Object);
+            var action = await controller.UpsertOrchestrationAsync("ORG1", "0123456789ABCDEF0123456789ABCDEF", new WorkstreamOrchestrationScratchRecord
+            {
+                WorkstreamId = "build-dynamics-platform",
+                WorkspaceId = "ws-build-dynamics-platform-t007-migration-cutover",
+                Kind = "authority-cutover",
+                Value = "{\"phase\":\"reconciled\"}"
+            });
+
+            Assert.IsInstanceOfType<OkResult>(action);
+            Assert.IsNotNull(captured);
+            Assert.AreEqual("ORG1", captured.Organization.Id);
+            Assert.AreEqual("0123456789ABCDEF0123456789ABCDEF", captured.Id.Value);
+            Assert.AreEqual("authority-cutover", captured.Kind);
+            authority.VerifyAll();
+        }
+
         private static VersionedApplicationDataRecord<T> Versioned<T>(T record, string version)
             where T : class, IApplicationDataRecord
         {
