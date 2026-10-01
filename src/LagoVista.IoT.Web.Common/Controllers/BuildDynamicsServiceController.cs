@@ -161,6 +161,43 @@ namespace LagoVista.IoT.Web.Common.Controllers
             return Ok();
         }
 
+        [HttpGet("coordination/{recordType}/{stableId}")]
+        public async Task<IActionResult> GetCoordinationAsync(string organizationId, string recordType, string stableId, CancellationToken ct = default)
+        {
+            var versioned = await _authority.GetCoordinationAsync(Scope(organizationId), Required(recordType, nameof(recordType)), Required(stableId, nameof(stableId)), ct);
+            return versioned == null ? NotFound() : Ok(Versioned(versioned));
+        }
+
+        [HttpGet("workstreams/{workstreamId}/coordination/{recordType}")]
+        public async Task<IActionResult> QueryCoordinationAsync(string organizationId, string workstreamId, string recordType, int pageSize = 100, string continuationToken = null, CancellationToken ct = default)
+        {
+            var page = await _authority.QueryCoordinationAsync(Scope(organizationId), Required(workstreamId, nameof(workstreamId)), Required(recordType, nameof(recordType)), Page(pageSize, continuationToken), ct);
+            return Ok(ToPage(page));
+        }
+
+        [HttpPost("coordination")]
+        public async Task<IActionResult> InsertCoordinationAsync(string organizationId, [FromBody] WorkstreamCoordinationAuthorityRecord record, CancellationToken ct = default)
+        {
+            if (record == null || String.IsNullOrWhiteSpace(record.WorkstreamId) || String.IsNullOrWhiteSpace(record.RecordType) || String.IsNullOrWhiteSpace(record.StableId))
+                return BadRequest("record.workstreamId, record.recordType, and record.stableId are required.");
+
+            record.Organization = Scope(organizationId);
+            await _authority.InsertCoordinationAsync(record, ct);
+            return Ok();
+        }
+
+        [HttpPut("coordination/{recordType}/{stableId}")]
+        public async Task<IActionResult> UpdateCoordinationAsync(string organizationId, string recordType, string stableId, [FromBody] BuildDynamicsMutationRequest<WorkstreamCoordinationAuthorityRecord> request, CancellationToken ct = default)
+        {
+            if (request?.Record == null || String.IsNullOrWhiteSpace(request.ExpectedVersion))
+                return BadRequest("record and expectedVersion are required.");
+
+            request.Record.Organization = Scope(organizationId);
+            request.Record.RecordType = Required(recordType, nameof(recordType));
+            request.Record.StableId = Required(stableId, nameof(stableId));
+            return MapMutation(await _authority.UpdateCoordinationAsync(request.Record, ApplicationDataConcurrencyToken.FromValue(request.ExpectedVersion), ct));
+        }
+
         [HttpPut("orchestration/{scratchId}")]
         public async Task<IActionResult> UpsertOrchestrationAsync(string organizationId, string scratchId, [FromBody] WorkstreamOrchestrationScratchRecord record, CancellationToken ct = default)
         {

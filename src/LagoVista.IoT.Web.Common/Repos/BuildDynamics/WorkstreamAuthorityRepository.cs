@@ -80,6 +80,26 @@ namespace LagoVista.IoT.Web.Common.Repos.BuildDynamics
             return _activity.QueryAsync(query, cancellationToken);
         }
 
+        public Task InsertCoordinationAsync(WorkstreamCoordinationAuthorityRecord record, CancellationToken cancellationToken = default) =>
+            _applicationData.InsertAsync(Prepare(record, CoordinationKind(record?.RecordType), record?.StableId), cancellationToken);
+
+        public Task<VersionedApplicationDataRecord<WorkstreamCoordinationAuthorityRecord>> GetCoordinationAsync(EntityHeader scope, string recordType, string stableId, CancellationToken cancellationToken = default) =>
+            _applicationData.GetVersionedAsync<WorkstreamCoordinationAuthorityRecord>(Key(scope, CoordinationKind(recordType), stableId), cancellationToken);
+
+        public Task<ApplicationDataMutationResult> UpdateCoordinationAsync(WorkstreamCoordinationAuthorityRecord record, ApplicationDataConcurrencyToken expectedVersion, CancellationToken cancellationToken = default) =>
+            _applicationData.UpdateIfVersionAsync(Prepare(record, CoordinationKind(record?.RecordType), record?.StableId), expectedVersion, cancellationToken);
+
+        public Task<StoragePageResult<WorkstreamCoordinationAuthorityRecord>> QueryCoordinationAsync(EntityHeader scope, string workstreamId, string recordType, StoragePageRequest page = null, CancellationToken cancellationToken = default)
+        {
+            RequireScope(scope);
+            var query = new StorageQuery<WorkstreamCoordinationAuthorityRecord>()
+                .Where(x => x.Organization.Id, StorageFilterOperator.Equal, scope.Id)
+                .Where(x => x.WorkstreamId, StorageFilterOperator.Equal, Required(workstreamId, nameof(workstreamId)))
+                .Where(x => x.RecordType, StorageFilterOperator.Equal, Required(recordType, nameof(recordType)))
+                .WithPage(page ?? new StoragePageRequest());
+            return _applicationData.QueryAsync(query, cancellationToken);
+        }
+
         public Task UpsertScratchAsync(WorkstreamOrchestrationScratchRecord record, CancellationToken cancellationToken = default)
         {
             if (record == null) throw new ArgumentNullException(nameof(record));
@@ -94,6 +114,9 @@ namespace LagoVista.IoT.Web.Common.Repos.BuildDynamics
 
         public Task DeleteScratchAsync(EntityHeader scope, string scratchId, CancellationToken cancellationToken = default) =>
             _scratch.DeleteAsync<WorkstreamOrchestrationScratchRecord>(new StorageKey(Required(scratchId, nameof(scratchId)), RequireScope(scope).Id), cancellationToken);
+
+        private static string CoordinationKind(string recordType) =>
+            "coordination:" + Required(recordType, nameof(recordType)).Trim().ToLowerInvariant();
 
         private static T Prepare<T>(T record, string kind, string stableId) where T : BuildDynamicsApplicationRecord
         {

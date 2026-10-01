@@ -25,6 +25,11 @@ namespace LagoVista.IoT.Web.Common.Interfaces.BuildDynamics
         Task AppendActivityAsync(WorkstreamActivityRecord record, CancellationToken cancellationToken = default);
         Task<StoragePageResult<WorkstreamActivityRecord>> QueryActivityAsync(EntityHeader scope, string workstreamId, DateTime? startUtc, DateTime? endUtc, StoragePageRequest page = null, CancellationToken cancellationToken = default);
 
+        Task InsertCoordinationAsync(WorkstreamCoordinationAuthorityRecord record, CancellationToken cancellationToken = default);
+        Task<VersionedApplicationDataRecord<WorkstreamCoordinationAuthorityRecord>> GetCoordinationAsync(EntityHeader scope, string recordType, string stableId, CancellationToken cancellationToken = default);
+        Task<ApplicationDataMutationResult> UpdateCoordinationAsync(WorkstreamCoordinationAuthorityRecord record, ApplicationDataConcurrencyToken expectedVersion, CancellationToken cancellationToken = default);
+        Task<StoragePageResult<WorkstreamCoordinationAuthorityRecord>> QueryCoordinationAsync(EntityHeader scope, string workstreamId, string recordType, StoragePageRequest page = null, CancellationToken cancellationToken = default);
+
         Task UpsertScratchAsync(WorkstreamOrchestrationScratchRecord record, CancellationToken cancellationToken = default);
         Task<WorkstreamOrchestrationScratchRecord> GetScratchAsync(EntityHeader scope, string scratchId, CancellationToken cancellationToken = default);
         Task DeleteScratchAsync(EntityHeader scope, string scratchId, CancellationToken cancellationToken = default);

@@ -47,6 +47,15 @@ namespace LagoVista.IoT.Web.Common.Models.BuildDynamics
         public DateTime? LeaseExpiresAtUtc { get; set; }
     }
 
+    public sealed class WorkstreamCoordinationAuthorityRecord : BuildDynamicsApplicationRecord
+    {
+        public string WorkstreamId { get; set; } = String.Empty;
+        public string RecordType { get; set; } = String.Empty;
+        public string StableId { get; set; } = String.Empty;
+        public string TaskId { get; set; } = String.Empty;
+        public string Payload { get; set; } = String.Empty;
+    }
+
     public sealed class WorkstreamOrchestrationScratchRecord : IScratchDataRecord
     {
         public NormalizedId32 Id { get; set; }
