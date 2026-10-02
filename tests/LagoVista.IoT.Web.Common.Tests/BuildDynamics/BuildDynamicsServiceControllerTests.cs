@@ -273,6 +273,55 @@ namespace LagoVista.IoT.Web.Common.Tests.BuildDynamics
             authority.VerifyAll();
         }
 
+        [TestMethod]
+        public async Task CurrentAuthorityEndpoints_PreserveStableIdsAndOrganizationScope()
+        {
+            var authority = new Mock<IWorkstreamAuthorityRepository>(MockBehavior.Strict);
+            var aar = new Mock<IAarCompletionRepository>(MockBehavior.Loose);
+            var retention = new Mock<IStorageRetentionPolicyStore>(MockBehavior.Loose);
+            var performance = new Mock<IBuildPerformanceTelemetryService>(MockBehavior.Loose);
+            FixWorkspaceAuthorityRecord fix = null;
+            DevOpsActivityAuthorityRecord devOps = null;
+            StableFinalizationAuthorityRecord finalization = null;
+
+            authority.Setup(x => x.InsertFixWorkspaceAsync(It.IsAny<FixWorkspaceAuthorityRecord>(), It.IsAny<CancellationToken>()))
+                .Callback<FixWorkspaceAuthorityRecord, CancellationToken>((record, _) => fix = record)
+                .Returns(Task.CompletedTask);
+            authority.Setup(x => x.InsertDevOpsActivityAsync(It.IsAny<DevOpsActivityAuthorityRecord>(), It.IsAny<CancellationToken>()))
+                .Callback<DevOpsActivityAuthorityRecord, CancellationToken>((record, _) => devOps = record)
+                .Returns(Task.CompletedTask);
+            authority.Setup(x => x.InsertFinalizationAsync(It.IsAny<StableFinalizationAuthorityRecord>(), It.IsAny<CancellationToken>()))
+                .Callback<StableFinalizationAuthorityRecord, CancellationToken>((record, _) => finalization = record)
+                .Returns(Task.CompletedTask);
+
+            var controller = new BuildDynamicsServiceController(authority.Object, aar.Object, retention.Object, performance.Object);
+            Assert.IsInstanceOfType<OkResult>(await controller.InsertFixWorkspaceAsync("ORG1", new FixWorkspaceAuthorityRecord
+            {
+                WorkspaceId = "fix-1",
+                ReferenceId = "F001",
+                Identifier = "FIX-ONE"
+            }));
+            Assert.IsInstanceOfType<OkResult>(await controller.InsertDevOpsActivityAsync("ORG1", new DevOpsActivityAuthorityRecord
+            {
+                ActivityId = "D001",
+                OriginWorkstreamId = "build-dynamics-platform"
+            }));
+            Assert.IsInstanceOfType<OkResult>(await controller.InsertFinalizationAsync("ORG1", new StableFinalizationAuthorityRecord
+            {
+                FinalizationId = "ABCDEF0123456789ABCDEF0123456789",
+                OwnerType = "FixWorkspace",
+                OwnerId = "fix-1"
+            }));
+
+            Assert.AreEqual("ORG1", fix.Organization.Id);
+            Assert.AreEqual("fix-1", fix.WorkspaceId);
+            Assert.AreEqual("ORG1", devOps.Organization.Id);
+            Assert.AreEqual("D001", devOps.ActivityId);
+            Assert.AreEqual("ORG1", finalization.Organization.Id);
+            Assert.AreEqual("ABCDEF0123456789ABCDEF0123456789", finalization.FinalizationId);
+            authority.VerifyAll();
+        }
+
         private static VersionedApplicationDataRecord<T> Versioned<T>(T record, string version)
             where T : class, IApplicationDataRecord
         {

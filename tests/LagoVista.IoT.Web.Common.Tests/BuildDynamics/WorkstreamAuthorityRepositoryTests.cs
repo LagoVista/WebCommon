@@ -141,6 +141,68 @@ namespace LagoVista.IoT.Web.Common.Tests.BuildDynamics
             Assert.IsTrue(captured.Filters.Any(f => f.Field == "WorkstreamId" && (string)f.Value == "ws-1"));
         }
 
+        [TestMethod]
+        public async Task CurrentAuthorityRecords_UseStableApplicationDataIdentityAndConditionalMutation()
+        {
+            var app = new Mock<IApplicationDataStore>(MockBehavior.Strict);
+            var scratch = new Mock<IScratchStore>(MockBehavior.Loose);
+            var activity = new Mock<IActivityRecordStore<WorkstreamActivityRecord>>(MockBehavior.Loose);
+            var scope = EntityHeader.Create("ORG123", "Org");
+            FixWorkspaceAuthorityRecord insertedFix = null;
+            DevOpsActivityAuthorityRecord insertedDevOps = null;
+            StableFinalizationAuthorityRecord insertedFinalization = null;
+            var version = CreateConcurrencyToken("current-version");
+
+            app.Setup(x => x.InsertAsync(It.IsAny<FixWorkspaceAuthorityRecord>(), It.IsAny<CancellationToken>()))
+               .Callback<FixWorkspaceAuthorityRecord, CancellationToken>((r, _) => insertedFix = r)
+               .Returns(Task.CompletedTask);
+            app.Setup(x => x.InsertAsync(It.IsAny<DevOpsActivityAuthorityRecord>(), It.IsAny<CancellationToken>()))
+               .Callback<DevOpsActivityAuthorityRecord, CancellationToken>((r, _) => insertedDevOps = r)
+               .Returns(Task.CompletedTask);
+            app.Setup(x => x.InsertAsync(It.IsAny<StableFinalizationAuthorityRecord>(), It.IsAny<CancellationToken>()))
+               .Callback<StableFinalizationAuthorityRecord, CancellationToken>((r, _) => insertedFinalization = r)
+               .Returns(Task.CompletedTask);
+            app.Setup(x => x.UpdateIfVersionAsync(It.IsAny<FixWorkspaceAuthorityRecord>(), version, It.IsAny<CancellationToken>()))
+               .ReturnsAsync(CreateMutationResult(ApplicationDataMutationStatus.Updated));
+
+            var repo = new WorkstreamAuthorityRepository(app.Object, scratch.Object, activity.Object);
+            var fix = new FixWorkspaceAuthorityRecord
+            {
+                Organization = scope,
+                WorkspaceId = "fix-current",
+                ReferenceId = "F053",
+                Identifier = "CURRENT",
+                State = "completed",
+                Payload = "{\"tasks\":[{\"id\":1,\"closed\":true}]}"
+            };
+            await repo.InsertFixWorkspaceAsync(fix);
+            await repo.UpdateFixWorkspaceAsync(fix, version);
+            await repo.InsertDevOpsActivityAsync(new DevOpsActivityAuthorityRecord
+            {
+                Organization = scope,
+                ActivityId = "D035",
+                OriginWorkstreamId = "build-dynamics-platform",
+                State = "resolved",
+                Payload = "{\"fixWorkspaceIds\":[\"fix-current\"]}"
+            });
+            await repo.InsertFinalizationAsync(new StableFinalizationAuthorityRecord
+            {
+                Organization = scope,
+                FinalizationId = "ABCDEF0123456789ABCDEF0123456789",
+                OwnerType = "FixWorkspace",
+                OwnerId = "fix-current",
+                State = "Succeeded",
+                Payload = "{\"ownerId\":\"fix-current\"}"
+            });
+
+            Assert.AreEqual(32, insertedFix.Id.Value.Length);
+            Assert.AreEqual(32, insertedDevOps.Id.Value.Length);
+            Assert.AreEqual(32, insertedFinalization.Id.Value.Length);
+            Assert.AreNotEqual(insertedFix.Id.Value, insertedDevOps.Id.Value);
+            Assert.AreNotEqual(insertedFix.Id.Value, insertedFinalization.Id.Value);
+            app.VerifyAll();
+        }
+
         private static ApplicationDataConcurrencyToken CreateConcurrencyToken(string value)
         {
             return (ApplicationDataConcurrencyToken)Activator.CreateInstance(
