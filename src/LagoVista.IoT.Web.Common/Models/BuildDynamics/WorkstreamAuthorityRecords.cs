@@ -47,6 +47,40 @@ namespace LagoVista.IoT.Web.Common.Models.BuildDynamics
         public DateTime? LeaseExpiresAtUtc { get; set; }
     }
 
+    public sealed class FixWorkspaceAuthorityRecord : BuildDynamicsApplicationRecord
+    {
+        public string WorkspaceId { get; set; } = String.Empty;
+        public string ReferenceId { get; set; } = String.Empty;
+        public string Identifier { get; set; } = String.Empty;
+        public string State { get; set; } = String.Empty;
+        public string FinalizationStatus { get; set; } = String.Empty;
+        public string DevOpsActivityId { get; set; } = String.Empty;
+        public string ConversationUrl { get; set; } = String.Empty;
+        public string Payload { get; set; } = String.Empty;
+    }
+
+    public sealed class DevOpsActivityAuthorityRecord : BuildDynamicsApplicationRecord
+    {
+        public string ActivityId { get; set; } = String.Empty;
+        public string OriginWorkstreamId { get; set; } = String.Empty;
+        public string OriginTaskId { get; set; } = String.Empty;
+        public string OriginWorkspaceId { get; set; } = String.Empty;
+        public string State { get; set; } = String.Empty;
+        public string Classification { get; set; } = String.Empty;
+        public string ConversationUrl { get; set; } = String.Empty;
+        public string Payload { get; set; } = String.Empty;
+    }
+
+    public sealed class StableFinalizationAuthorityRecord : BuildDynamicsApplicationRecord
+    {
+        public string FinalizationId { get; set; } = String.Empty;
+        public string OwnerType { get; set; } = String.Empty;
+        public string OwnerId { get; set; } = String.Empty;
+        public string State { get; set; } = String.Empty;
+        public string Mode { get; set; } = String.Empty;
+        public string Payload { get; set; } = String.Empty;
+    }
+
     public sealed class WorkstreamCoordinationAuthorityRecord : BuildDynamicsApplicationRecord
     {
         public string WorkstreamId { get; set; } = String.Empty;

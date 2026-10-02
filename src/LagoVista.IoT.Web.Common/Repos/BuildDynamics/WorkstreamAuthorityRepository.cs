@@ -80,6 +80,61 @@ namespace LagoVista.IoT.Web.Common.Repos.BuildDynamics
             return _activity.QueryAsync(query, cancellationToken);
         }
 
+        public Task InsertFixWorkspaceAsync(FixWorkspaceAuthorityRecord record, CancellationToken cancellationToken = default) =>
+            _applicationData.InsertAsync(Prepare(record, "fix-workspace", record?.WorkspaceId), cancellationToken);
+
+        public Task<VersionedApplicationDataRecord<FixWorkspaceAuthorityRecord>> GetFixWorkspaceAsync(EntityHeader scope, string workspaceId, CancellationToken cancellationToken = default) =>
+            _applicationData.GetVersionedAsync<FixWorkspaceAuthorityRecord>(Key(scope, "fix-workspace", workspaceId), cancellationToken);
+
+        public Task<ApplicationDataMutationResult> UpdateFixWorkspaceAsync(FixWorkspaceAuthorityRecord record, ApplicationDataConcurrencyToken expectedVersion, CancellationToken cancellationToken = default) =>
+            _applicationData.UpdateIfVersionAsync(Prepare(record, "fix-workspace", record?.WorkspaceId), expectedVersion, cancellationToken);
+
+        public Task<StoragePageResult<FixWorkspaceAuthorityRecord>> QueryFixWorkspacesAsync(EntityHeader scope, StoragePageRequest page = null, CancellationToken cancellationToken = default)
+        {
+            RequireScope(scope);
+            var query = new StorageQuery<FixWorkspaceAuthorityRecord>()
+                .Where(x => x.Organization.Id, StorageFilterOperator.Equal, scope.Id)
+                .WithPage(page ?? new StoragePageRequest());
+            return _applicationData.QueryAsync(query, cancellationToken);
+        }
+
+        public Task InsertDevOpsActivityAsync(DevOpsActivityAuthorityRecord record, CancellationToken cancellationToken = default) =>
+            _applicationData.InsertAsync(Prepare(record, "devops-activity", record?.ActivityId), cancellationToken);
+
+        public Task<VersionedApplicationDataRecord<DevOpsActivityAuthorityRecord>> GetDevOpsActivityAsync(EntityHeader scope, string activityId, CancellationToken cancellationToken = default) =>
+            _applicationData.GetVersionedAsync<DevOpsActivityAuthorityRecord>(Key(scope, "devops-activity", activityId), cancellationToken);
+
+        public Task<ApplicationDataMutationResult> UpdateDevOpsActivityAsync(DevOpsActivityAuthorityRecord record, ApplicationDataConcurrencyToken expectedVersion, CancellationToken cancellationToken = default) =>
+            _applicationData.UpdateIfVersionAsync(Prepare(record, "devops-activity", record?.ActivityId), expectedVersion, cancellationToken);
+
+        public Task<StoragePageResult<DevOpsActivityAuthorityRecord>> QueryDevOpsActivitiesAsync(EntityHeader scope, string workstreamId = null, StoragePageRequest page = null, CancellationToken cancellationToken = default)
+        {
+            RequireScope(scope);
+            var query = new StorageQuery<DevOpsActivityAuthorityRecord>()
+                .Where(x => x.Organization.Id, StorageFilterOperator.Equal, scope.Id);
+            if (!String.IsNullOrWhiteSpace(workstreamId))
+                query.Where(x => x.OriginWorkstreamId, StorageFilterOperator.Equal, workstreamId);
+            return _applicationData.QueryAsync(query.WithPage(page ?? new StoragePageRequest()), cancellationToken);
+        }
+
+        public Task InsertFinalizationAsync(StableFinalizationAuthorityRecord record, CancellationToken cancellationToken = default) =>
+            _applicationData.InsertAsync(Prepare(record, "stable-finalization", record?.FinalizationId), cancellationToken);
+
+        public Task<VersionedApplicationDataRecord<StableFinalizationAuthorityRecord>> GetFinalizationAsync(EntityHeader scope, string finalizationId, CancellationToken cancellationToken = default) =>
+            _applicationData.GetVersionedAsync<StableFinalizationAuthorityRecord>(Key(scope, "stable-finalization", finalizationId), cancellationToken);
+
+        public Task<ApplicationDataMutationResult> UpdateFinalizationAsync(StableFinalizationAuthorityRecord record, ApplicationDataConcurrencyToken expectedVersion, CancellationToken cancellationToken = default) =>
+            _applicationData.UpdateIfVersionAsync(Prepare(record, "stable-finalization", record?.FinalizationId), expectedVersion, cancellationToken);
+
+        public Task<StoragePageResult<StableFinalizationAuthorityRecord>> QueryFinalizationsAsync(EntityHeader scope, StoragePageRequest page = null, CancellationToken cancellationToken = default)
+        {
+            RequireScope(scope);
+            var query = new StorageQuery<StableFinalizationAuthorityRecord>()
+                .Where(x => x.Organization.Id, StorageFilterOperator.Equal, scope.Id)
+                .WithPage(page ?? new StoragePageRequest());
+            return _applicationData.QueryAsync(query, cancellationToken);
+        }
+
         public Task InsertCoordinationAsync(WorkstreamCoordinationAuthorityRecord record, CancellationToken cancellationToken = default) =>
             _applicationData.InsertAsync(Prepare(record, CoordinationKind(record?.RecordType), record?.StableId), cancellationToken);
 
