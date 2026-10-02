@@ -161,6 +161,121 @@ namespace LagoVista.IoT.Web.Common.Controllers
             return Ok();
         }
 
+        [HttpGet("fix-workspaces/{workspaceId}")]
+        public async Task<IActionResult> GetFixWorkspaceAsync(string organizationId, string workspaceId, CancellationToken ct = default)
+        {
+            var versioned = await _authority.GetFixWorkspaceAsync(Scope(organizationId), Required(workspaceId, nameof(workspaceId)), ct);
+            return versioned == null ? NotFound() : Ok(Versioned(versioned));
+        }
+
+        [HttpGet("fix-workspaces")]
+        public async Task<IActionResult> QueryFixWorkspacesAsync(string organizationId, int pageSize = 100, string continuationToken = null, CancellationToken ct = default)
+        {
+            return Ok(ToPage(await _authority.QueryFixWorkspacesAsync(
+                Scope(organizationId),
+                Page(pageSize, continuationToken),
+                ct)));
+        }
+
+        [HttpPost("fix-workspaces")]
+        public async Task<IActionResult> InsertFixWorkspaceAsync(string organizationId, [FromBody] FixWorkspaceAuthorityRecord record, CancellationToken ct = default)
+        {
+            if (record == null || String.IsNullOrWhiteSpace(record.WorkspaceId))
+                return BadRequest("record.workspaceId is required.");
+
+            record.Organization = Scope(organizationId);
+            await _authority.InsertFixWorkspaceAsync(record, ct);
+            return Ok();
+        }
+
+        [HttpPut("fix-workspaces/{workspaceId}")]
+        public async Task<IActionResult> UpdateFixWorkspaceAsync(string organizationId, string workspaceId, [FromBody] BuildDynamicsMutationRequest<FixWorkspaceAuthorityRecord> request, CancellationToken ct = default)
+        {
+            if (request?.Record == null || String.IsNullOrWhiteSpace(request.ExpectedVersion))
+                return BadRequest("record and expectedVersion are required.");
+
+            request.Record.Organization = Scope(organizationId);
+            request.Record.WorkspaceId = Required(workspaceId, nameof(workspaceId));
+            return MapMutation(await _authority.UpdateFixWorkspaceAsync(request.Record, ApplicationDataConcurrencyToken.FromValue(request.ExpectedVersion), ct));
+        }
+
+        [HttpGet("devops-activities/{activityId}")]
+        public async Task<IActionResult> GetDevOpsActivityAsync(string organizationId, string activityId, CancellationToken ct = default)
+        {
+            var versioned = await _authority.GetDevOpsActivityAsync(Scope(organizationId), Required(activityId, nameof(activityId)), ct);
+            return versioned == null ? NotFound() : Ok(Versioned(versioned));
+        }
+
+        [HttpGet("devops-activities")]
+        public async Task<IActionResult> QueryDevOpsActivitiesAsync(string organizationId, string workstreamId = null, int pageSize = 100, string continuationToken = null, CancellationToken ct = default)
+        {
+            return Ok(ToPage(await _authority.QueryDevOpsActivitiesAsync(
+                Scope(organizationId),
+                workstreamId,
+                Page(pageSize, continuationToken),
+                ct)));
+        }
+
+        [HttpPost("devops-activities")]
+        public async Task<IActionResult> InsertDevOpsActivityAsync(string organizationId, [FromBody] DevOpsActivityAuthorityRecord record, CancellationToken ct = default)
+        {
+            if (record == null || String.IsNullOrWhiteSpace(record.ActivityId))
+                return BadRequest("record.activityId is required.");
+
+            record.Organization = Scope(organizationId);
+            await _authority.InsertDevOpsActivityAsync(record, ct);
+            return Ok();
+        }
+
+        [HttpPut("devops-activities/{activityId}")]
+        public async Task<IActionResult> UpdateDevOpsActivityAsync(string organizationId, string activityId, [FromBody] BuildDynamicsMutationRequest<DevOpsActivityAuthorityRecord> request, CancellationToken ct = default)
+        {
+            if (request?.Record == null || String.IsNullOrWhiteSpace(request.ExpectedVersion))
+                return BadRequest("record and expectedVersion are required.");
+
+            request.Record.Organization = Scope(organizationId);
+            request.Record.ActivityId = Required(activityId, nameof(activityId));
+            return MapMutation(await _authority.UpdateDevOpsActivityAsync(request.Record, ApplicationDataConcurrencyToken.FromValue(request.ExpectedVersion), ct));
+        }
+
+        [HttpGet("finalizations/{finalizationId}")]
+        public async Task<IActionResult> GetFinalizationAsync(string organizationId, string finalizationId, CancellationToken ct = default)
+        {
+            var versioned = await _authority.GetFinalizationAsync(Scope(organizationId), Required(finalizationId, nameof(finalizationId)), ct);
+            return versioned == null ? NotFound() : Ok(Versioned(versioned));
+        }
+
+        [HttpGet("finalizations")]
+        public async Task<IActionResult> QueryFinalizationsAsync(string organizationId, int pageSize = 100, string continuationToken = null, CancellationToken ct = default)
+        {
+            return Ok(ToPage(await _authority.QueryFinalizationsAsync(
+                Scope(organizationId),
+                Page(pageSize, continuationToken),
+                ct)));
+        }
+
+        [HttpPost("finalizations")]
+        public async Task<IActionResult> InsertFinalizationAsync(string organizationId, [FromBody] StableFinalizationAuthorityRecord record, CancellationToken ct = default)
+        {
+            if (record == null || String.IsNullOrWhiteSpace(record.FinalizationId))
+                return BadRequest("record.finalizationId is required.");
+
+            record.Organization = Scope(organizationId);
+            await _authority.InsertFinalizationAsync(record, ct);
+            return Ok();
+        }
+
+        [HttpPut("finalizations/{finalizationId}")]
+        public async Task<IActionResult> UpdateFinalizationAsync(string organizationId, string finalizationId, [FromBody] BuildDynamicsMutationRequest<StableFinalizationAuthorityRecord> request, CancellationToken ct = default)
+        {
+            if (request?.Record == null || String.IsNullOrWhiteSpace(request.ExpectedVersion))
+                return BadRequest("record and expectedVersion are required.");
+
+            request.Record.Organization = Scope(organizationId);
+            request.Record.FinalizationId = Required(finalizationId, nameof(finalizationId));
+            return MapMutation(await _authority.UpdateFinalizationAsync(request.Record, ApplicationDataConcurrencyToken.FromValue(request.ExpectedVersion), ct));
+        }
+
         [HttpGet("coordination/{recordType}/{stableId}")]
         public async Task<IActionResult> GetCoordinationAsync(string organizationId, string recordType, string stableId, CancellationToken ct = default)
         {
