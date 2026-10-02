@@ -14,6 +14,7 @@ using LagoVista.IoT.Web.Common.Interfaces.Services;
 using LagoVista.IoT.Web.Common.Managers;
 using LagoVista.IoT.Web.Common.Services;
 using LagoVista.IoT.Web.Common.Utils;
+using LagoVista.Relational.Storage;
 using LagoVista.UserAdmin.Interfaces;
 using LagoVista.Web.Common.Security;
 using Microsoft.Extensions.Configuration;
@@ -42,6 +43,7 @@ namespace LagoVista.IoT.Web.Common
             services.AddTransient<IAarCompletionRepository, AarCompletionRepository>();
             services.AddTransient<IStorageRetentionPolicyStore, StorageRetentionPolicyStore>();
             services.AddTransient<IBuildPerformanceTelemetryService, BuildPerformanceTelemetryService>();
+            services.AddPostgresMetricsStore();
             services.AddActivityRecordStore<WorkstreamActivityRecord, CassandraActivityRecordStore<WorkstreamActivityRecord>>(
                 definition => definition.PartitionBy(record => record.OrganizationId));
             services.AddActivityRecordStore<WorkstreamMessageRecord, CassandraActivityRecordStore<WorkstreamMessageRecord>>(
