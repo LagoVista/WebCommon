@@ -2,6 +2,7 @@ using LagoVista.CloudStorage.Storage;
 using LagoVista.Core.Models;
 using LagoVista.IoT.Web.Common.Models.BuildDynamics;
 using LagoVista.IoT.Web.Common.Repos.BuildDynamics;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
@@ -73,6 +74,22 @@ namespace LagoVista.IoT.Web.Common.Tests.BuildDynamics
             Assert.IsTrue(captured.Filters.Any(f => f.Field == "ToId" && (string)f.Value == "worker-7"));
             Assert.IsTrue(captured.Filters.Any(f => f.Field == "AttentionRequired" && (bool)f.Value));
             store.VerifyAll();
+        }
+
+        [TestMethod]
+        public void Startup_IndexesEveryMessageQueryField()
+        {
+            var services = new ServiceCollection();
+            LagoVista.IoT.Web.Common.Startup.ConfigureServices(services);
+            using var provider = services.BuildServiceProvider();
+            var definition = provider
+                .GetRequiredService<ActivityRecordStoreOptions<WorkstreamMessageRecord>>()
+                .Definition;
+
+            CollectionAssert.AreEqual(new[] { "OrganizationId" }, definition.PartitionFields.ToArray());
+            CollectionAssert.AreEquivalent(
+                new[] { "WorkstreamId", "TaskId", "ToRole", "ToId", "AttentionRequired" },
+                definition.IndexedFields.ToArray());
         }
 
         [TestMethod]

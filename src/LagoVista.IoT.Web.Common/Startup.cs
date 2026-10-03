@@ -47,7 +47,13 @@ namespace LagoVista.IoT.Web.Common
             services.AddActivityRecordStore<WorkstreamActivityRecord, CassandraActivityRecordStore<WorkstreamActivityRecord>>(
                 definition => definition.PartitionBy(record => record.OrganizationId));
             services.AddActivityRecordStore<WorkstreamMessageRecord, CassandraActivityRecordStore<WorkstreamMessageRecord>>(
-                definition => definition.PartitionBy(record => record.OrganizationId));
+                definition => definition
+                    .PartitionBy(record => record.OrganizationId)
+                    .Index(record => record.WorkstreamId)
+                    .Index(record => record.TaskId)
+                    .Index(record => record.ToRole)
+                    .Index(record => record.ToId)
+                    .Index(record => record.AttentionRequired));
             services.AddActivityRecordStore<BuildExecutionTelemetry, CassandraActivityRecordStore<BuildExecutionTelemetry>>(
                 definition => definition.PartitionBy(record => record.OrganizationId));
 
