@@ -53,6 +53,8 @@ namespace LagoVista.IoT.Web.Common
             services.AddTransient<IHostedServiceDiagnosticsManager, HostedServiceDiagnosticsManager>();
             services.AddTransient<ILocalHostedServiceDiagnosticsService, LocalHostedServiceDiagnosticsService>();
 
+            services.AddScoped<IProcessManager, LagoVista.Core.Managers.ProcessManager>();
+
             services.AddSingleton<IAppConfig, AppConfig>();
 
         }
