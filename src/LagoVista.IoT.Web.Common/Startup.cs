@@ -55,6 +55,12 @@ namespace LagoVista.IoT.Web.Common
 
             services.AddScoped<IProcessManager, LagoVista.Core.Managers.ProcessManager>();
 
+            services.AddHttpClient("McpCapability", client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
+            services.AddSingleton<IMcpCapabilityService, McpCapabilityService>();
+
             services.AddSingleton<IAppConfig, AppConfig>();
 
         }
