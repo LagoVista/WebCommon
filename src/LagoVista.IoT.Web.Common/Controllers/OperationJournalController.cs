@@ -14,7 +14,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
     /// No arbitrary model activity may be written through this controller.</summary>
     [Authorize]
     [ApiController]
-    [Route("api/operations")]
+    [Route("api/devops/operations")]
     public sealed class OperationJournalController : ControllerBase
     {
         private readonly OperationJournalAccessService _journal;
