@@ -1,4 +1,7 @@
 using LagoVista.CloudStorage.Storage;
+using LagoVista.Core.Validation;
+using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using LagoVista.AspNetCore.Identity;
 using LagoVista.AspNetCore.Identity.Managers;
 using Microsoft.AspNetCore.Authorization;
@@ -18,9 +21,11 @@ namespace LagoVista.IoT.Web.Common.Controllers
     public sealed class OperationJournalController : ControllerBase
     {
         private readonly OperationJournalAccessService _journal;
-        public OperationJournalController(OperationJournalAccessService journal)
+        private readonly ILogger<OperationJournalController> _logger;
+        public OperationJournalController(OperationJournalAccessService journal, ILogger<OperationJournalController> logger)
         {
             _journal = journal ?? throw new ArgumentNullException(nameof(journal));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         private OperationJournalPrincipal Principal()
@@ -43,59 +48,89 @@ namespace LagoVista.IoT.Web.Common.Controllers
             };
         }
 
+        // Preserve the original exception message for actionable diagnostics, while
+        // returning a typed InvokeResult rather than an empty ASP.NET failure.
+        private async Task<ActionResult<InvokeResult<T>>> Execute<T>(Func<Task<T>> action)
+        {
+            try
+            {
+                return Ok(InvokeResult<T>.Create(await action()));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, InvokeResult<T>.FromError(ex.Message, "OPERATION_JOURNAL_FORBIDDEN"));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(InvokeResult<T>.FromError(ex.Message, "OPERATION_JOURNAL_NOT_FOUND"));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(InvokeResult<T>.FromError(ex.Message, "OPERATION_JOURNAL_ARGUMENT"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Operation Journal request failed.");
+                return StatusCode(502, InvokeResult<T>.FromError(
+                    ex.Message, "OPERATION_JOURNAL_UPSTREAM_FAILURE"));
+            }
+        }
+
         [HttpGet("{operationId}")]
-        public Task<OperationJournalRecord> Get(string operationId, CancellationToken ct)
-            => _journal.GetAsync(Principal(), operationId, ct);
+        public Task<ActionResult<InvokeResult<OperationJournalRecord>>> Get(string operationId, CancellationToken ct)
+            => Execute(() => _journal.GetAsync(Principal(), operationId, ct));
 
         [HttpGet("{operationId}/details")]
-        public Task<OperationJournalPage<OperationJournalDetail>> Details(string operationId,
+        public Task<ActionResult<InvokeResult<OperationJournalPage<OperationJournalDetail>>>> Details(string operationId,
             [FromQuery] int pageSize = 50, [FromQuery] string cursor = null, CancellationToken ct = default)
-            => _journal.GetDetailsAsync(Principal(), operationId, pageSize, cursor, ct);
+            => Execute(() => _journal.GetDetailsAsync(Principal(), operationId, pageSize, cursor, ct));
 
         [HttpGet]
-        public Task<OperationJournalPage<OperationJournalRecord>> List(
+        public Task<ActionResult<InvokeResult<OperationJournalPage<OperationJournalRecord>>>> List(
             [FromQuery] string scopeType, [FromQuery] string ownerId,
             [FromQuery] DateTimeOffset startUtc, [FromQuery] DateTimeOffset endUtc,
             [FromQuery] int pageSize = 50, [FromQuery] string cursor = null, CancellationToken ct = default)
-        {
-            var principal = Principal();
-            var scope = new OperationJournalScope
+            => Execute(() =>
             {
-                OrganizationId = principal.OrganizationId,
-                ScopeType = scopeType,
-                WorkstreamId = scopeType == "workstream" ? ownerId : null,
-                WorkspaceId = scopeType == "workspace" ? ownerId : null,
-                FixWorkspaceId = scopeType == "fix-workspace" ? ownerId : null,
-                StartUtc = startUtc,
-                EndUtc = endUtc
-            };
-            return _journal.ListAsync(principal, scope, pageSize, cursor, ct);
-        }
+                var principal = Principal();
+                var scope = new OperationJournalScope
+                {
+                    OrganizationId = principal.OrganizationId,
+                    ScopeType = scopeType,
+                    WorkstreamId = scopeType == "workstream" ? ownerId : null,
+                    WorkspaceId = scopeType == "workspace" ? ownerId : null,
+                    FixWorkspaceId = scopeType == "fix-workspace" ? ownerId : null,
+                    StartUtc = startUtc,
+                    EndUtc = endUtc
+                };
+                return _journal.ListAsync(principal, scope, pageSize, cursor, ct);
+            });
 
         [HttpPost("start")]
-        public Task<OperationJournalRecord> Start([FromBody] OperationJournalRecord operation, CancellationToken ct)
-            => _journal.StartAsync(Principal(), operation, ct);
+        public Task<ActionResult<InvokeResult<OperationJournalRecord>>> Start([FromBody] OperationJournalRecord operation, CancellationToken ct)
+            => Execute(() => _journal.StartAsync(Principal(), operation, ct));
 
         [HttpPost("{operationId}/transition")]
-        public Task<OperationJournalRecord> Transition(string operationId,
+        public Task<ActionResult<InvokeResult<OperationJournalRecord>>> Transition(string operationId,
             [FromBody] OperationJournalTransitionRequest request, CancellationToken ct)
-            => _journal.TransitionAsync(Principal(), operationId,
-                request.ExpectedStatus, request.NextStatus, request.Summary, request.ChangedAtUtc, ct);
+            => Execute(() => _journal.TransitionAsync(Principal(), operationId,
+                request.ExpectedStatus, request.NextStatus, request.Summary, request.ChangedAtUtc, ct));
 
         [HttpPost("{operationId}/recover")]
-        public Task<OperationJournalRecord> Recover(string operationId,
+        public Task<ActionResult<InvokeResult<OperationJournalRecord>>> Recover(string operationId,
             [FromBody] OperationJournalRecoveryRequest request, CancellationToken ct)
-            => _journal.RecoverAsync(Principal(), operationId,
-                request.ExpectedStatus, request.Summary, request.ChangedAtUtc, ct);
+            => Execute(() => _journal.RecoverAsync(Principal(), operationId,
+                request.ExpectedStatus, request.Summary, request.ChangedAtUtc, ct));
 
         [HttpPost("{operationId}/details")]
-        public Task<OperationJournalDetail> Append(string operationId,
+        public Task<ActionResult<InvokeResult<OperationJournalDetail>>> Append(string operationId,
             [FromBody] OperationJournalDetail detail, CancellationToken ct)
-        {
-            if (detail == null || !String.Equals(detail.OperationId, operationId, StringComparison.Ordinal))
-                throw new ArgumentException("Detail must match route operation.");
-            return _journal.AppendAsync(Principal(), detail, ct);
-        }
+            => Execute(() =>
+            {
+                if (detail == null || !String.Equals(detail.OperationId, operationId, StringComparison.Ordinal))
+                    throw new ArgumentException("Detail must match route operation.");
+                return _journal.AppendAsync(Principal(), detail, ct);
+            });
     }
 
     public sealed class OperationJournalTransitionRequest
