@@ -54,6 +54,8 @@ namespace LagoVista.IoT.Web.Common
             services.AddTransient<ILocalHostedServiceDiagnosticsService, LocalHostedServiceDiagnosticsService>();
 
             services.AddScoped<IProcessManager, LagoVista.Core.Managers.ProcessManager>();
+            services.AddScoped<LagoVista.CloudStorage.Storage.OperationJournalAccessService>();
+            services.AddScoped<LagoVista.CloudStorage.Storage.IOperationJournalStore, LagoVista.CloudStorage.Storage.StorageProviders.Cassandra.CassandraOperationJournalStore>();
 
             services.AddHttpClient("McpCapability", client =>
             {
