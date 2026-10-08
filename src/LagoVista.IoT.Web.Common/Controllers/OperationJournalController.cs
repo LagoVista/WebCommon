@@ -1,5 +1,6 @@
 using LagoVista.CloudStorage.Storage;
 using LagoVista.AspNetCore.Identity;
+using LagoVista.AspNetCore.Identity.Managers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
