@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 namespace LagoVista.IoT.Web.Common.Controllers
 {
     /// <summary>
-    /// Machine-to-machine, read-only journal diagnostics. The service-http signing
+    /// Machine-to-machine journal reads and deterministic-operation writes. The service-http signing
     /// filter authenticates the caller; tenant scope is part of the signed route.
     /// Public user routes remain under /api/devops/operations.
     /// </summary>
@@ -39,7 +39,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
             {
                 OrganizationId = organizationId,
                 CanReadAllOperations = true,
-                InternalDeterministicExecutor = false
+                InternalDeterministicExecutor = true
             };
         }
 
@@ -105,5 +105,33 @@ namespace LagoVista.IoT.Web.Common.Controllers
             [FromQuery] string cursor = null, CancellationToken ct = default)
             => Execute(() => _journal.GetDetailsAsync(
                 SignedPrincipal(organizationId), operationId, pageSize, cursor, ct));
+        [HttpPost("start")]
+        public Task<ActionResult<InvokeResult<OperationJournalRecord>>> Start(
+            string organizationId, [FromBody] OperationJournalRecord operation, CancellationToken ct)
+            => Execute(() => _journal.StartAsync(SignedPrincipal(organizationId), operation, ct));
+
+        [HttpPost("{operationId}/details")]
+        public Task<ActionResult<InvokeResult<OperationJournalDetail>>> Append(
+            string organizationId, string operationId, [FromBody] OperationJournalDetail detail, CancellationToken ct)
+            => Execute(() =>
+            {
+                if (detail == null || !String.Equals(detail.OperationId, operationId, StringComparison.Ordinal))
+                    throw new ArgumentException("Detail must match route operation.");
+                return _journal.AppendAsync(SignedPrincipal(organizationId), detail, ct);
+            });
+
+        [HttpPost("{operationId}/transition")]
+        public Task<ActionResult<InvokeResult<OperationJournalRecord>>> Transition(
+            string organizationId, string operationId,
+            [FromBody] OperationJournalTransitionRequest request, CancellationToken ct)
+            => Execute(() => _journal.TransitionAsync(SignedPrincipal(organizationId), operationId,
+                request.ExpectedStatus, request.NextStatus, request.Summary, request.ChangedAtUtc, ct));
+
+        [HttpPost("{operationId}/recover")]
+        public Task<ActionResult<InvokeResult<OperationJournalRecord>>> Recover(
+            string organizationId, string operationId,
+            [FromBody] OperationJournalRecoveryRequest request, CancellationToken ct)
+            => Execute(() => _journal.RecoverAsync(SignedPrincipal(organizationId), operationId,
+                request.ExpectedStatus, request.Summary, request.ChangedAtUtc, ct));
     }
 }
