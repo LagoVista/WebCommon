@@ -1,5 +1,11 @@
 using k8s;
 using LagoVista.CloudStorage.Interfaces;
+using LagoVista.CloudStorage.Storage;
+using LagoVista.CloudStorage.Storage.StorageProviders.Cassandra;
+using LagoVista.IoT.Web.Common.Interfaces.BuildDynamics;
+using LagoVista.IoT.Web.Common.Repos.BuildDynamics;
+using LagoVista.IoT.Web.Common.BuildDynamics;
+using LagoVista.IoT.Web.Common.Models.BuildDynamics;
 using LagoVista.Core.Interfaces;
 using LagoVista.IoT.Logging.Loggers;
 using LagoVista.IoT.Web.Common.Configuration;
@@ -8,6 +14,7 @@ using LagoVista.IoT.Web.Common.Interfaces.Services;
 using LagoVista.IoT.Web.Common.Managers;
 using LagoVista.IoT.Web.Common.Services;
 using LagoVista.IoT.Web.Common.Utils;
+using LagoVista.Relational.Storage;
 using LagoVista.UserAdmin.Interfaces;
 using LagoVista.Web.Common.Security;
 using Microsoft.Extensions.Configuration;
@@ -31,6 +38,24 @@ namespace LagoVista.IoT.Web.Common
             services.AddTransient<ISignedRequestHttpValidator, SignedRequestHttpValidator>();
             services.AddTransient<IEntryIntentService, EntryIntentService>();
             services.AddTransient<IMetricsBySessionRepo, Repos.MetricsBySessionRepo>();
+            services.AddTransient<IWorkstreamAuthorityRepository, WorkstreamAuthorityRepository>();
+            services.AddTransient<IWorkstreamMessageRepository, WorkstreamMessageRepository>();
+            services.AddTransient<IAarCompletionRepository, AarCompletionRepository>();
+            services.AddTransient<IStorageRetentionPolicyStore, StorageRetentionPolicyStore>();
+            services.AddTransient<IBuildPerformanceTelemetryService, BuildPerformanceTelemetryService>();
+            services.AddPostgresMetricsStore();
+            services.AddActivityRecordStore<WorkstreamActivityRecord, CassandraActivityRecordStore<WorkstreamActivityRecord>>(
+                definition => definition.PartitionBy(record => record.OrganizationId));
+            services.AddActivityRecordStore<WorkstreamMessageRecord, CassandraActivityRecordStore<WorkstreamMessageRecord>>(
+                definition => definition
+                    .PartitionBy(record => record.OrganizationId)
+                    .Index(record => record.WorkstreamId)
+                    .Index(record => record.TaskId)
+                    .Index(record => record.ToRole)
+                    .Index(record => record.ToId)
+                    .Index(record => record.AttentionRequired));
+            services.AddActivityRecordStore<BuildExecutionTelemetry, CassandraActivityRecordStore<BuildExecutionTelemetry>>(
+                definition => definition.PartitionBy(record => record.OrganizationId));
 
             services.AddTransient<IMetricsLoggerSettings, MetricsLoggerSettings>();
 

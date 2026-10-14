@@ -12,6 +12,7 @@
     <PackageReference Include="LagoVista.UserAdmin" />
     <PackageReference Include="LagoVista.Core.Configuration" />
     <PackageReference Include="LagoVista.CloudStorage" />
+    <PackageReference Include="LagoVista.Relational" />
     <PackageReference Include="LagoVista.Core.Rcg.Client" />
     <PackageReference Include="LagoVista.AspNetCore.Identity" />
     <PackageReference Include="prometheus-net.AspNetCore" />
