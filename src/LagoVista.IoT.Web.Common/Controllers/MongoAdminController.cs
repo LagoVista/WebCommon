@@ -1,5 +1,6 @@
 using LagoVista.CloudStorage.Interfaces;
 using LagoVista.CloudStorage.Models;
+using LagoVista.CloudStorage.Storage;
 using LagoVista.Core.Models.UIMetaData;
 using LagoVista.Core.Validation;
 using LagoVista.IoT.Logging.Loggers;
@@ -21,14 +22,17 @@ namespace LagoVista.IoT.Web.Common.Controllers
     public class MongoAdminController : LagoVistaBaseController
     {
         private readonly IMongoAdminRepo _mongoAdminRepo;
+        private readonly IScratchStore _scratchStore;
 
         public MongoAdminController(
             IMongoAdminRepo mongoAdminRepo,
+            IScratchStore scratchStore,
             UserManager<AppUser> userManager,
             IAdminLogger logger)
             : base(userManager, logger)
         {
             _mongoAdminRepo = mongoAdminRepo ?? throw new ArgumentNullException(nameof(mongoAdminRepo));
+            _scratchStore = scratchStore ?? throw new ArgumentNullException(nameof(scratchStore));
         }
 
         [HttpGet("databases")]
@@ -143,6 +147,22 @@ namespace LagoVista.IoT.Web.Common.Controllers
             catch (Exception ex)
             {
                 return InvokeResult.FromError($"Mongo delete failed: {ex.Message}");
+            }
+        }
+
+        [HttpDelete("scratch/{collection}")]
+        public async Task<InvokeResult<long>> ClearScratchCollectionAsync(
+            [FromRoute] string collection,
+            CancellationToken ct = default)
+        {
+            try
+            {
+                var deleted = await _scratchStore.ClearCollectionAsync(collection, ct);
+                return InvokeResult<long>.Create(deleted);
+            }
+            catch (Exception ex)
+            {
+                return InvokeResult<long>.FromError($"Scratch collection clear failed: {ex.Message}");
             }
         }
 
