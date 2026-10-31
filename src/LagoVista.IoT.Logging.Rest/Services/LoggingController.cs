@@ -105,6 +105,7 @@ namespace LagoVista.IoT.Logging.Rest.Services
         /// </summary>
         /// <param name="entry">Client log entry.</param>
         /// <returns>Success when the entry has been accepted by the server logger.</returns>
+        [AllowAnonymous]
         [HttpPost("/api/sys/logging/client")]
         public InvokeResult LogClient([FromBody] ClientLogEntry entry)
         {
