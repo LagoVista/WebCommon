@@ -19,5 +19,10 @@ namespace LagoVista.IoT.Web.Common.Attributes
 
         public string Name { get; }
         public string Description { get; set; }
+
+        /// <summary>
+        /// Optional MCP tool family. An unset family makes the tool available in every family endpoint.
+        /// </summary>
+        public string FamilyId { get; set; }
     }
 }
