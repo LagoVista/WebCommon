@@ -68,7 +68,6 @@ namespace LagoVista.Web.Common.Security
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
 
-            _adminLogger.Trace($"{this.Tag()} - Validating signed request for ServiceHttpV1 profile. Method: {request.Method}, Path: {request.Path}");
 
             return _validatorService.ValidateServiceHttpV1Async(new SignedRequestValidationContext
             {

@@ -26,7 +26,6 @@ namespace LagoVista.Web.Common.Security
 
             SignedRequestValidationResult result;
 
-            _logger.Trace($"{this.Tag()} - Profile {_profile} - {context.HttpContext.Request.Path}");
 
             switch (_profile)
             {
