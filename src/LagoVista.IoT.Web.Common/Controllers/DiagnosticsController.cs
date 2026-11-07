@@ -1,12 +1,11 @@
-using LagoVista.AspNetCore.Identity.Managers;
 using LagoVista.Core.Models.UIMetaData;
 using LagoVista.Core.Validation;
 using LagoVista.IoT.Logging.Loggers;
 using LagoVista.IoT.Logging.Models;
 using LagoVista.IoT.Web.Common.Attributes;
 using LagoVista.UserAdmin.Models.Users;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -17,9 +16,8 @@ using System.Threading.Tasks;
 namespace LagoVista.IoT.Web.Common.Controllers
 {
     /// <summary>
-    /// Read-only diagnostic viewer for the System Admin application.
-    /// Cassandra is an append-only 48-hour stream; Mongo scratch contains
-    /// longer-lived errors. Both are accessed through their existing readers.
+    /// Read-only system-admin diagnostics over Cassandra's 48-hour per-application
+    /// partitions and Mongo's 30-day error scratch store.
     /// </summary>
     [Authorize]
     [SystemAdmin]
@@ -27,6 +25,8 @@ namespace LagoVista.IoT.Web.Common.Controllers
     [Route("api/diagnostics")]
     public sealed class DiagnosticsController : LagoVistaBaseController
     {
+        private const int MaxCombinedResults = 500;
+        private const int MaxTags = 5;
         private readonly IDiagnosticLogReader _logs;
         private readonly IApplicationErrorRepository _errors;
 
@@ -42,9 +42,9 @@ namespace LagoVista.IoT.Web.Common.Controllers
         }
 
         /// <summary>
-        /// Combined, most-recent-first view of both diagnostic stores.
-        /// V1 pages the latest 500 records per application/environment/window;
-        /// source-specific queries are available for deeper investigation.
+        /// Up to 500 most recent combined records, in pages; real app/environment
+        /// scope remains mandatory for Cassandra. Multiple tags use OR semantics.
+        /// startUtc/endUtc override the relative hours window when both are set.
         /// </summary>
         [HttpGet]
         public async Task<ListResponse<DiagnosticRecordSummary>> GetDiagnosticsAsync(
@@ -53,57 +53,48 @@ namespace LagoVista.IoT.Web.Common.Controllers
             [FromQuery] int hours = 2,
             [FromQuery] string level = null,
             [FromQuery] string tag = null,
+            [FromQuery] DateTime? startUtc = null,
+            [FromQuery] DateTime? endUtc = null,
+            [FromQuery] string tags = null,
             CancellationToken ct = default)
         {
             var request = GetListRequestFromHeader();
             if (String.IsNullOrWhiteSpace(application) || String.IsNullOrWhiteSpace(environment))
-                return ListResponse<DiagnosticRecordSummary>.FromError("Application and environment are required for a unified diagnostic query.");
-            if (hours < 1 || hours > 48)
-                return ListResponse<DiagnosticRecordSummary>.FromError("Unified diagnostic queries must be within the last 1-48 hours.");
-            if (request.PageSize < 1 || request.PageSize > 100 || request.PageIndex < 1 ||
-                (long)request.PageIndex * request.PageSize > 500)
-                return ListResponse<DiagnosticRecordSummary>.FromError("Unified diagnostics support up to 500 bounded records using page sizes 1-100.");
+                return ListResponse<DiagnosticRecordSummary>.FromError("Application and environment are required for a combined diagnostics query.");
+            if (!ValidBoundedPage(request, 100, MaxCombinedResults))
+                return ListResponse<DiagnosticRecordSummary>.FromError("Combined diagnostics support pages of 1-100, within the latest 500 results.");
+            if (!TryWindow(hours, startUtc, endUtc, 48, out var from, out var to, out var error))
+                return ListResponse<DiagnosticRecordSummary>.FromError(error);
+            var selectedTags = ParseTags(tag, tags);
+            if (selectedTags.Count > MaxTags)
+                return ListResponse<DiagnosticRecordSummary>.FromError("Select no more than five tags.");
 
             try
             {
-                var now = DateTime.UtcNow;
-                var from = now.AddHours(-hours);
+                var app = application.Trim();
                 var env = NormalizeEnvironment(environment);
-                var top = request.PageIndex * request.PageSize + 1;
-                var logsTask = _logs.QueryAsync(new DiagnosticLogQuery
-                {
-                    Application = application.Trim(),
-                    Environment = env,
-                    StartUtc = from,
-                    EndUtc = now,
-                    PageSize = Math.Min(top, 500)
-                }, ct);
-                var errorsTask = _errors.GetRecentErrorsAsync(1000, application.Trim(), ct);
-                await Task.WhenAll(logsTask, errorsTask).ConfigureAwait(false);
-
-                var logPage = await logsTask.ConfigureAwait(false);
-                var errors = await errorsTask.ConfigureAwait(false);
-                var rows = logPage.Records
-                    .Select(record => DiagnosticRecordSummary.FromLog(record))
-                    .Concat(errors
-                        .Where(record => record != null &&
-                                         String.Equals(record.Environment, env, StringComparison.OrdinalIgnoreCase) &&
-                                         record.TimeStamp >= from && record.TimeStamp <= now)
-                        .Select(record => DiagnosticRecordSummary.FromError(record)))
-                    .Where(record => (String.IsNullOrWhiteSpace(level) ||
-                                      String.Equals(record.LogLevel, level.Trim(), StringComparison.OrdinalIgnoreCase)) &&
-                                     (String.IsNullOrWhiteSpace(tag) ||
-                                      String.Equals(record.Tag, tag.Trim(), StringComparison.OrdinalIgnoreCase)))
-                    .OrderByDescending(record => record.TimeStamp)
-                    .ThenBy(record => record.Source, StringComparer.Ordinal)
-                    .ThenBy(record => record.Id, StringComparer.Ordinal)
+                var pages = await QueryLogPagesAsync(app, env, from, to, level, selectedTags, MaxCombinedResults, ct).ConfigureAwait(false);
+                var errors = await _errors.GetRecentErrorsAsync(1000, app, ct).ConfigureAwait(false);
+                var merged = pages.SelectMany(page => page.Records)
+                    .Select(DiagnosticRecordSummary.FromLog)
+                    .Concat(errors.Where(item => item != null &&
+                               InWindow(item.TimeStamp, from, to) &&
+                               String.Equals(item.Environment, env, StringComparison.OrdinalIgnoreCase))
+                        .Select(DiagnosticRecordSummary.FromError))
+                    .Where(item =>
+                        Matches(item.LogLevel, level) &&
+                        (selectedTags.Count == 0 ||
+                         selectedTags.Any(value => Matches(item.Tag, value))))
+                    .OrderByDescending(item => item.TimeStamp)
+                    .ThenBy(item => item.Source, StringComparer.Ordinal)
+                    .ThenBy(item => item.Id, StringComparer.Ordinal)
+                    .Take(MaxCombinedResults)
                     .ToList();
 
                 var skip = (request.PageIndex - 1) * request.PageSize;
-                var selected = rows.Skip(skip).Take(request.PageSize).ToList();
-                var more = rows.Count > skip + selected.Count ||
-                           !String.IsNullOrWhiteSpace(logPage.ContinuationToken);
-                return ListResponse<DiagnosticRecordSummary>.Create(selected, request, more, String.Empty, String.Empty);
+                var items = merged.Skip(skip).Take(request.PageSize).ToList();
+                return ListResponse<DiagnosticRecordSummary>.Create(
+                    items, request, merged.Count > skip + items.Count, String.Empty, String.Empty);
             }
             catch (Exception ex)
             {
@@ -111,7 +102,10 @@ namespace LagoVista.IoT.Web.Common.Controllers
             }
         }
 
-        /// <summary>Query Cassandra logs with native opaque continuation tokens.</summary>
+        /// <summary>
+        /// Native Cassandra paging for zero or one tag. Up to five selected tags
+        /// use bounded union paging over the latest 500 matching records.
+        /// </summary>
         [HttpGet("logs")]
         public async Task<ListResponse<LogRecord>> GetLogsAsync(
             [FromQuery] string application,
@@ -119,29 +113,56 @@ namespace LagoVista.IoT.Web.Common.Controllers
             [FromQuery] int hours = 2,
             [FromQuery] string level = null,
             [FromQuery] string tag = null,
+            [FromQuery] DateTime? startUtc = null,
+            [FromQuery] DateTime? endUtc = null,
+            [FromQuery] string tags = null,
             CancellationToken ct = default)
         {
             var request = GetListRequestFromHeader();
             if (String.IsNullOrWhiteSpace(application) || String.IsNullOrWhiteSpace(environment))
-                return ListResponse<LogRecord>.FromError("Application and environment are required.");
-            if (hours < 1 || hours > 48 || request.PageSize < 1 || request.PageSize > 500)
-                return ListResponse<LogRecord>.FromError("Cassandra diagnostics require 1-48 hours and a page size of 1-500.");
-            if (request.PageIndex > 1 && !request.HasCursor)
-                return ListResponse<LogRecord>.FromError("A continuation cursor is required after the first Cassandra page.");
-            if (request.HasCursor && request.NextPartitionKey != "diagnostic-logs")
+                return ListResponse<LogRecord>.FromError("Application and environment are required for Cassandra diagnostics.");
+            if (!TryWindow(hours, startUtc, endUtc, 48, out var from, out var to, out var error))
+                return ListResponse<LogRecord>.FromError(error);
+            var selectedTags = ParseTags(tag, tags);
+            if (selectedTags.Count > MaxTags)
+                return ListResponse<LogRecord>.FromError("Select no more than five tags.");
+
+            var multiple = selectedTags.Count > 1;
+            if (request.PageSize < 1 || request.PageSize > (multiple ? 100 : 500) ||
+                request.PageIndex < 1 || (multiple && (long)request.PageIndex * request.PageSize > MaxCombinedResults))
+                return ListResponse<LogRecord>.FromError("Cassandra diagnostics require a bounded page: up to 500 records, or 100 per page for multiple tags.");
+            if (multiple && request.HasCursor)
+                return ListResponse<LogRecord>.FromError("Multiple-tag queries use page indexes, not Cassandra continuation tokens.");
+            if (!multiple && request.PageIndex > 1 && !request.HasCursor)
+                return ListResponse<LogRecord>.FromError("A Cassandra continuation cursor is required after the first page.");
+            if (!multiple && request.HasCursor && request.NextPartitionKey != "diagnostic-logs")
                 return ListResponse<LogRecord>.FromError("Invalid diagnostic continuation cursor.");
 
             try
             {
-                var now = DateTime.UtcNow;
+                var app = application.Trim();
+                var env = NormalizeEnvironment(environment);
+                if (multiple)
+                {
+                    var pages = await QueryLogPagesAsync(app, env, from, to, level, selectedTags, MaxCombinedResults, ct).ConfigureAwait(false);
+                    var ordered = pages.SelectMany(page => page.Records)
+                        .OrderByDescending(item => item.TimeStamp)
+                        .ThenBy(item => item.Id.ToString(), StringComparer.Ordinal)
+                        .Take(MaxCombinedResults).ToList();
+                    var skip = (request.PageIndex - 1) * request.PageSize;
+                    var items = ordered.Skip(skip).Take(request.PageSize).ToList();
+                    return ListResponse<LogRecord>.Create(
+                        items, request, ordered.Count > skip + items.Count, String.Empty, String.Empty);
+                }
+
                 var result = await _logs.QueryAsync(new DiagnosticLogQuery
                 {
-                    Application = application.Trim(),
-                    Environment = NormalizeEnvironment(environment),
-                    StartUtc = now.AddHours(-hours),
-                    EndUtc = now,
+                    Application = app,
+                    Environment = env,
+                    StartUtc = from,
+                    EndUtc = to,
                     Level = level,
-                    Tag = tag,
+                    Tag = selectedTags.FirstOrDefault(),
                     PageSize = request.PageSize,
                     ContinuationToken = request.HasCursor ? request.NextRowKey : null
                 }, ct).ConfigureAwait(false);
@@ -158,33 +179,40 @@ namespace LagoVista.IoT.Web.Common.Controllers
         }
 
         /// <summary>
-        /// Read the 30-day Mongo scratch error store. The existing repository
-        /// exposes the latest 1,000 entries; pages are bounded by that limit.
+        /// Pages over the existing repository's latest 1,000 Mongo error summaries.
         /// </summary>
         [HttpGet("errors")]
         public async Task<ListResponse<ApplicationErrorSummary>> GetErrorsAsync(
             [FromQuery] string application = null,
             [FromQuery] string environment = null,
             [FromQuery] int hours = 48,
+            [FromQuery] DateTime? startUtc = null,
+            [FromQuery] DateTime? endUtc = null,
+            [FromQuery] string tags = null,
             CancellationToken ct = default)
         {
             var request = GetListRequestFromHeader();
-            if (hours < 1 || hours > 720 || request.PageSize < 1 || request.PageSize > 100 ||
-                request.PageIndex < 1 || (long)request.PageIndex * request.PageSize > 1000)
-                return ListResponse<ApplicationErrorSummary>.FromError("Mongo error queries allow 1-720 hours and up to 1,000 recent records, in pages of 1-100.");
+            if (!ValidBoundedPage(request, 100, 1000))
+                return ListResponse<ApplicationErrorSummary>.FromError("Mongo error queries support up to 1,000 recent records in pages of 1-100.");
+            if (!TryWindow(hours, startUtc, endUtc, 720, out var from, out var to, out var error))
+                return ListResponse<ApplicationErrorSummary>.FromError(error);
+            var selectedTags = ParseTags(null, tags);
+            if (selectedTags.Count > MaxTags)
+                return ListResponse<ApplicationErrorSummary>.FromError("Select no more than five tags.");
+
             try
             {
                 var latest = await _errors.GetRecentErrorsAsync(1000, application, ct).ConfigureAwait(false);
-                var from = DateTime.UtcNow.AddHours(-hours);
                 var env = String.IsNullOrWhiteSpace(environment) ? null : NormalizeEnvironment(environment);
-                var eligible = latest
-                    .Where(error => error != null && error.TimeStamp >= from &&
-                                    (env == null || String.Equals(error.Environment, env, StringComparison.OrdinalIgnoreCase)))
-                    .OrderByDescending(error => error.TimeStamp).ToList();
+                var eligible = latest.Where(item =>
+                        item != null && InWindow(item.TimeStamp, from, to) &&
+                        (env == null || String.Equals(item.Environment, env, StringComparison.OrdinalIgnoreCase)) &&
+                        (selectedTags.Count == 0 || selectedTags.Any(value => Matches(item.Tag, value))))
+                    .OrderByDescending(item => item.TimeStamp).ToList();
                 var skip = (request.PageIndex - 1) * request.PageSize;
-                var model = eligible.Skip(skip).Take(request.PageSize).ToList();
-                return ListResponse<ApplicationErrorSummary>.Create(model, request,
-                    eligible.Count > skip + model.Count, String.Empty, String.Empty);
+                var items = eligible.Skip(skip).Take(request.PageSize).ToList();
+                return ListResponse<ApplicationErrorSummary>.Create(
+                    items, request, eligible.Count > skip + items.Count, String.Empty, String.Empty);
             }
             catch (Exception ex)
             {
@@ -192,10 +220,91 @@ namespace LagoVista.IoT.Web.Common.Controllers
             }
         }
 
+        /// <summary>
+        /// Searchable nuviotTag facet for the chosen application, source and time range.
+        /// Counts are from a bounded sample: up to 500 Cassandra events and 1,000
+        /// Mongo error summaries. They are NOT global aggregate counts.
+        /// </summary>
+        [HttpGet("facets/tags")]
+        public async Task<ListResponse<DiagnosticTagFacet>> GetTagFacetsAsync(
+            [FromQuery] string application,
+            [FromQuery] string environment,
+            [FromQuery] int hours = 2,
+            [FromQuery] string source = "all",
+            [FromQuery] string level = null,
+            [FromQuery] DateTime? startUtc = null,
+            [FromQuery] DateTime? endUtc = null,
+            CancellationToken ct = default)
+        {
+            var request = GetListRequestFromHeader();
+            var errorsOnly = String.Equals(source, "errors", StringComparison.OrdinalIgnoreCase);
+            var logsOnly = String.Equals(source, "logs", StringComparison.OrdinalIgnoreCase);
+            if (!errorsOnly && !logsOnly && !Matches(source, "all"))
+                return ListResponse<DiagnosticTagFacet>.FromError("Unknown diagnostic source.");
+            if ((!errorsOnly && String.IsNullOrWhiteSpace(application)) ||
+                String.IsNullOrWhiteSpace(environment))
+                return ListResponse<DiagnosticTagFacet>.FromError("Application and environment are required for diagnostic tag facets.");
+            if (!ValidBoundedPage(request, 500, 1000))
+                return ListResponse<DiagnosticTagFacet>.FromError("Tag facets support a page size of 1-500.");
+            if (!TryWindow(hours, startUtc, endUtc, errorsOnly ? 720 : 48, out var from, out var to, out var error))
+                return ListResponse<DiagnosticTagFacet>.FromError(error);
+
+            try
+            {
+                var sample = new List<string>();
+                var env = NormalizeEnvironment(environment);
+                if (!errorsOnly)
+                {
+                    var page = await _logs.QueryAsync(new DiagnosticLogQuery
+                    {
+                        Application = application.Trim(),
+                        Environment = env,
+                        StartUtc = from,
+                        EndUtc = to,
+                        Level = level,
+                        PageSize = 500
+                    }, ct).ConfigureAwait(false);
+                    sample.AddRange(page.Records.Select(item => item.Tag));
+                }
+                if (!logsOnly)
+                {
+                    var errors = await _errors.GetRecentErrorsAsync(1000, application, ct).ConfigureAwait(false);
+                    sample.AddRange(errors.Where(item => item != null && InWindow(item.TimeStamp, from, to) &&
+                                         String.Equals(item.Environment, env, StringComparison.OrdinalIgnoreCase) &&
+                                         Matches(item.LogLevel, level))
+                        .Select(item => item.Tag));
+                }
+
+                var total = sample.Count;
+                var facets = sample.Where(value => !String.IsNullOrWhiteSpace(value))
+                    .GroupBy(value => value.Trim(), StringComparer.OrdinalIgnoreCase)
+                    .Select(group => new DiagnosticTagFacet
+                    {
+                        Value = group.Key,
+                        Count = group.Count(),
+                        SampleSize = total,
+                        Percentage = total == 0 ? 0 : Math.Round(100d * group.Count() / total, 1)
+                    })
+                    .OrderByDescending(item => item.Count)
+                    .ThenBy(item => item.Value, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+                var skip = (request.PageIndex - 1) * request.PageSize;
+                var items = facets.Skip(skip).Take(request.PageSize).ToList();
+                var response = ListResponse<DiagnosticTagFacet>.Create(
+                    items, request, facets.Count > skip + items.Count, String.Empty, String.Empty);
+                response.Help = "Facet percentages are based on a bounded " + total +
+                                "-record sample, not the total volume of stored logs.";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                return ListResponse<DiagnosticTagFacet>.FromError("Failed to compute tag facets: " + ex.Message);
+            }
+        }
+
         [HttpGet("errors/{id}")]
         public async Task<ActionResult<InvokeResult<LogRecord>>> GetErrorAsync(
-            [FromRoute] string id,
-            CancellationToken ct = default)
+            [FromRoute] string id, CancellationToken ct = default)
         {
             if (String.IsNullOrWhiteSpace(id))
                 return BadRequest(InvokeResult<LogRecord>.FromError("Error id is required."));
@@ -212,6 +321,88 @@ namespace LagoVista.IoT.Web.Common.Controllers
             }
         }
 
+        private async Task<DiagnosticLogPage[]> QueryLogPagesAsync(
+            string application, string environment, DateTime from, DateTime to,
+            string level, IReadOnlyList<string> tags, int perTagLimit, CancellationToken ct)
+        {
+            var selected = tags.Count == 0 ? new string[] { null } : tags.ToArray();
+            var tasks = selected.Select(tag => _logs.QueryAsync(new DiagnosticLogQuery
+            {
+                Application = application,
+                Environment = environment,
+                StartUtc = from,
+                EndUtc = to,
+                Level = level,
+                Tag = tag,
+                PageSize = perTagLimit
+            }, ct)).ToArray();
+            return await Task.WhenAll(tasks).ConfigureAwait(false);
+        }
+
+        private static IReadOnlyList<string> ParseTags(string tag, string tags)
+        {
+            if (!String.IsNullOrWhiteSpace(tags))
+                return tags.Split('|')
+                    .Select(value => value.Trim())
+                    .Where(value => value.Length > 0)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToArray();
+            return String.IsNullOrWhiteSpace(tag) ? Array.Empty<string>() : new[] { tag.Trim() };
+        }
+
+        private static bool ValidBoundedPage(ListRequest request, int maxPageSize, int maxTotal)
+        {
+            return request.PageSize >= 1 && request.PageSize <= maxPageSize &&
+                   request.PageIndex >= 1 && (long)request.PageIndex * request.PageSize <= maxTotal;
+        }
+
+        private static bool InWindow(DateTime time, DateTime from, DateTime to)
+        {
+            var utc = NormalizeUtc(time);
+            return utc >= from && utc <= to;
+        }
+
+        private static bool Matches(string actual, string selected)
+        {
+            return String.IsNullOrWhiteSpace(selected) ||
+                   String.Equals(actual, selected.Trim(), StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool TryWindow(int hours, DateTime? startUtc, DateTime? endUtc, int maxHours,
+            out DateTime from, out DateTime to, out string error)
+        {
+            from = default;
+            to = default;
+            error = null;
+            if (startUtc.HasValue != endUtc.HasValue)
+            {
+                error = "Absolute queries require both startUtc and endUtc.";
+                return false;
+            }
+            if (!startUtc.HasValue && (hours < 1 || hours > maxHours))
+            {
+                error = "Relative diagnostic window must be between 1 and " + maxHours + " hours.";
+                return false;
+            }
+            to = endUtc.HasValue ? NormalizeUtc(endUtc.Value) : DateTime.UtcNow;
+            from = startUtc.HasValue ? NormalizeUtc(startUtc.Value) : to.AddHours(-hours);
+            if (to <= from || to > DateTime.UtcNow.AddMinutes(5) ||
+                to - from > TimeSpan.FromHours(maxHours))
+            {
+                error = "Diagnostic window must be positive, end no later than now, and span at most " +
+                        maxHours + " hours.";
+                return false;
+            }
+            return true;
+        }
+
+        private static DateTime NormalizeUtc(DateTime date)
+        {
+            if (date.Kind == DateTimeKind.Utc) return date;
+            if (date.Kind == DateTimeKind.Unspecified) return DateTime.SpecifyKind(date, DateTimeKind.Utc);
+            return date.ToUniversalTime();
+        }
+
         private static string NormalizeEnvironment(string environment)
         {
             var normalized = environment?.Trim();
@@ -221,6 +412,14 @@ namespace LagoVista.IoT.Web.Common.Controllers
                 return "Production";
             return normalized;
         }
+    }
+
+    public sealed class DiagnosticTagFacet
+    {
+        public string Value { get; set; }
+        public int Count { get; set; }
+        public int SampleSize { get; set; }
+        public double Percentage { get; set; }
     }
 
     public sealed class DiagnosticRecordSummary
