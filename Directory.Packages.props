@@ -10,7 +10,7 @@
     <PackageVersion Include="LagoVista.IoT.Logging" Version="7.0.16" />
     <PackageVersion Include="LagoVista.Core.Configuration" Version="7.0.66" />
     <PackageVersion Include="LagoVista.Core.Rcg.Client" Version="7.0.66" />
-    <PackageVersion Include="LagoVista.Relational" Version="7.0.118" />
+    <PackageVersion Include="LagoVista.Relational" Version="7.0.123" />
     <PackageVersion Include="LagoVista.UserAdmin" Version="7.0.41" />
     <PackageVersion Include="Microsoft.AspNetCore" Version="2.3.9" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
