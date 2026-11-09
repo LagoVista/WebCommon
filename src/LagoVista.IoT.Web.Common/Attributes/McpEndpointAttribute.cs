@@ -31,5 +31,12 @@ namespace LagoVista.IoT.Web.Common.Attributes
         /// The declared arguments must use the OpenAI file object wire schema.
         /// </summary>
         public string[] FileParams { get; set; }
+
+        /// <summary>
+        /// Optional MCP Apps UI resource URI (ui://...) for a render tool.
+        /// The widget resource and its code are owned by the feature assembly;
+        /// the API host only exposes the protocol link in tool metadata.
+        /// </summary>
+        public string WidgetResourceUri { get; set; }
     }
 }
