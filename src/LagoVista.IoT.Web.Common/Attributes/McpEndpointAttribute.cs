@@ -24,5 +24,12 @@ namespace LagoVista.IoT.Web.Common.Attributes
         /// Optional MCP tool family. An unset family makes the tool available in every family endpoint.
         /// </summary>
         public string FamilyId { get; set; }
+
+        /// <summary>
+        /// Optional top-level MCP file arguments. ChatGPT resolves these with
+        /// _meta["openai/fileParams"] into temporary hosted file references.
+        /// The declared arguments must use the OpenAI file object wire schema.
+        /// </summary>
+        public string[] FileParams { get; set; }
     }
 }
