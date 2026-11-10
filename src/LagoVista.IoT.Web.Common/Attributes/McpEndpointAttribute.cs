@@ -26,6 +26,12 @@ namespace LagoVista.IoT.Web.Common.Attributes
         public string FamilyId { get; set; }
 
         /// <summary>
+        /// Restrict the MCP invocation to a DEV/Development host. The underlying REST
+        /// endpoint keeps its existing authorization and environment behavior.
+        /// </summary>
+        public bool DevOnly { get; set; }
+
+        /// <summary>
         /// Optional top-level MCP file arguments. ChatGPT resolves these with
         /// _meta["openai/fileParams"] into temporary hosted file references.
         /// The declared arguments must use the OpenAI file object wire schema.
