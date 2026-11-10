@@ -89,6 +89,9 @@ namespace LagoVista.IoT.Web.Common.Controllers
             }
         }
 
+        [McpEndpoint("document-raw-get",
+            Description = "Read exactly one raw MongoDB document by database, collection and ID for a SystemAdmin in DEV. Returns BSON as JSON without typed entity deserialization. Read-only: never creates, patches, or deletes records.",
+            FamilyId = "sys", DevOnly = true)]
         [HttpGet("{database}/{collection}/{id}")]
         public async Task<InvokeResult<string>> GetDocumentAsync(
             [FromRoute] string database,
