@@ -1,6 +1,7 @@
 using LagoVista.AspNetCore.Identity.Managers;
 using LagoVista.CloudStorage.Storage;
 using LagoVista.Core.Models;
+using LagoVista.Core.Models.UIMetaData;
 using LagoVista.Core.Validation;
 using LagoVista.IoT.Logging.Loggers;
 using LagoVista.IoT.Web.Common.Attributes;
@@ -42,24 +43,25 @@ namespace LagoVista.IoT.Web.Common.Controllers
         }
 
         [McpEndpoint("d3m-draft-list", FamilyId = "sys", DevOnly = true,
-            Description = "List editable D3M definition drafts for the authenticated operator's current organization in DEV. Read only.")]
+            Description = "List editable D3M drafts using standard ListRequest/ListResponse paging. Supply pageSize/pageIndex and the nextPartitionKey/nextRowKey from the previous result to advance. REST clients may also use x-pagesize, x-pageindex, x-nextpartitionkey and x-nextrowkey headers.")]
         [HttpGet("drafts")]
-        public async Task<InvokeResult<StoragePageResult<D3MDefinitionRecord>>> ListDraftsAsync(
-            [FromQuery] int pageSize = 100,
-            [FromQuery] string continuationToken = null,
+        public async Task<ListResponse<D3MDefinitionRecord>> ListDraftsAsync(
+            [FromQuery] int? pageSize = null,
+            [FromQuery] int? pageIndex = null,
+            [FromQuery] string nextPartitionKey = null,
+            [FromQuery] string nextRowKey = null,
             CancellationToken ct = default)
         {
             var scope = await AuthorizedScopeAsync();
-            if (!scope.Allowed) return InvokeResult<StoragePageResult<D3MDefinitionRecord>>.FromError(scope.Error);
+            if (!scope.Allowed) return ListResponse<D3MDefinitionRecord>.FromError(scope.Error);
             try
             {
-                var page = await _definitions.ListDraftsAsync(scope.Organization.Id,
-                    new StoragePageRequest(pageSize, continuationToken), ct);
-                return InvokeResult<StoragePageResult<D3MDefinitionRecord>>.Create(page);
+                var request = GetD3MListRequest(pageSize, pageIndex, nextPartitionKey, nextRowKey);
+                return await _definitions.ListDraftsAsync(scope.Organization.Id, request, ct);
             }
             catch (ArgumentException ex)
             {
-                return InvokeResult<StoragePageResult<D3MDefinitionRecord>>.FromError(ex.Message);
+                return ListResponse<D3MDefinitionRecord>.FromError(ex.Message);
             }
         }
 
@@ -220,31 +222,32 @@ namespace LagoVista.IoT.Web.Common.Controllers
         }
 
         [McpEndpoint("d3m-revisions", FamilyId = "sys", DevOnly = true,
-            Description = "List immutable published D3M revision history for one registered type in the current organization. Read only.")]
+            Description = "List immutable D3M publication history with ListRequest/ListResponse paging. Supply pageSize/pageIndex and the nextPartitionKey/nextRowKey from the previous result to advance.")]
         [HttpGet("revisions/{typeKey}")]
-        public async Task<InvokeResult<StoragePageResult<D3MPublishedDefinitionRecord>>> ListRevisionsAsync(
+        public async Task<ListResponse<D3MPublishedDefinitionRecord>> ListRevisionsAsync(
             [FromRoute] string typeKey,
-            [FromQuery] int pageSize = 100,
-            [FromQuery] string continuationToken = null,
+            [FromQuery] int? pageSize = null,
+            [FromQuery] int? pageIndex = null,
+            [FromQuery] string nextPartitionKey = null,
+            [FromQuery] string nextRowKey = null,
             CancellationToken ct = default)
         {
             var scope = await AuthorizedScopeAsync();
-            if (!scope.Allowed) return InvokeResult<StoragePageResult<D3MPublishedDefinitionRecord>>.FromError(scope.Error);
+            if (!scope.Allowed) return ListResponse<D3MPublishedDefinitionRecord>.FromError(scope.Error);
             if (String.IsNullOrWhiteSpace(typeKey))
-                return InvokeResult<StoragePageResult<D3MPublishedDefinitionRecord>>.FromError("typeKey is required.");
+                return ListResponse<D3MPublishedDefinitionRecord>.FromError("typeKey is required.");
             try
             {
-                var page = await _definitions.ListRevisionsAsync(typeKey.Trim(), scope.Organization.Id,
-                    new StoragePageRequest(pageSize, continuationToken), ct);
-                return InvokeResult<StoragePageResult<D3MPublishedDefinitionRecord>>.Create(page);
+                var request = GetD3MListRequest(pageSize, pageIndex, nextPartitionKey, nextRowKey);
+                return await _definitions.ListRevisionsAsync(typeKey.Trim(), scope.Organization.Id, request, ct);
             }
             catch (ArgumentException ex)
             {
-                return InvokeResult<StoragePageResult<D3MPublishedDefinitionRecord>>.FromError(ex.Message);
+                return ListResponse<D3MPublishedDefinitionRecord>.FromError(ex.Message);
             }
             catch (InvalidOperationException ex)
             {
-                return InvokeResult<StoragePageResult<D3MPublishedDefinitionRecord>>.FromError(ex.Message);
+                return ListResponse<D3MPublishedDefinitionRecord>.FromError(ex.Message);
             }
         }
 
@@ -270,6 +273,22 @@ namespace LagoVista.IoT.Web.Common.Controllers
             {
                 return InvokeResult<string>.FromError(ex.Message);
             }
+        }
+
+        /// <summary>
+        /// REST uses the established x-page* / x-next* headers. MCP has no caller-
+        /// supplied REST headers, so optional tool arguments override the same
+        /// ListRequest values without inventing another paging envelope.
+        /// </summary>
+        private ListRequest GetD3MListRequest(
+            int? pageSize, int? pageIndex, string nextPartitionKey, string nextRowKey)
+        {
+            var request = GetListRequestFromHeader();
+            if (pageSize.HasValue) request.PageSize = pageSize.Value;
+            if (pageIndex.HasValue) request.PageIndex = pageIndex.Value;
+            if (nextPartitionKey != null) request.NextPartitionKey = nextPartitionKey;
+            if (nextRowKey != null) request.NextRowKey = nextRowKey;
+            return request;
         }
 
         private async Task<D3MOperatorScope> AuthorizedScopeAsync()
