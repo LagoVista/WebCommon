@@ -35,6 +35,7 @@ namespace LagoVista.IoT.Web.Common
             services.AddTransient<IMetricsBySessionRepo, Repos.MetricsBySessionRepo>();
             // Shared storage provider registration remains in WebCommon.
             services.AddTransient<IStorageRetentionPolicyStore, StorageRetentionPolicyStore>();
+            services.AddD3MDefinitions(D3MTypeRegistrationCatalog.Configure);
             services.AddPostgresMetricsStore();
 
             services.AddTransient<IMetricsLoggerSettings, MetricsLoggerSettings>();
