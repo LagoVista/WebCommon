@@ -1,7 +1,7 @@
 # D3M authoring through the sys MCP family
 
 **Implementation:** `LagoVista/WebCommon`  
-**Backend:** `LagoVista/CloudStorage` `D3MDefinitionService` (`LagoVista.CloudStorage@7.0.130` or newer)  
+**Backend:** `LagoVista/CloudStorage` `D3MDefinitionService` (stable CloudStorage package with ListRequest/ListResponse D3M lists)  
 **Host:** existing API-host MCP action discovery, **not** a separate MCP server  
 **MCP family URL:** `/sys/mcp` (plus aggregate `/mcp`)  
 **REST prefix:** `/api/sysadmin/d3m`
@@ -10,7 +10,7 @@
 
 | MCP tool | REST method + path | Notes |
 | --- | --- | --- |
-| `d3m-draft-list` | `GET /drafts` | Org-scoped, cursor-paged |
+| `d3m-draft-list` | `GET /drafts` | Org-scoped `ListResponse<D3MDefinitionRecord>`, cursor-paged |
 | `d3m-draft-get` | `GET /draft/{typeKey}` | Returns complete draft, validation issues, `expectedVersion` |
 | `d3m-draft-create` | `POST /draft` | Takes `D3MDraftInput`; assigns organization and ID on server |
 | `d3m-draft-update` | `PUT /draft/{typeKey}` | Takes `D3MDraftUpdateRequest` (full draft plus `expectedVersion`) |
@@ -18,10 +18,20 @@
 | `d3m-publish` | `POST /publish/{typeKey}` | Takes `D3MVersionRequest` with `expectedVersion`; creates immutable revision |
 | `d3m-published-get` | `GET /published/{typeKey}` | Read current active published revision |
 | `d3m-revision-get` | `GET /revision/{typeKey}/{revision}` | Read exact immutable revision |
-| `d3m-revisions` | `GET /revisions/{typeKey}` | Read revision history (cursor-paged) |
+| `d3m-revisions` | `GET /revisions/{typeKey}` | `ListResponse<D3MPublishedDefinitionRecord>`, cursor-paged |
 | `d3m-retire` | `POST /retire/{typeKey}` | Takes `D3MVersionRequest`; disables active definition, retains revision history |
 
 All actions are annotated with `[McpEndpoint(..., FamilyId = "sys", DevOnly = true)]`, `[Authorize]`, and `[SystemAdmin]`. The controller explicitly verifies the deployment is DEV, checks the authenticated SystemAdmin user's current persisted privileges and selected organization, and derives the organization and actor exclusively from that identity. The API MCP adapter independently checks OIDC, user, organization, privileges and the DEV environment. **No tool accepts an organization ID, custom collection, type activation, or a destination for promotion.**
+
+## Standard ListRequest / ListResponse paging
+
+Both D3M list methods accept the platform's `ListRequest` and return `ListResponse<T>`, rather than returning `StoragePageResult<T>` or wrapping it in `InvokeResult`. The underlying storage provider still uses opaque continuation tokens internally, but the external wire contract follows our house style:
+
+- REST clients set `x-pagesize` (default 100), `x-pageindex` (default 1), and then `x-nextpartitionkey` / `x-nextrowkey` from the prior list response.
+- MCP callers supply the optional `pageSize`, `pageIndex`, `nextPartitionKey`, and `nextRowKey` tool arguments (because the MCP transport does not carry the REST paging headers).
+- The response has `model`, `recordCount` (returned page size), `pageSize`, `pageIndex`, `hasMoreRecords`, `nextPartitionKey`, and `nextRowKey`. `pageCount` is not an exact total for cursor-based results.
+- After page one, provide **both** continuation keys from the previous response. Page indexes alone do not work with the cursor-backed Mongo ApplicationData query. The server rejects mismatched list scopes or missing cursors.
+- Page sizes are bounded to 1–1000; authorization, organization scope, and sorting are preserved across pages.
 
 ## First authoring session
 
