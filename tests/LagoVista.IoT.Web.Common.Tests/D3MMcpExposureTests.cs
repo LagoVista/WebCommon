@@ -1,5 +1,6 @@
 using LagoVista.CloudStorage.Storage;
 using LagoVista.Core.Models;
+using LagoVista.Core.Models.UIMetaData;
 using LagoVista.IoT.Web.Common.Attributes;
 using LagoVista.IoT.Web.Common.Controllers;
 using LagoVista.IoT.Web.Common.Services;
@@ -10,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace LagoVista.IoT.Web.Common.Tests
 {
@@ -46,6 +48,27 @@ namespace LagoVista.IoT.Web.Common.Tests
                     action.IsDefined(typeof(HttpPostAttribute), false) ||
                     action.IsDefined(typeof(HttpPutAttribute), false), action.Name);
             }
+        }
+
+        [TestMethod]
+        public void D3MListsExposeHouseStyleListResponseAndPagingInputs()
+        {
+            var drafts = typeof(D3MDefinitionController).GetMethod(nameof(D3MDefinitionController.ListDraftsAsync));
+            var revisions = typeof(D3MDefinitionController).GetMethod(nameof(D3MDefinitionController.ListRevisionsAsync));
+
+            Assert.AreEqual(typeof(Task<ListResponse<D3MDefinitionRecord>>), drafts.ReturnType);
+            Assert.AreEqual(typeof(Task<ListResponse<D3MPublishedDefinitionRecord>>), revisions.ReturnType);
+
+            var draftParameters = drafts.GetParameters().Select(parameter => parameter.Name).ToArray();
+            var revisionParameters = revisions.GetParameters().Select(parameter => parameter.Name).ToArray();
+            foreach (var parameterName in new[] { "pageSize", "pageIndex", "nextPartitionKey", "nextRowKey" })
+            {
+                CollectionAssert.Contains(draftParameters, parameterName);
+                CollectionAssert.Contains(revisionParameters, parameterName);
+            }
+
+            Assert.AreEqual("drafts", drafts.GetCustomAttribute<HttpGetAttribute>()?.Template);
+            Assert.AreEqual("revisions/{typeKey}", revisions.GetCustomAttribute<HttpGetAttribute>()?.Template);
         }
 
         [TestMethod]
