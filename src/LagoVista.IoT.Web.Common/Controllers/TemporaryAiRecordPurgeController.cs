@@ -34,12 +34,6 @@ namespace LagoVista.IoT.Web.Common.Controllers
             _clients = clients ?? throw new ArgumentNullException(nameof(clients));
         }
 
-        public sealed class PurgeRequest
-        {
-            public string Confirmation { get; set; }
-            public string OrganizationId { get; set; }
-        }
-
         public sealed class PurgeFailure
         {
             public string Type { get; set; }
@@ -65,12 +59,17 @@ namespace LagoVista.IoT.Web.Common.Controllers
             public bool IsPublic { get; set; }
         }
 
-        [HttpPost("run")]
+        [HttpGet("run")]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
         public async Task<ActionResult<InvokeResult<PurgeReport>>> RunAsync(
-            [FromBody] PurgeRequest input, CancellationToken ct = default)
+            [FromQuery] string confirmation,
+            [FromQuery] string organizationId,
+            CancellationToken ct = default)
         {
             // SystemAdminAttribute currently performs its check in OnActionExecuted.
             // Reject BEFORE the first side effect, even if that filter is changed.
+            // This temporary browser GET intentionally requires BOTH exact confirmation
+            // and active-org ID; no request without these values can delete data.
             if (User?.Identity?.IsAuthenticated != true ||
                 !User.HasClaim(ClaimsFactory.IsSystemAdmin, true.ToString()))
             {
@@ -79,9 +78,8 @@ namespace LagoVista.IoT.Web.Common.Controllers
 
             var orgId = User.FindFirst(ClaimsFactory.CurrentOrgId)?.Value;
             if (String.IsNullOrWhiteSpace(orgId) ||
-                input == null ||
-                !String.Equals(input.Confirmation, Confirmation, StringComparison.Ordinal) ||
-                !String.Equals(input.OrganizationId, orgId, StringComparison.OrdinalIgnoreCase))
+                !String.Equals(confirmation, Confirmation, StringComparison.Ordinal) ||
+                !String.Equals(organizationId, orgId, StringComparison.OrdinalIgnoreCase))
             {
                 return BadRequest(InvokeResult<PurgeReport>.FromError(
                     "Supply the active organization ID and the exact confirmation: " + Confirmation));
