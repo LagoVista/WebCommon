@@ -38,6 +38,11 @@ namespace LagoVista.IoT.Web.Common
             services.AddD3MDefinitions(D3MTypeRegistrationCatalog.Configure);
             services.AddPostgresMetricsStore();
             services.AddScoped<IPostgresAdminRepo, PostgresAdminRepo>();
+            services.AddScoped<IQdrantAdminRepo, QdrantAdminRepo>();
+            services.AddHttpClient("QdrantAdmin", client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(15);
+            });
 
             services.AddTransient<IMetricsLoggerSettings, MetricsLoggerSettings>();
 
