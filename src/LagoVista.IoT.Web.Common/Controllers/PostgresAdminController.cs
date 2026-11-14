@@ -28,8 +28,8 @@ namespace LagoVista.IoT.Web.Common.Controllers
             _repo = repo ?? throw new ArgumentNullException(nameof(repo));
         }
 
-        [McpEndpoint("postgres-databases", FamilyId = "sys", DevOnly = true,
-            Description = "List PostgreSQL databases accessible to the cluster's configured application account. SystemAdmin, DEV only; no credentials returned.")]
+        [McpEndpoint("postgres-databases", FamilyId = "sys",
+            Description = "List PostgreSQL databases accessible to the cluster's configured application account. SystemAdmin; no credentials returned.")]
         [HttpGet("databases")]
         public async Task<InvokeResult<List<PostgresDatabaseInfo>>> GetDatabasesAsync(CancellationToken ct = default)
         {
@@ -44,8 +44,8 @@ namespace LagoVista.IoT.Web.Common.Controllers
             }
         }
 
-        [McpEndpoint("postgres-schemas", FamilyId = "sys", DevOnly = true,
-            Description = "List visible schemas in a selected PostgreSQL database. SystemAdmin, DEV only.")]
+        [McpEndpoint("postgres-schemas", FamilyId = "sys",
+            Description = "List visible schemas in a selected PostgreSQL database. SystemAdmin.")]
         [HttpGet("{database}/schemas")]
         public async Task<InvokeResult<List<string>>> GetSchemasAsync([FromRoute] string database, CancellationToken ct = default)
         {
@@ -60,8 +60,8 @@ namespace LagoVista.IoT.Web.Common.Controllers
             }
         }
 
-        [McpEndpoint("postgres-tables", FamilyId = "sys", DevOnly = true,
-            Description = "List PostgreSQL tables and views in one selected database and schema. SystemAdmin, DEV only.")]
+        [McpEndpoint("postgres-tables", FamilyId = "sys",
+            Description = "List PostgreSQL tables and views in one selected database and schema. SystemAdmin.")]
         [HttpGet("{database}/{schema}/tables")]
         public async Task<InvokeResult<List<PostgresTableInfo>>> GetTablesAsync(
             [FromRoute] string database, [FromRoute] string schema, CancellationToken ct = default)
@@ -95,8 +95,8 @@ namespace LagoVista.IoT.Web.Common.Controllers
 
         // Separate GET action lets the MCP SDK correctly advertise ReadOnly=true.
         // It delegates to precisely the same bounded, read-only repository as POST.
-        [McpEndpoint("postgres-query", FamilyId = "sys", DevOnly = true,
-            Description = "Execute one bounded, read-only PostgreSQL SELECT/WITH/VALUES/TABLE query in DEV. Supply database, sql and optional pageSize (1-500). SystemAdmin only; no mutations.")]
+        [McpEndpoint("postgres-query", FamilyId = "sys",
+            Description = "Execute one bounded, read-only PostgreSQL SELECT/WITH/VALUES/TABLE query in the current environment. Supply database, sql and optional pageSize (1-500). SystemAdmin only; no mutations.")]
         [HttpGet("query")]
         public async Task<InvokeResult<PostgresQueryResult>> QueryMcpAsync(
             [FromQuery] string database, [FromQuery] string sql,
