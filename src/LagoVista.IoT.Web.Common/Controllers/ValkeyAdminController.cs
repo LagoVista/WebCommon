@@ -58,6 +58,33 @@ namespace LagoVista.IoT.Web.Common.Controllers
             }
         }
 
+        [McpEndpoint("valkey-scan", FamilyId = "sys", DevOnly = true,
+            Description = "Scan for Valkey cache keys by database and glob pattern; at most 100 keys. SystemAdmin, DEV only; read-only.")]
+        [HttpGet("mcp/scan")]
+        public Task<InvokeResult<List<ValkeyKeyInfo>>> ScanMcpAsync(
+            [FromQuery] string database, [FromQuery] string pattern = null, CancellationToken ct = default)
+        {
+            if (!int.TryParse(database, out var index) || index < 0)
+                return Task.FromResult(InvokeResult<List<ValkeyKeyInfo>>.FromError("A nonnegative database index is required."));
+            return ScanAsync(new ValkeyScanRequest
+            {
+                Database = index,
+                Pattern = String.IsNullOrWhiteSpace(pattern) ? "*" : pattern,
+                PageSize = 100
+            }, ct);
+        }
+
+        [McpEndpoint("valkey-get", FamilyId = "sys", DevOnly = true,
+            Description = "Read one Valkey key's type, value and TTL from a nonnegative database index. SystemAdmin, DEV only; read-only.")]
+        [HttpGet("mcp/get")]
+        public Task<InvokeResult<ValkeyKeyInfo>> GetMcpAsync(
+            [FromQuery] string database, [FromQuery] string key, CancellationToken ct = default)
+        {
+            if (!int.TryParse(database, out var index) || index < 0 || String.IsNullOrWhiteSpace(key))
+                return Task.FromResult(InvokeResult<ValkeyKeyInfo>.FromError("Nonnegative database index and key are required."));
+            return GetAsync(index, key, ct);
+        }
+
         [HttpPost("set")]
         public async Task<InvokeResult> SetAsync(
             [FromBody] ValkeySetRequest request,
