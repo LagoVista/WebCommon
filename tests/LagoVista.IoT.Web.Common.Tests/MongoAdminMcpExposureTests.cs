@@ -13,7 +13,7 @@ namespace LagoVista.IoT.Web.Common.Tests
     public sealed class MongoAdminMcpExposureTests
     {
         [TestMethod]
-        public void RawDocumentGet_IsDevOnlyAndSystemAdminProtected()
+        public void RawDocumentGet_IsEnvironmentIndependentAndSystemAdminProtected()
         {
             var controller = typeof(MongoAdminController);
             Assert.IsNotNull(controller.GetCustomAttribute<AuthorizeAttribute>());
@@ -25,7 +25,7 @@ namespace LagoVista.IoT.Web.Common.Tests
             Assert.IsNotNull(marker);
             Assert.AreEqual("document-raw-get", marker.Name);
             Assert.AreEqual("sys", marker.FamilyId);
-            Assert.IsTrue(marker.DevOnly);
+            Assert.IsFalse(marker.DevOnly);
             Assert.AreEqual("{database}/{collection}/{id}", method.GetCustomAttribute<HttpGetAttribute>()?.Template);
         }
 
