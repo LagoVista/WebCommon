@@ -25,16 +25,16 @@ namespace LagoVista.IoT.Web.Common.Controllers
             _repo = repo ?? throw new ArgumentNullException(nameof(repo));
         }
 
-        [McpEndpoint("cassandra-keyspace", FamilyId = "sys", DevOnly = true,
-            Description = "Read the configured Cassandra keyspace name. SystemAdmin, DEV only.")]
+        [McpEndpoint("cassandra-keyspace", FamilyId = "sys",
+            Description = "Read the configured Cassandra keyspace name. SystemAdmin.")]
         [HttpGet("keyspace")]
         public InvokeResult<string> GetKeyspace()
         {
             return InvokeResult<string>.Create(_repo.Keyspace);
         }
 
-        [McpEndpoint("cassandra-tables", FamilyId = "sys", DevOnly = true,
-            Description = "List tables in the configured Cassandra keyspace. SystemAdmin, DEV only.")]
+        [McpEndpoint("cassandra-tables", FamilyId = "sys",
+            Description = "List tables in the configured Cassandra keyspace. SystemAdmin.")]
         [HttpGet("tables")]
         public async Task<InvokeResult<List<CassandraTableInfo>>> GetTablesAsync(CancellationToken ct = default)
         {
@@ -65,8 +65,8 @@ namespace LagoVista.IoT.Web.Common.Controllers
             }
         }
 
-        [McpEndpoint("cassandra-query", FamilyId = "sys", DevOnly = true,
-            Description = "Run a read-only SELECT CQL query in the configured Cassandra keyspace with a maximum of 500 rows. SystemAdmin, DEV only.")]
+        [McpEndpoint("cassandra-query", FamilyId = "sys",
+            Description = "Run a read-only SELECT CQL query in the configured Cassandra keyspace with a maximum of 500 rows. SystemAdmin.")]
         [HttpGet("mcp/query")]
         public Task<InvokeResult<CassandraQueryResult>> QueryMcpAsync(
             [FromQuery] string cql, [FromQuery] string pageSize = null, CancellationToken ct = default)
