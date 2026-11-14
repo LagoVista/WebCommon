@@ -13,7 +13,7 @@ namespace LagoVista.IoT.Web.Common.Tests
     public sealed class PostgresAdminMcpExposureTests
     {
         [TestMethod]
-        public void McpToolsAreReadOnlyDevOnlyAndSystemAdminProtected()
+        public void McpToolsAreReadOnlyAcrossEnvironmentsAndSystemAdminProtected()
         {
             var controller = typeof(PostgresAdminController);
             Assert.IsNotNull(controller.GetCustomAttribute<AuthorizeAttribute>());
@@ -25,7 +25,7 @@ namespace LagoVista.IoT.Web.Common.Tests
                 if (marker == null) continue;
 
                 Assert.AreEqual("sys", marker.FamilyId);
-                Assert.IsTrue(marker.DevOnly);
+                Assert.IsFalse(marker.DevOnly);
                 Assert.IsNotNull(method.GetCustomAttribute<HttpGetAttribute>(), method.Name);
             }
 
