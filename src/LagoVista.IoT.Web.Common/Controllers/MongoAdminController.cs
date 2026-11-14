@@ -93,12 +93,12 @@ namespace LagoVista.IoT.Web.Common.Controllers
             Description = "List MongoDB databases using the existing System Admin repository, up to 100 per page. DEV only.")]
         [HttpGet("mcp/databases")]
         public Task<ListResponse<MongoDatabaseInfo>> GetDatabasesMcpAsync(
-            [FromQuery] string pageSize = null, CancellationToken ct = default)
+            CancellationToken ct = default)
         {
             return _mongoAdminRepo.GetDatabasesAsync(new ListRequest
             {
                 PageIndex = 0,
-                PageSize = BoundedMcpPageSize(pageSize)
+                PageSize = 100
             }, ct);
         }
 
@@ -106,12 +106,12 @@ namespace LagoVista.IoT.Web.Common.Controllers
             Description = "List MongoDB collections in one database, up to 100 per page. SystemAdmin, DEV only.")]
         [HttpGet("mcp/{database}/collections")]
         public Task<ListResponse<MongoCollectionInfo>> GetCollectionsMcpAsync(
-            [FromRoute] string database, [FromQuery] string pageSize = null, CancellationToken ct = default)
+            [FromRoute] string database, CancellationToken ct = default)
         {
             return _mongoAdminRepo.GetCollectionsAsync(database, new ListRequest
             {
                 PageIndex = 0,
-                PageSize = BoundedMcpPageSize(pageSize)
+                PageSize = 100
             }, ct);
         }
 
@@ -121,7 +121,7 @@ namespace LagoVista.IoT.Web.Common.Controllers
         public Task<ListResponse<MongoDocumentInfo>> QueryMcpAsync(
             [FromRoute] string database, [FromRoute] string collection,
             [FromQuery] string filter = null, [FromQuery] string sort = null,
-            [FromQuery] string projection = null, [FromQuery] string pageSize = null,
+            [FromQuery] string projection = null,
             CancellationToken ct = default)
         {
             return _mongoAdminRepo.QueryAsync(database, collection, new MongoQueryRequest
@@ -130,12 +130,9 @@ namespace LagoVista.IoT.Web.Common.Controllers
                 Sort = sort,
                 Projection = projection,
                 PageIndex = 0,
-                PageSize = BoundedMcpPageSize(pageSize)
+                PageSize = 100
             }, ct);
         }
-
-        private static int BoundedMcpPageSize(string value)
-            => int.TryParse(value, out var parsed) ? Math.Max(1, Math.Min(parsed, 100)) : 100;
 
         [McpEndpoint("document-raw-get",
             Description = "Read exactly one raw MongoDB document by database, collection and ID for a SystemAdmin in DEV. Returns BSON as JSON without typed entity deserialization. Read-only: never creates, patches, or deletes records.",
