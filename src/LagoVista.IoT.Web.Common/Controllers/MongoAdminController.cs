@@ -89,8 +89,8 @@ namespace LagoVista.IoT.Web.Common.Controllers
             }
         }
 
-        [McpEndpoint("mongo-databases", FamilyId = "sys", DevOnly = true,
-            Description = "List MongoDB databases using the existing System Admin repository, up to 100 per page. DEV only.")]
+        [McpEndpoint("mongo-databases", FamilyId = "sys",
+            Description = "List MongoDB databases using the existing System Admin repository, up to 100 per page. ")]
         [HttpGet("mcp/databases")]
         public Task<ListResponse<MongoDatabaseInfo>> GetDatabasesMcpAsync(
             CancellationToken ct = default)
@@ -102,8 +102,8 @@ namespace LagoVista.IoT.Web.Common.Controllers
             }, ct);
         }
 
-        [McpEndpoint("mongo-collections", FamilyId = "sys", DevOnly = true,
-            Description = "List MongoDB collections in one database, up to 100 per page. SystemAdmin, DEV only.")]
+        [McpEndpoint("mongo-collections", FamilyId = "sys",
+            Description = "List MongoDB collections in one database, up to 100 per page. SystemAdmin.")]
         [HttpGet("mcp/{database}/collections")]
         public Task<ListResponse<MongoCollectionInfo>> GetCollectionsMcpAsync(
             [FromRoute] string database, CancellationToken ct = default)
@@ -115,8 +115,8 @@ namespace LagoVista.IoT.Web.Common.Controllers
             }, ct);
         }
 
-        [McpEndpoint("mongo-query", FamilyId = "sys", DevOnly = true,
-            Description = "Query documents in a MongoDB collection using JSON filter, sort and projection. Up to 100 documents; read-only; SystemAdmin, DEV only.")]
+        [McpEndpoint("mongo-query", FamilyId = "sys",
+            Description = "Query documents in a MongoDB collection using JSON filter, sort and projection. Up to 100 documents; read-only; SystemAdmin.")]
         [HttpGet("mcp/{database}/{collection}/query")]
         public Task<ListResponse<MongoDocumentInfo>> QueryMcpAsync(
             [FromRoute] string database, [FromRoute] string collection,
@@ -135,8 +135,8 @@ namespace LagoVista.IoT.Web.Common.Controllers
         }
 
         [McpEndpoint("document-raw-get",
-            Description = "Read exactly one raw MongoDB document by database, collection and ID for a SystemAdmin in DEV. Returns BSON as JSON without typed entity deserialization. Read-only: never creates, patches, or deletes records.",
-            FamilyId = "sys", DevOnly = true)]
+            Description = "Read exactly one raw MongoDB document by database, collection and ID for a SystemAdmin in the current environment. Returns BSON as JSON without typed entity deserialization. Read-only: never creates, patches, or deletes records.",
+            FamilyId = "sys")]
         [HttpGet("{database}/{collection}/{id}")]
         public async Task<InvokeResult<string>> GetDocumentAsync(
             [FromRoute] string database,
