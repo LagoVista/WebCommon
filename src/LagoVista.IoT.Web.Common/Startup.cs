@@ -37,6 +37,7 @@ namespace LagoVista.IoT.Web.Common
             services.AddTransient<IStorageRetentionPolicyStore, StorageRetentionPolicyStore>();
             services.AddD3MDefinitions(D3MTypeRegistrationCatalog.Configure);
             services.AddPostgresMetricsStore();
+            services.AddScoped<IPostgresAdminRepo, PostgresAdminRepo>();
 
             services.AddTransient<IMetricsLoggerSettings, MetricsLoggerSettings>();
 
