@@ -14,7 +14,7 @@ namespace LagoVista.IoT.Web.Common.Tests
     public sealed class DatabaseExplorerMcpExposureTests
     {
         [TestMethod]
-        public void EveryExplorerToolIsDevOnlyInSysAndReadOnly()
+        public void EveryExplorerToolIsAvailableInSysAndReadOnly()
         {
             var types = new[] { typeof(PostgresAdminController), typeof(CassandraAdminController),
                 typeof(ValkeyAdminController), typeof(MongoAdminController) };
@@ -30,7 +30,7 @@ namespace LagoVista.IoT.Web.Common.Tests
                     var marker = method.GetCustomAttribute<McpEndpointAttribute>();
                     if (marker == null) continue;
                     Assert.AreEqual("sys", marker.FamilyId, method.Name);
-                    Assert.IsTrue(marker.DevOnly, method.Name);
+                    Assert.IsFalse(marker.DevOnly, method.Name);
                     Assert.IsNotNull(method.GetCustomAttribute<HttpGetAttribute>(), method.Name);
                     Assert.IsTrue(tools.Add(marker.Name), marker.Name);
                     // The API's reflection MCP bridge only accepts string and CancellationToken
