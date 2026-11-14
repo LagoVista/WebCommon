@@ -100,13 +100,13 @@ namespace LagoVista.IoT.Web.Common.Controllers
         [HttpGet("query")]
         public async Task<InvokeResult<PostgresQueryResult>> QueryMcpAsync(
             [FromQuery] string database, [FromQuery] string sql,
-            [FromQuery] int pageSize = 100, CancellationToken ct = default)
+            [FromQuery] string pageSize = null, CancellationToken ct = default)
         {
             return await QueryAsync(new PostgresQueryRequest
             {
                 Database = database,
                 Sql = sql,
-                PageSize = pageSize
+                PageSize = int.TryParse(pageSize, out var parsedSize) ? parsedSize : 100
             }, ct);
         }
     }
