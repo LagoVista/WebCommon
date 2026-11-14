@@ -71,6 +71,9 @@ namespace LagoVista.IoT.Web.Common.Controllers
         public Task<InvokeResult<CassandraQueryResult>> QueryMcpAsync(
             [FromQuery] string cql, [FromQuery] string pageSize = null, CancellationToken ct = default)
         {
+            if (String.IsNullOrWhiteSpace(cql) || cql.Contains(";"))
+                return Task.FromResult(InvokeResult<CassandraQueryResult>.FromError(
+                    "Supply one read-only SELECT statement without semicolons."));
             return QueryAsync(new CassandraQueryRequest
             {
                 Cql = cql,
