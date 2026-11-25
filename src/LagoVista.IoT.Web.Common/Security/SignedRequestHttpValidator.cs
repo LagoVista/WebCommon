@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Linq;
 using LagoVista.IoT.Logging.Loggers;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -93,21 +94,38 @@ namespace LagoVista.Web.Common.Security
             }, cancellationToken).ConfigureAwait(false);
 
             if (!result.Successful) return result;
-            // A missing catalog or runtime service cannot silently turn off verification.
-            var controlRegistered = RuntimeControlCatalog.Definitions.Any(x => x.Key == VerifyBodyHashControl);
-            if (_runtimeControls != null && controlRegistered && !_runtimeControls.IsEnabled(VerifyBodyHashControl))
-                return result;
+            if (!ShouldVerifyBodyHash()) return result;
 
             var bodyResult = await VerifyBodyAsync(request, cancellationToken).ConfigureAwait(false);
             if (bodyResult != null)
             {
                 _adminLogger.AddError("SignedRequest.BodyIntegrity",
-                    $"{bodyResult.ErrorCode}; request correlation={request.HttpContext.TraceIdentifier}");
+                    $"{bodyResult.ErrorCode}; caller={SafeDiagnostic(SignedRequestHeaders.GetOptional(ReadHeaders(request), SignedRequestHeaders.AppKey))}; " +
+                    $"route={SafeDiagnostic((request.HttpContext.GetEndpoint() as RouteEndpoint)?.RoutePattern.RawText)}; " +
+                    $"request correlation={SafeDiagnostic(request.HttpContext.TraceIdentifier)}");
                 return bodyResult;
             }
 
             return result;
         }
+
+        private bool ShouldVerifyBodyHash()
+        {
+            if (_runtimeControls == null) return true;
+            try
+            {
+                return _runtimeControls.IsEnabled(VerifyBodyHashControl);
+            }
+            catch (ArgumentException) when (!RuntimeControlCatalog.Definitions.Any(x => x.Key == VerifyBodyHashControl))
+            {
+                // Stable package composition can temporarily lack the new catalog entry.
+                // An unavailable rollback switch must never disable body verification.
+                return true;
+            }
+        }
+
+        private static string SafeDiagnostic(string value) =>
+            String.IsNullOrWhiteSpace(value) ? "(unknown)" : new string(value.Take(128).Select(c => Char.IsControl(c) ? '?' : c).ToArray());
 
         // Returns null on success. Verify bytes, not reserialized JSON, and leave the stream
         // available to the original endpoint. ServiceHttpV1 canonicalization is unchanged.
