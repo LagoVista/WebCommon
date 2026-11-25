@@ -77,14 +77,19 @@ namespace LagoVista.Web.Common.Security
             _runtimeSessionService.Issue(request, response, hostId, ttl);
         }
 
-        public async Task<SignedRequestValidationResult> ValidateServiceHttpV1Async(HttpRequest request, CancellationToken cancellationToken = default)
+        public Task<SignedRequestValidationResult> ValidateServiceHttpV1Async(HttpRequest request, CancellationToken cancellationToken = default)
+            => ValidateServiceHttpV1Async(request, null, cancellationToken);
+
+        // Only the explicit machine scheme may supply an authoritative request-local resolver.
+        internal async Task<SignedRequestValidationResult> ValidateServiceHttpV1Async(HttpRequest request,
+            ISignedRequestAuthoritativeKeyResolver authoritativeResolver, CancellationToken cancellationToken)
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
-
 
             var result = await _validatorService.ValidateServiceHttpV1Async(new SignedRequestValidationContext
             {
                 Profile = SignedRequestCanonicalProfile.ServiceHttpV1,
+                AuthoritativeKeyResolver = authoritativeResolver,
                 Headers = ReadHeaders(request),
                 Method = request.Method,
                 PathAndQuery = GetPathAndQuery(request),
@@ -94,7 +99,7 @@ namespace LagoVista.Web.Common.Security
             }, cancellationToken).ConfigureAwait(false);
 
             if (!result.Successful) return result;
-            if (!ShouldVerifyBodyHash()) return result;
+            if (authoritativeResolver == null && !ShouldVerifyBodyHash()) return result;
 
             var bodyResult = await VerifyBodyAsync(request, cancellationToken).ConfigureAwait(false);
             if (bodyResult != null)
