@@ -1,5 +1,8 @@
 using LagoVista.Core.Security;
 using LagoVista.IoT.Logging.Loggers;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
@@ -23,6 +26,35 @@ namespace LagoVista.Web.Common.Security
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
+
+            var http = context.HttpContext;
+            if (SignedMachineAuthentication.IsSharedEndpoint(http) &&
+                SignedMachineAuthentication.ClaimsMachineNamespace(http, http.RequestServices.GetServices<ISignedMachineKeyProvider>()))
+            {
+                // Reuse the request handler's cached result, never revalidate/claim replay or
+                // fall through to legacy signing for a reserved identity.
+                var machine = await http.AuthenticateAsync(SignedMachineAuthentication.Scheme);
+                if (!machine.Succeeded)
+                {
+                    context.Result = new UnauthorizedResult();
+                    return;
+                }
+
+                var organization = machine.Principal.FindFirst(SignedMachineAuthentication.OrganizationClaim)?.Value;
+                if (String.IsNullOrWhiteSpace(organization) ||
+                    !String.Equals(http.Request.RouteValues["organizationId"] as string, organization, StringComparison.Ordinal) ||
+                    (http.Request.Headers.TryGetValue(SignedRequestHeaders.OrganizationId, out var suppliedOrg) &&
+                     (suppliedOrg.Count != 1 || suppliedOrg[0] != organization)))
+                {
+                    context.Result = new StatusCodeResult(StatusCodes.Status403Forbidden);
+                    return;
+                }
+
+                http.User = machine.Principal;
+                // Controller route binding now uses the verified registration organization.
+                http.Request.RouteValues["organizationId"] = organization;
+                return;
+            }
 
             SignedRequestValidationResult result;
 

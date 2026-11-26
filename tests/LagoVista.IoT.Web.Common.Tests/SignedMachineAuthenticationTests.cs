@@ -11,6 +11,11 @@ using LagoVista.Web.Common.Security;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Routing;
+using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -80,6 +85,95 @@ namespace LagoVista.IoT.Web.Common.Tests
             fixture.Refresh.Verify(x => x.RefreshAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
+        [TestMethod]
+        public async Task SharedSignedActionAcceptsVerifiedOrganizationWithoutLegacyValidation()
+        {
+            using var fixture = new Fixture();
+            using var scope = fixture.Services.CreateScope();
+            var context = fixture.Request(scope.ServiceProvider, fixture.Headers(), false);
+            context.SetEndpoint(new Endpoint(_ => Task.CompletedTask,
+                new EndpointMetadataCollection(new RequireSignedRequestAttribute(), new AllowEnrolledMachineAttribute()), "shared"));
+            context.Request.RouteValues["organizationId"] = "org-a";
+            var handler = await scope.ServiceProvider.GetRequiredService<IAuthenticationHandlerProvider>()
+                .GetHandlerAsync(context, SignedMachineAuthentication.Scheme);
+            Assert.IsFalse(await ((IAuthenticationRequestHandler)handler).HandleRequestAsync());
+            var legacy = new Mock<ISignedRequestHttpValidator>(MockBehavior.Strict);
+            var filter = new RequireSignedRequestFilter(legacy.Object, Mock.Of<IAdminLogger>());
+            var authorization = new AuthorizationFilterContext(new ActionContext(context, new RouteData(), new ActionDescriptor()), new List<IFilterMetadata>());
+            await filter.OnAuthorizationAsync(authorization);
+            Assert.IsNull(authorization.Result);
+            Assert.AreEqual("org-a", context.User.FindFirst(SignedMachineAuthentication.OrganizationClaim)?.Value);
+            Assert.AreEqual(1, fixture.Claims);
+            legacy.VerifyNoOtherCalls();
+        }
+
+        [TestMethod]
+        public async Task SharedSignedActionRejectsCrossOrganizationAndDoesNotFallBack()
+        {
+            using var fixture = new Fixture();
+            using var scope = fixture.Services.CreateScope();
+            var context = fixture.Request(scope.ServiceProvider, fixture.Headers(), false);
+            context.SetEndpoint(new Endpoint(_ => Task.CompletedTask,
+                new EndpointMetadataCollection(new RequireSignedRequestAttribute(), new AllowEnrolledMachineAttribute()), "shared"));
+            context.Request.RouteValues["organizationId"] = "org-b";
+            var legacy = new Mock<ISignedRequestHttpValidator>(MockBehavior.Strict);
+            var filter = new RequireSignedRequestFilter(legacy.Object, Mock.Of<IAdminLogger>());
+            var authorization = new AuthorizationFilterContext(new ActionContext(context, new RouteData(), new ActionDescriptor()), new List<IFilterMetadata>());
+            await filter.OnAuthorizationAsync(authorization);
+            Assert.AreEqual(403, ((StatusCodeResult)authorization.Result).StatusCode);
+            legacy.VerifyNoOtherCalls();
+        }
+
+        [TestMethod]
+        public async Task SharedSignedActionPreservesActualLegacyRsaValidation()
+        {
+            using var fixture = new Fixture();
+            using var scope = fixture.Services.CreateScope();
+            var context = fixture.Request(scope.ServiceProvider, fixture.Headers("legacy-api"), false);
+            context.SetEndpoint(new Endpoint(_ => Task.CompletedTask,
+                new EndpointMetadataCollection(new RequireSignedRequestAttribute(), new AllowEnrolledMachineAttribute()), "shared"));
+            context.Request.RouteValues["organizationId"] = "legacy-org";
+            var handler = await scope.ServiceProvider.GetRequiredService<IAuthenticationHandlerProvider>()
+                .GetHandlerAsync(context, SignedMachineAuthentication.Scheme);
+            Assert.IsFalse(await ((IAuthenticationRequestHandler)handler).HandleRequestAsync());
+            var filter = new RequireSignedRequestFilter(scope.ServiceProvider.GetRequiredService<SignedRequestHttpValidator>(), Mock.Of<IAdminLogger>());
+            var authorization = new AuthorizationFilterContext(new ActionContext(context, new RouteData(), new ActionDescriptor()), new List<IFilterMetadata>());
+            await filter.OnAuthorizationAsync(authorization);
+            Assert.IsNull(authorization.Result);
+            Assert.AreEqual(0, fixture.Provider.Reads);
+            Assert.AreEqual(0, fixture.Claims);
+        }
+
+        [TestMethod]
+        public async Task SharedSignedActionDeniesUnavailableRegistrationAndConflictingOrganizationHeader()
+        {
+            using var fixture = new Fixture();
+            using var scope = fixture.Services.CreateScope();
+            var context = fixture.Request(scope.ServiceProvider, fixture.Headers(), false);
+            context.SetEndpoint(new Endpoint(_ => Task.CompletedTask,
+                new EndpointMetadataCollection(new RequireSignedRequestAttribute(), new AllowEnrolledMachineAttribute()), "shared"));
+            context.Request.RouteValues["organizationId"] = "org-a";
+            fixture.Provider.Enabled = false;
+            var handler = await scope.ServiceProvider.GetRequiredService<IAuthenticationHandlerProvider>()
+                .GetHandlerAsync(context, SignedMachineAuthentication.Scheme);
+            Assert.IsTrue(await ((IAuthenticationRequestHandler)handler).HandleRequestAsync());
+            Assert.AreEqual(401, context.Response.StatusCode);
+            Assert.AreEqual(0, fixture.Claims);
+
+            using var other = fixture.Services.CreateScope();
+            fixture.Provider.Enabled = true;
+            var conflicting = fixture.Request(other.ServiceProvider, fixture.Headers(), false);
+            conflicting.SetEndpoint(context.GetEndpoint());
+            conflicting.Request.RouteValues["organizationId"] = "org-a";
+            conflicting.Request.Headers[SignedRequestHeaders.OrganizationId] = "org-b";
+            var legacy = new Mock<ISignedRequestHttpValidator>(MockBehavior.Strict);
+            var filter = new RequireSignedRequestFilter(legacy.Object, Mock.Of<IAdminLogger>());
+            var authorization = new AuthorizationFilterContext(new ActionContext(conflicting, new RouteData(), new ActionDescriptor()), new List<IFilterMetadata>());
+            await filter.OnAuthorizationAsync(authorization);
+            Assert.IsNotNull(authorization.Result);
+            legacy.VerifyNoOtherCalls();
+        }
+
         private sealed class ProviderStub : ISignedMachineKeyProvider
         {
             public bool Enabled = true;
@@ -114,7 +208,18 @@ namespace LagoVista.IoT.Web.Common.Tests
                 var services = new ServiceCollection();
                 services.AddLogging();
                 services.AddSingleton<ISignedMachineKeyProvider>(Provider);
-                var shared = new SignedRequestPublicKeySet();
+                var shared = new SignedRequestPublicKeySet
+                {
+                    Environment = "dev", Version = "test", GeneratedUtc = DateTimeOffset.UtcNow,
+                    Keys = { new SignedRequestPublicKeyEntry
+                    {
+                        AppKey = "legacy-api", KeyId = Provider.Key.KeyId,
+                        Algorithm = SignedRequestSignatureAlgorithms.RsaPssSha256,
+                        KeyMaterialFormat = SignedRequestKeyMaterialFormats.RsaXml,
+                        PublicKeyMaterial = Provider.Key.PublicKeyMaterial,
+                        Status = SignedRequestValidationKeyStatuses.Active
+                    } }
+                };
                 services.AddSingleton<ISignedRequestValidatorService>(new SignedRequestValidatorService(new SignedRequestPublicKeySetResolver(shared), Refresh.Object));
                 services.AddSingleton(Mock.Of<IAdminLogger>());
                 services.AddSingleton(Mock.Of<IRuntimeSignedRequestSessionService>());
@@ -129,10 +234,10 @@ namespace LagoVista.IoT.Web.Common.Tests
                 Services = services.BuildServiceProvider();
             }
 
-            public System.Collections.Generic.IDictionary<string, string> Headers() => new SignedRequestHeaderBuilder().BuildHeaders(new SignedRequestHeaderBuildContext
+            public System.Collections.Generic.IDictionary<string, string> Headers(string caller = null) => new SignedRequestHeaderBuilder().BuildHeaders(new SignedRequestHeaderBuildContext
             {
                 Profile = SignedRequestCanonicalProfile.ServiceHttpV1,
-                AppKey = Provider.Key.AppKey, RequestId = Guid.NewGuid().ToString("N"), DateUtc = DateTimeOffset.UtcNow,
+                AppKey = caller ?? Provider.Key.AppKey, RequestId = Guid.NewGuid().ToString("N"), DateUtc = DateTimeOffset.UtcNow,
                 Version = "1", SigningKeyId = Provider.Key.KeyId,
                 PrivateKeyMaterial = SignedRequestRsaXmlSerializer.ToXmlString(_rsa.ExportParameters(true), true),
                 Method = "POST", PathAndQuery = "/api/test", Body = new byte[] { 1 }
