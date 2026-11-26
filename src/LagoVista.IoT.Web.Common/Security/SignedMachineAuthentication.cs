@@ -32,12 +32,27 @@ namespace LagoVista.Web.Common.Security
         public RequireSignedMachineAttribute() => AuthenticationSchemes = SignedMachineAuthentication.Scheme;
     }
 
+    // Opt in individual existing signed engineering actions, not an authorization scheme
+    // for legacy callers. The signed-request filter enforces the verified organization.
+    [AttributeUsage(AttributeTargets.Method, Inherited = true)]
+    public sealed class AllowEnrolledMachineAttribute : Attribute { }
+
     public static class SignedMachineAuthentication
     {
         public const string Scheme = "SignedMachine";
         public const string OrganizationClaim = "signed-machine:organization";
         public const string MachineClaim = "signed-machine:identity";
         public const string GenerationClaim = "signed-machine:generation";
+
+        internal static bool IsSharedEndpoint(HttpContext context) =>
+            context.GetEndpoint()?.Metadata.GetMetadata<AllowEnrolledMachineAttribute>() != null &&
+            context.GetEndpoint()?.Metadata.GetMetadata<RequireSignedRequestAttribute>() != null &&
+            context.GetEndpoint()?.Metadata.GetMetadata<IAllowAnonymous>() == null;
+
+        internal static bool ClaimsMachineNamespace(HttpContext context, IEnumerable<ISignedMachineKeyProvider> providers) =>
+            context.Request.Headers[SignedRequestHeaders.AppKey]
+                .SelectMany(value => (value ?? String.Empty).Split(','))
+                .Any(value => providers.Any(provider => provider.HandlesCaller(value.Trim())));
 
         // Called by the owning library's existing host registration; no new host default.
         public static IServiceCollection AddSignedMachineAuthentication(this IServiceCollection services)
@@ -67,16 +82,15 @@ namespace LagoVista.Web.Common.Security
         private bool IsMachineEndpoint => Context.GetEndpoint()?.Metadata.GetMetadata<RequireSignedMachineAttribute>() != null &&
             Context.GetEndpoint()?.Metadata.GetMetadata<IAllowAnonymous>() == null;
 
-        private bool ClaimsMachineNamespace => Request.Headers[SignedRequestHeaders.AppKey]
-            .SelectMany(value => (value ?? String.Empty).Split(','))
-            .Any(value => _providers.Any(provider => provider.HandlesCaller(value.Trim())));
+        private bool AcceptsMachine => IsMachineEndpoint || SignedMachineAuthentication.IsSharedEndpoint(Context);
+        private bool ClaimsMachineNamespace => SignedMachineAuthentication.ClaimsMachineNamespace(Context, _providers);
 
         // ASP.NET calls request handlers before its ordinary default authentication.
         // A reserved caller may not fall through to an unrelated signed, human or anonymous API action.
         public async Task<bool> HandleRequestAsync()
         {
             if (!ClaimsMachineNamespace && !IsMachineEndpoint) return false;
-            if (!IsMachineEndpoint)
+            if (!AcceptsMachine)
             {
                 Response.StatusCode = StatusCodes.Status403Forbidden;
                 return true;
@@ -92,7 +106,7 @@ namespace LagoVista.Web.Common.Security
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            if (!IsMachineEndpoint) return AuthenticateResult.Fail("Machine endpoint authorization required.");
+            if (!AcceptsMachine) return AuthenticateResult.Fail("Machine endpoint authorization required.");
             if (!TryGetCaller(out var caller)) return AuthenticateResult.Fail("Invalid signed machine caller.");
             var matches = _providers.Where(provider => provider.HandlesCaller(caller)).ToArray();
             if (matches.Length != 1) return AuthenticateResult.Fail("Authoritative machine provider required.");
