@@ -24,6 +24,7 @@ namespace LagoVista.IoT.Web.Common.Notifications
     {
         internal static IServiceCollection AddBrowserNotificationRegistration(this IServiceCollection services, IConfiguration configuration)
         {
+            services.Configure<MvcOptions>(options => options.InputFormatters.Insert(0, new NotificationRegistrationInputFormatter()));
             if (configuration == null || !configuration.GetValue<bool>("BrowserInstallation:Enabled") ||
                 !configuration.GetValue<bool>("HumanNotifications:EndpointRegistrationEnabled") ||
                 !configuration.GetValue<bool>("HumanNotifications:WebPush:Enabled"))
@@ -40,7 +41,6 @@ namespace LagoVista.IoT.Web.Common.Notifications
             services.ConfigureApplicationData<RuntimeProviderConfiguration>(d => d.Index(x => x.AppId));
             services.ConfigureApplicationData<DeliveryEndpoint>(d => d.Index(x => x.AppId));
             services.ConfigureApplicationData<DestinationOwnership>(d => d.Index(x => x.Organization.Id));
-            services.Configure<MvcOptions>(options => options.InputFormatters.Insert(0, new NotificationRegistrationInputFormatter()));
 
             // Keep registration's policy/provider registry local to this service.
             // Do not override the host's existing management or worker registrations.
