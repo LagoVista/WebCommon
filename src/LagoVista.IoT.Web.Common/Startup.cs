@@ -7,6 +7,7 @@ using LagoVista.IoT.Web.Common.Configuration;
 using LagoVista.IoT.Web.Common.Interfaces;
 using LagoVista.IoT.Web.Common.Interfaces.Services;
 using LagoVista.IoT.Web.Common.Managers;
+using LagoVista.IoT.Web.Common.Notifications;
 using LagoVista.IoT.Web.Common.Services;
 using LagoVista.IoT.Web.Common.Utils;
 using LagoVista.Relational.Storage;
@@ -22,7 +23,7 @@ namespace LagoVista.IoT.Web.Common
 {
     public class Startup
     {
-        public static void ConfigureServices(IServiceCollection services)
+        public static void ConfigureServices(IServiceCollection services, IConfiguration configuration = null)
         {
             services.AddTransient<IHostedServiceDiagnosticsManager, HostedServiceDiagnosticsManager>();
             services.AddTransient<IPlatformSmokeTestManager, PlatformSmokeTestManager>();
@@ -74,6 +75,7 @@ namespace LagoVista.IoT.Web.Common
             services.AddSingleton<IMcpCapabilityService, McpCapabilityService>();
 
             services.AddSingleton<IAppConfig, AppConfig>();
+            services.AddBrowserNotificationRegistration(configuration);
 
         }
     }
@@ -85,7 +87,7 @@ namespace LagoVista.DependencyInjection
     {
         public static void AddWebCommonModule(this IServiceCollection services, IConfigurationRoot configRoot, IAdminLogger logger)
         {
-            LagoVista.IoT.Web.Common.Startup.ConfigureServices(services);
+            LagoVista.IoT.Web.Common.Startup.ConfigureServices(services, configRoot);
         }
     }
 }
