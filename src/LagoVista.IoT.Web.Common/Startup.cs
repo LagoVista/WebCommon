@@ -23,7 +23,9 @@ namespace LagoVista.IoT.Web.Common
 {
     public class Startup
     {
-        public static void ConfigureServices(IServiceCollection services, IConfiguration configuration = null)
+        public static void ConfigureServices(IServiceCollection services) => ConfigureServices(services, null);
+
+        public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
             services.AddTransient<IHostedServiceDiagnosticsManager, HostedServiceDiagnosticsManager>();
             services.AddTransient<IPlatformSmokeTestManager, PlatformSmokeTestManager>();
