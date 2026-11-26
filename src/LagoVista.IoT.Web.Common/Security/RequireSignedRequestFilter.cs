@@ -42,7 +42,9 @@ namespace LagoVista.Web.Common.Security
 
                 var organization = machine.Principal.FindFirst(SignedMachineAuthentication.OrganizationClaim)?.Value;
                 if (String.IsNullOrWhiteSpace(organization) ||
-                    !String.Equals(http.Request.RouteValues["organizationId"] as string, organization, StringComparison.Ordinal))
+                    !String.Equals(http.Request.RouteValues["organizationId"] as string, organization, StringComparison.Ordinal) ||
+                    (http.Request.Headers.TryGetValue(SignedRequestHeaders.OrganizationId, out var suppliedOrg) &&
+                     (suppliedOrg.Count != 1 || suppliedOrg[0] != organization)))
                 {
                     context.Result = new StatusCodeResult(StatusCodes.Status403Forbidden);
                     return;
