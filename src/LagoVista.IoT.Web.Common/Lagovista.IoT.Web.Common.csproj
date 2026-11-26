@@ -16,6 +16,7 @@
     <PackageReference Include="LagoVista.Relational" />
     <PackageReference Include="LagoVista.Core.Rcg.Client" />
     <PackageReference Include="LagoVista.AspNetCore.Identity" />
+    <PackageReference Include="LagoVista.Notifications.Models" />
     <PackageReference Include="prometheus-net.AspNetCore" />
   </ItemGroup>
   <ItemGroup>
